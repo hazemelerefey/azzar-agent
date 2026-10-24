@@ -34,7 +34,7 @@
     "@azzar/agent-gateway-client": "workspace:*",
     "@azzar/types": "workspace:*",
     "@azzar/utils": "workspace:*",
-    "@azzar/icons": "^6.0.0",
+    "@azzar/icons": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "diff": "^8.0.4",
     "zod": "^4.4.3"

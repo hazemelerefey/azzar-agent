@@ -60,14 +60,14 @@
     "@azzar/builtin-tool-web-browsing": "workspace:*",
     "@azzar/builtin-tool-web-onboarding": "workspace:*",
     "@azzar/const": "workspace:*",
-    "@azzar/icons": "^6.0.0"
+    "@azzar/icons": "workspace:*"
   },
   "devDependencies": {
     "@azzar/types": "workspace:*",
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@azzar/ui": "^6.0.4",
+    "@azzar/ui": "workspace:*",
     "lucide-react": "*",
     "react": "*",
     "react-i18next": "*"

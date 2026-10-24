@@ -16,7 +16,7 @@
     "@azzar/types": "workspace:*"
   },
   "peerDependencies": {
-    "@azzar/ui": "^6.0.4",
+    "@azzar/ui": "workspace:*",
     "debug": "*",
     "lucide-react": "*",
     "polished": "*",

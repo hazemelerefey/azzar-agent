@@ -13,7 +13,7 @@
     "lexical": "0.42.0"
   },
   "peerDependencies": {
-    "@azzar/editor": "^5.0.0",
+    "@azzar/editor": "workspace:*",
     "debug": "*"
   },
   "description": "Runtime for the AZZAR editor"
