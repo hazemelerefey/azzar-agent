@@ -1,0 +1,199 @@
+@layer azzar-ui {
+  /* registered so the scroll-driven fade interpolates instead of snapping at the edges */
+  @property --azzar-scroll-area-fade-top {
+    inherits: true;
+    initial-value: 0;
+    syntax: '<length>';
+  }
+
+  @property --azzar-scroll-area-fade-bottom {
+    inherits: true;
+    initial-value: 0;
+    syntax: '<length>';
+  }
+}
+
+@layer azzar-ui {
+  .azzar-scroll-area-fade {
+    --scroll-area-overflow-y-start: inherit;
+    --scroll-area-overflow-y-end: inherit;
+    --azzar-scroll-area-fade-size: 40px;
+    --azzar-scroll-area-fade-top: min(
+      var(--azzar-scroll-area-fade-size),
+      var(--scroll-area-overflow-y-start, 0px)
+    );
+    --azzar-scroll-area-fade-bottom: min(
+      var(--azzar-scroll-area-fade-size),
+      var(--scroll-area-overflow-y-end, 0px)
+    );
+
+    /* Fade the CONTENT via mask, so it works on background images too. */
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--azzar-scroll-area-fade-top),
+      #000 calc(100% - var(--azzar-scroll-area-fade-bottom)),
+      transparent 100%
+    );
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  .azzar-scroll-area-fade-horizontal {
+    --scroll-area-overflow-x-start: inherit;
+    --scroll-area-overflow-x-end: inherit;
+    --azzar-scroll-area-fade-size: 40px;
+    --azzar-scroll-area-fade-left: min(
+      var(--azzar-scroll-area-fade-size),
+      var(--scroll-area-overflow-x-start, 0px)
+    );
+    --azzar-scroll-area-fade-right: min(
+      var(--azzar-scroll-area-fade-size),
+      var(--scroll-area-overflow-x-end, 0px)
+    );
+
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--azzar-scroll-area-fade-left),
+      #000 calc(100% - var(--azzar-scroll-area-fade-right)),
+      transparent 100%
+    );
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  .azzar-scroll-area-fade-both {
+    --scroll-area-overflow-x-start: inherit;
+    --scroll-area-overflow-x-end: inherit;
+    --scroll-area-overflow-y-start: inherit;
+    --scroll-area-overflow-y-end: inherit;
+    --azzar-scroll-area-fade-size: 40px;
+    --azzar-scroll-area-fade-top: min(
+      var(--azzar-scroll-area-fade-size),
+      var(--scroll-area-overflow-y-start, 0px)
+    );
+    --azzar-scroll-area-fade-bottom: min(
+      var(--azzar-scroll-area-fade-size),
+      var(--scroll-area-overflow-y-end, 0px)
+    );
+    --azzar-scroll-area-fade-left: min(
+      var(--azzar-scroll-area-fade-size),
+      var(--scroll-area-overflow-x-start, 0px)
+    );
+    --azzar-scroll-area-fade-right: min(
+      var(--azzar-scroll-area-fade-size),
+      var(--scroll-area-overflow-x-end, 0px)
+    );
+
+    mask-composite: intersect;
+
+    /*
+     * Combine vertical + horizontal fades by intersecting two gradient masks
+     * so the four corners stay transparent only when both axes overflow.
+     */
+    mask-image:
+      linear-gradient(
+        to bottom,
+        transparent 0,
+        #000 var(--azzar-scroll-area-fade-top),
+        #000 calc(100% - var(--azzar-scroll-area-fade-bottom)),
+        transparent 100%
+      ),
+      linear-gradient(
+        to right,
+        transparent 0,
+        #000 var(--azzar-scroll-area-fade-left),
+        #000 calc(100% - var(--azzar-scroll-area-fade-right)),
+        transparent 100%
+      );
+    mask-repeat: no-repeat, no-repeat;
+    mask-size:
+      100% 100%,
+      100% 100%;
+  }
+
+  /* Scroll-driven animation: drive the fade by *distance to edges* (first/last
+   * 40px), so reaching an edge doesn't cause a sudden snap. */
+  @supports (animation-timeline: scroll()) {
+    @keyframes azzar-scroll-area-fade-top-in {
+      from {
+        --azzar-scroll-area-fade-top: 0;
+      }
+
+      to {
+        --azzar-scroll-area-fade-top: var(--azzar-scroll-area-fade-size);
+      }
+    }
+
+    @keyframes azzar-scroll-area-fade-bottom-out {
+      from {
+        --azzar-scroll-area-fade-bottom: var(--azzar-scroll-area-fade-size);
+      }
+
+      to {
+        --azzar-scroll-area-fade-bottom: 0;
+      }
+    }
+
+    @keyframes azzar-scroll-area-fade-left-in {
+      from {
+        --azzar-scroll-area-fade-left: 0;
+      }
+
+      to {
+        --azzar-scroll-area-fade-left: var(--azzar-scroll-area-fade-size);
+      }
+    }
+
+    @keyframes azzar-scroll-area-fade-right-out {
+      from {
+        --azzar-scroll-area-fade-right: var(--azzar-scroll-area-fade-size);
+      }
+
+      to {
+        --azzar-scroll-area-fade-right: 0;
+      }
+    }
+
+    .azzar-scroll-area-fade {
+      animation-name: azzar-scroll-area-fade-top-in, azzar-scroll-area-fade-bottom-out;
+      animation-duration: 1ms, 1ms;
+      animation-timing-function: linear, linear;
+      animation-fill-mode: both, both;
+      animation-timeline: scroll(self y), scroll(self y);
+
+      animation-range:
+        0 var(--azzar-scroll-area-fade-size),
+        calc(100% - var(--azzar-scroll-area-fade-size)) 100%;
+    }
+
+    .azzar-scroll-area-fade-horizontal {
+      animation-name: azzar-scroll-area-fade-left-in, azzar-scroll-area-fade-right-out;
+      animation-duration: 1ms, 1ms;
+      animation-timing-function: linear, linear;
+      animation-fill-mode: both, both;
+      animation-timeline: scroll(self x), scroll(self x);
+
+      animation-range:
+        0 var(--azzar-scroll-area-fade-size),
+        calc(100% - var(--azzar-scroll-area-fade-size)) 100%;
+    }
+
+    .azzar-scroll-area-fade-both {
+      animation-name:
+        azzar-scroll-area-fade-top-in, azzar-scroll-area-fade-bottom-out,
+        azzar-scroll-area-fade-left-in, azzar-scroll-area-fade-right-out;
+      animation-duration: 1ms, 1ms, 1ms, 1ms;
+      animation-timing-function: linear, linear, linear, linear;
+      animation-fill-mode: both, both, both, both;
+      animation-timeline: scroll(self y), scroll(self y), scroll(self x), scroll(self x);
+
+      animation-range:
+        0 var(--azzar-scroll-area-fade-size),
+        calc(100% - var(--azzar-scroll-area-fade-size)) 100%,
+        0 var(--azzar-scroll-area-fade-size),
+        calc(100% - var(--azzar-scroll-area-fade-size)) 100%;
+    }
+  }
+}

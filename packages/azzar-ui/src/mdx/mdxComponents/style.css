@@ -1,0 +1,14 @@
+@layer azzar-ui {
+  .azzar-mdx-image,
+  .azzar-mdx-video {
+    margin-block: calc(var(--azzar-markdown-margin-multiple) * 1em);
+    border-radius: calc(var(--azzar-markdown-border-radius) * 1px);
+  }
+
+  .azzar-mdx-pre {
+    overflow: hidden;
+    margin-block: calc(var(--azzar-markdown-margin-multiple) * 0.5em);
+    border-radius: calc(var(--azzar-markdown-border-radius) * 1px);
+    box-shadow: 0 0 0 1px var(--azzar-markdown-border-color) inset;
+  }
+}

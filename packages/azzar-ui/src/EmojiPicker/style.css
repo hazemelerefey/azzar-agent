@@ -1,0 +1,55 @@
+@layer azzar-ui {
+  .azzar-emoji-picker em-emoji-picker {
+    --rgb-accent: var(--emoji-picker-rgb-accent, 0, 0, 0);
+    --shadow: none;
+    --rgb-background: var(--emoji-picker-rgb-background, 255, 255, 255);
+    --border-radius: 0;
+  }
+
+  .azzar-emoji-picker-avatar {
+    position: relative;
+    transition: background 150ms var(--azzar-motion-ease-out);
+  }
+
+  .azzar-emoji-picker-avatar:hover {
+    background: var(--azzar-color-fill-secondary) !important;
+  }
+
+  .azzar-emoji-picker-popover {
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  .azzar-emoji-picker-positioner {
+    width: fit-content !important;
+  }
+
+  .azzar-emoji-picker-tabs-root {
+    width: auto !important;
+  }
+
+  .azzar-emoji-picker-tabs-list {
+    gap: 8px !important;
+    padding: 4px;
+    box-shadow: none !important;
+  }
+
+  .azzar-emoji-picker-tabs-indicator {
+    height: 3px !important;
+    border-start-start-radius: 3px;
+    border-start-end-radius: 3px;
+  }
+
+  .azzar-emoji-picker-tab {
+    width: 32px;
+    height: 32px !important;
+    padding: 0 !important;
+    border-radius: var(--azzar-border-radius) !important;
+
+    transition: background-color 100ms ease-out !important;
+  }
+
+  .azzar-emoji-picker-tab:hover:not([data-disabled]) {
+    background: var(--azzar-color-fill-tertiary) !important;
+  }
+}

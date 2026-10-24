@@ -1,0 +1,14 @@
+@layer azzar-ui {
+  .azzar-landing-hero-badge a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .azzar-landing-hero-badge a:hover {
+    color: var(--azzar-color-text);
+  }
+
+  .azzar-landing-hero-aside > * {
+    inline-size: 100%;
+  }
+}

@@ -1,0 +1,325 @@
+import {
+  $createCodeNode,
+  $isCodeHighlightNode,
+  $isCodeNode,
+  CodeHighlightNode,
+  CodeNode,
+} from '@lexical/code-core';
+import type { DOMConversionOutput, ElementNode, LexicalEditor, TextNode } from 'lexical';
+import {
+  $createRangeSelection,
+  $getSelection,
+  $isRangeSelection,
+  $setSelection,
+  COMMAND_PRIORITY_EDITOR,
+  PASTE_COMMAND,
+  TabNode,
+} from 'lexical';
+
+import { INodeHelper } from '../../../editor-kernel/inode/helper';
+import { KernelPlugin } from '../../../editor-kernel/plugin';
+import { IBlockMenuService } from '../../block/service';
+import { ILitexmlService } from '../../litexml';
+import { IMarkdownShortCutService } from '../../markdown/service/shortcut';
+import type { IEditorKernel, IEditorPlugin, IEditorPluginConstructor } from '../../../types';
+
+import { CustomShikiTokenizer, registerCodeCommand } from '../command';
+import { getCodeLanguageByInput } from '../utils/language';
+import { registerCodeHighlighting, toCodeTheme } from './CodeHighlighterShiki';
+
+const origin = CodeNode.importDOM;
+
+const LANGUAGE_DATA_ATTRIBUTE = 'data-language';
+const MAX_LENGTH = 8000;
+
+function $convertPreElement(domNode: HTMLElement): DOMConversionOutput {
+  const language = domNode.getAttribute(LANGUAGE_DATA_ATTRIBUTE);
+  if (domNode.innerHTML.length > MAX_LENGTH) {
+    return { node: null };
+  }
+  return { node: $createCodeNode(language) };
+}
+
+CodeNode.importDOM = () => {
+  const node = origin();
+  if (node) {
+    node.pre = () => ({
+      conversion: $convertPreElement,
+      priority: 0,
+    });
+  }
+  // Custom logic for handling imported DOM
+  return node;
+};
+
+export interface CodeblockPluginOptions {
+  /** Shiki theme name to use for syntax highlighting */
+  shikiTheme?:
+    | string
+    | {
+        dark: string;
+        light: string;
+      };
+  /** Custom CSS theme configuration */
+  theme?: {
+    code?: string;
+  };
+}
+
+function toMarkdownTheme(theme: CodeblockPluginOptions['shikiTheme']) {
+  if (!theme) {
+    return '';
+  }
+  if (typeof theme === 'string') {
+    return theme;
+  }
+  return `${theme.light} ${theme.dark}`;
+}
+
+function isHeadlessEditor(editor: LexicalEditor): boolean {
+  return editor._headless === true;
+}
+
+export const CodeblockPlugin: IEditorPluginConstructor<CodeblockPluginOptions> = class
+  extends KernelPlugin
+  implements IEditorPlugin<CodeblockPluginOptions>
+{
+  static pluginName = 'CodeblockPlugin';
+
+  constructor(
+    protected kernel: IEditorKernel,
+    public config: CodeblockPluginOptions = {},
+  ) {
+    super();
+    // Register the code block plugin
+    kernel.registerNodes([CodeNode, CodeHighlightNode]);
+    kernel.registerThemes({
+      code: config.theme?.code || 'editor-code',
+    });
+
+    if (this.config?.shikiTheme) {
+      CustomShikiTokenizer.defaultTheme = this.config?.shikiTheme;
+    }
+  }
+
+  onInit(editor: LexicalEditor): void {
+    if (!isHeadlessEditor(editor)) {
+      if (this.config?.shikiTheme) {
+        this.register(registerCodeHighlighting(editor, CustomShikiTokenizer));
+      } else {
+        this.register(registerCodeHighlighting(editor));
+      }
+    }
+
+    this.register(registerCodeCommand(editor));
+
+    if (!isHeadlessEditor(editor)) {
+      this.register(
+        editor.registerCommand(
+          PASTE_COMMAND,
+          (event) => {
+            if (!(event instanceof ClipboardEvent)) return false;
+
+            const clipboardData = event.clipboardData;
+            if (!clipboardData) return false;
+
+            const isInHighlightNodeSelection = editor.getEditorState().read(() => {
+              const sel = $getSelection();
+              if (!$isRangeSelection(sel)) {
+                return false;
+              }
+              let node: TextNode | ElementNode | null = sel.focus.getNode();
+              while (node) {
+                if ($isCodeHighlightNode(node) || $isCodeNode(node)) {
+                  return sel;
+                }
+                node = node.getParent();
+              }
+              return false;
+            });
+
+            if (isInHighlightNodeSelection) {
+              const rawText =
+                clipboardData.getData('text/plain').trimEnd() ||
+                clipboardData.getData('text/uri-list').trimEnd();
+              editor.update(() => {
+                isInHighlightNodeSelection.insertRawText(rawText);
+              });
+              return true;
+            }
+            return false;
+          },
+          COMMAND_PRIORITY_EDITOR,
+        ),
+      );
+    }
+
+    this.registerMarkdown();
+    this.registerLiteXml();
+    this.registerBlockSelect();
+  }
+
+  registerBlockSelect() {
+    const blockMenuService = this.kernel.requireService(IBlockMenuService);
+    if (!blockMenuService) {
+      return;
+    }
+
+    this.register(
+      blockMenuService.registerSelectHandler({
+        key: '__codeblock_block_select_handler',
+        onSelect: (node) => {
+          if (!$isCodeNode(node)) {
+            return false;
+          }
+
+          const textNodes = node.getAllTextNodes();
+          const firstTextNode = textNodes[0];
+          const lastTextNode = textNodes.at(-1);
+
+          if (!firstTextNode || !lastTextNode) {
+            node.select(0, node.getChildrenSize());
+            return true;
+          }
+
+          const selection = $createRangeSelection();
+          selection.setTextNodeRange(
+            firstTextNode,
+            0,
+            lastTextNode,
+            lastTextNode.getTextContentSize(),
+          );
+          $setSelection(selection);
+          return true;
+        },
+        order: 100,
+      }),
+    );
+  }
+
+  registerLiteXml() {
+    const litexmlService = this.kernel.requireService(ILitexmlService);
+    if (!litexmlService) {
+      return;
+    }
+
+    litexmlService.registerXMLWriter(CodeNode.getType(), (node, ctx) => {
+      const codeNode = node as CodeNode;
+      const xmlNode = ctx.createXmlNode(
+        'code',
+        {
+          lang: codeNode.getLanguage() || 'plaintext',
+        },
+        codeNode.getTextContent(),
+      );
+      return xmlNode;
+    });
+
+    litexmlService.registerXMLReader('code', (xmlElment: Element, children: any[]) => {
+      const text = children.map((v) => v.text || '').join('');
+      return INodeHelper.createElementNode(CodeNode.getType(), {
+        children: text
+          .split('\n')
+          .flatMap((text, index, arr) => {
+            const textNode = INodeHelper.createTextNode(text);
+            textNode.type = 'code-highlight';
+            if (index === arr.length - 1) {
+              return textNode;
+            }
+            return [
+              textNode,
+              {
+                type: 'linebreak',
+                version: 1,
+              },
+            ];
+          })
+          .flat(),
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        language: xmlElment.getAttribute('lang'),
+        textStyle: '--shiki-dark:var(--color-info);--shiki-light:var(--color-info)',
+        theme: `${toMarkdownTheme(this.config?.shikiTheme)} needUpdate`,
+        version: 1,
+      });
+    });
+  }
+
+  registerMarkdown() {
+    const kernel = this.kernel;
+    const markdownService = kernel.requireService(IMarkdownShortCutService);
+
+    if (!markdownService) {
+      return;
+    }
+
+    markdownService.registerMarkdownShortCut({
+      regExp: /^(```|···)(.+)?$/,
+      replace: (parentNode, _, match) => {
+        const code = $createCodeNode(
+          getCodeLanguageByInput(match[2]),
+          toCodeTheme(CustomShikiTokenizer),
+        );
+
+        parentNode.replace(code);
+
+        code.selectStart();
+      },
+      trigger: 'enter',
+      type: 'element',
+    });
+
+    markdownService.registerMarkdownWriter(CodeNode.getType(), (ctx, node) => {
+      if ($isCodeNode(node)) {
+        ctx.wrap('```' + (node.getLanguage() || '') + '\n', '\n```\n');
+      }
+    });
+
+    markdownService.registerMarkdownWriter(TabNode.getType(), (ctx) => {
+      ctx.appendLine('  ');
+    });
+
+    markdownService.registerMarkdownWriter(CodeHighlightNode.getType(), (ctx, node) => {
+      if ($isCodeHighlightNode(node)) {
+        ctx.appendLine(node.getTextContent());
+      }
+    });
+
+    markdownService.registerMarkdownWriter('linebreak', (ctx, node) => {
+      if ($isCodeNode(node.getParent())) {
+        ctx.appendLine('\n');
+      }
+    });
+
+    markdownService.registerMarkdownReader('code', (node) => {
+      const language = node.lang ? getCodeLanguageByInput(node.lang) : 'plaintext';
+      return INodeHelper.createElementNode('code', {
+        children: node.value
+          .split('\n')
+          .flatMap((text, index, arr) => {
+            const textNode = INodeHelper.createTextNode(text);
+            textNode.type = 'code-highlight';
+            if (index === arr.length - 1) {
+              return textNode;
+            }
+            return [
+              textNode,
+              {
+                type: 'linebreak',
+                version: 1,
+              },
+            ];
+          })
+          .flat(),
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        language,
+        textStyle: '--shiki-dark:var(--color-info);--shiki-light:var(--color-info)',
+        theme: `${toMarkdownTheme(this.config?.shikiTheme)} needUpdate`,
+        version: 1,
+      });
+    });
+  }
+};

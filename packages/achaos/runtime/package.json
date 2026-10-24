@@ -1,0 +1,15 @@
+{
+  "name": "@achaos/runtime",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@achaos/core": "workspace:*",
+    "@azzar/agent-runtime": "workspace:*"
+  },
+  "description": "Chaos engineering runtime"
+}

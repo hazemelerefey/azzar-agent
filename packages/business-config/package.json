@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@azzar/types": "workspace:*",
+    "model-bank": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  },
+  "main": "./src/index.ts",
+  "name": "@azzar/business-config",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Business configuration for AZZAR"
+}

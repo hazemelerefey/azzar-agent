@@ -1,0 +1,5 @@
+@layer azzar-ui {
+  [data-orientation='horizontal'] .azzar-tabs-indicator:dir(rtl) {
+    --azzar-tabs-indicator-start: var(--active-tab-right);
+  }
+}

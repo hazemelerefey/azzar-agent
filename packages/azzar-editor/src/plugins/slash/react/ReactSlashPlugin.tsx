@@ -1,0 +1,285 @@
+'use client';
+
+import { mergeRegister } from '@lexical/utils';
+import {
+  COMMAND_PRIORITY_CRITICAL,
+  KEY_ARROW_DOWN_COMMAND,
+  KEY_ARROW_LEFT_COMMAND,
+  KEY_ARROW_RIGHT_COMMAND,
+  KEY_ARROW_UP_COMMAND,
+  KEY_DOWN_COMMAND,
+  KEY_ESCAPE_COMMAND,
+  KEY_TAB_COMMAND,
+} from 'lexical';
+import {
+  Children,
+  type FC,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+
+import { noop } from '../../../editor-kernel';
+import { useLexicalEditor } from '../../../editor-kernel/react';
+import { useLexicalComposerContext } from '../../../editor-kernel/react/react-context';
+
+import { type ITriggerContext, SlashPlugin } from '../plugin/index';
+import {
+  type ISlashMenuOption,
+  type ISlashOption,
+  ISlashService,
+  type SlashOptions,
+} from '../service/i-slash-service';
+import { $splitNodeContainingQuery } from '../utils/utils';
+import SlashMenu from './components/SlashMenu';
+import {
+  findSlashOptionByKey,
+  getNextSlashActiveKey,
+  getNextSlashSpatialActiveKey,
+} from './menu-utils';
+import type { ReactSlashOptionProps, ReactSlashPluginProps } from './type';
+import { setCancelablePromise } from './utils';
+
+const ReactSlashPlugin: FC<ReactSlashPluginProps> = ({
+  children,
+  anchorClassName,
+  getPopupContainer,
+  placement,
+}) => {
+  const [editor] = useLexicalComposerContext();
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [resolution, setResolution] = useState<ITriggerContext | null>(null);
+  const [options, setOptions] = useState<Array<ISlashOption>>([]);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    getRect?: () => DOMRect;
+    rect?: DOMRect;
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
+  const cancelRef = useRef<{
+    cancel: () => void;
+  }>({
+    cancel: noop,
+  });
+  const triggerMapRef = useRef<Map<string, ReactSlashOptionProps>>(new Map());
+
+  const close = useCallback(() => {
+    setIsOpen((open) => (open ? false : open));
+    setOptions((currentOptions) => (currentOptions.length > 0 ? [] : currentOptions));
+    setResolution((currentResolution) => (currentResolution ? null : currentResolution));
+    setActiveKey((currentActiveKey) => (currentActiveKey ? null : currentActiveKey));
+  }, []);
+
+  // Close menu on unmount to prevent orphaned portal at (0,0)
+  useEffect(() => close, [close]);
+
+  const handleActiveKeyChange = useCallback((key: string | null) => {
+    setActiveKey(key);
+  }, []);
+
+  const updateMenuOptions = useCallback((items: ISlashOption[]) => {
+    setOptions(items);
+    setActiveKey(getNextSlashActiveKey(items, null, 'forward'));
+  }, []);
+
+  useLayoutEffect(() => {
+    const options =
+      Children.map(children, (child) => {
+        if (!child) return null;
+        const option = child.props as SlashOptions;
+        triggerMapRef.current.set(option.trigger, option);
+        return option;
+      })?.filter(Boolean) || [];
+
+    editor.registerPlugin(SlashPlugin, {
+      slashOptions: options,
+      triggerClose: () => {
+        close();
+        cancelRef.current.cancel();
+      },
+      triggerOpen: (ctx: ITriggerContext) => {
+        setResolution(ctx);
+        cancelRef.current.cancel();
+        if (Array.isArray(ctx.items)) {
+          updateMenuOptions(ctx.items);
+        } else {
+          setLoading(true);
+          const pr = setCancelablePromise((resolve, reject) => {
+            ctx
+              // @ts-ignore
+              .items(ctx.match || null)
+              .then(resolve, reject)
+              .finally(() => setLoading(false));
+          });
+          pr.promise.then((items) => {
+            const typedItems = items as ISlashOption[];
+            updateMenuOptions(typedItems);
+          });
+          cancelRef.current.cancel = () => {
+            pr.cancel();
+            setLoading(false);
+          };
+        }
+        const rect = ctx.getRect();
+        setDropdownPosition({ getRect: ctx.getRect, rect, x: rect.left, y: rect.bottom });
+        setIsOpen(true);
+      },
+    });
+  }, [editor, close, updateMenuOptions]);
+
+  useLayoutEffect(() => {
+    const slash = editor.requireService(ISlashService);
+    if (slash) {
+      const options =
+        Children.map(children, (child) => {
+          if (!child) return null;
+          const option = child.props as SlashOptions;
+          triggerMapRef.current.set(option.trigger, option);
+          return option;
+        })?.filter(Boolean) || [];
+      slash.updateOptions(options);
+    }
+  }, [children]);
+
+  const handleMenuSelect = useCallback(
+    (option: ISlashMenuOption) => {
+      const lexicalEditor = editor.getLexicalEditor();
+      if (lexicalEditor && resolution) {
+        lexicalEditor.update(() => {
+          const textNodeContainingQuery = resolution.match
+            ? $splitNodeContainingQuery(resolution.match)
+            : null;
+
+          textNodeContainingQuery?.remove();
+          option.onSelect?.(editor, resolution.match ? resolution.match.matchingString : '');
+        });
+      }
+
+      const currentTriggerProps = triggerMapRef.current.get(resolution?.trigger || '');
+
+      // Call the external unified onSelect first if it exists
+      if (currentTriggerProps?.onSelect) {
+        currentTriggerProps.onSelect(editor, option);
+      }
+
+      close();
+    },
+    [editor, resolution, close],
+  );
+
+  useLexicalEditor(() => {
+    const activateSpatialSibling = (
+      event: KeyboardEvent,
+      direction: 'down' | 'left' | 'right' | 'up',
+    ) => {
+      const nextKey = getNextSlashSpatialActiveKey(options, activeKey, direction);
+      if (!nextKey) return false;
+
+      setActiveKey(nextKey);
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return true;
+    };
+
+    return mergeRegister(
+      editor.registerHighCommand<KeyboardEvent>(
+        KEY_ARROW_DOWN_COMMAND,
+        (payload) => activateSpatialSibling(payload, 'down'),
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      editor.registerHighCommand<KeyboardEvent>(
+        KEY_ARROW_UP_COMMAND,
+        (payload) => activateSpatialSibling(payload, 'up'),
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      editor.registerHighCommand<KeyboardEvent>(
+        KEY_ARROW_RIGHT_COMMAND,
+        (payload) => activateSpatialSibling(payload, 'right'),
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      editor.registerHighCommand<KeyboardEvent>(
+        KEY_ARROW_LEFT_COMMAND,
+        (payload) => activateSpatialSibling(payload, 'left'),
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      editor.registerHighCommand<KeyboardEvent>(
+        KEY_ESCAPE_COMMAND,
+        (payload) => {
+          const event = payload;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          close();
+          return true;
+        },
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      editor.registerHighCommand<KeyboardEvent>(
+        KEY_TAB_COMMAND,
+        (payload) => {
+          const event = payload;
+          if (options === null || activeKey === null) {
+            return false;
+          }
+          const selectedOption = findSlashOptionByKey(options, activeKey);
+          if (!selectedOption) {
+            return false;
+          }
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          handleMenuSelect(selectedOption);
+          return true;
+        },
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      editor.registerHighCommand(
+        KEY_DOWN_COMMAND,
+        (event: KeyboardEvent) => {
+          // If slash menu is open and enter key is pressed, always block propagation
+          if (isOpen && event.key === 'Enter' && !event.isComposing) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            // Only select option if we have valid options and activeKey
+            if (options !== null && activeKey !== null) {
+              const selectedOption = findSlashOptionByKey(options, activeKey);
+              if (selectedOption) {
+                handleMenuSelect(selectedOption);
+              }
+            }
+            return true;
+          }
+          return false;
+        },
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+    );
+  }, [options, activeKey, handleMenuSelect, isOpen]);
+
+  // Get custom render component if available
+  const { renderComp: CustomRender } = triggerMapRef.current.get(resolution?.trigger || '') || {};
+
+  return (
+    <SlashMenu
+      activeKey={activeKey}
+      anchorClassName={anchorClassName}
+      customRender={CustomRender}
+      getPopupContainer={getPopupContainer}
+      loading={loading}
+      onActiveKeyChange={handleActiveKeyChange}
+      onClose={close}
+      onSelect={handleMenuSelect}
+      open={isOpen}
+      options={options}
+      placement={placement}
+      position={dropdownPosition}
+    />
+  );
+};
+
+ReactSlashPlugin.displayName = 'ReactSlashPlugin';
+
+export default ReactSlashPlugin;

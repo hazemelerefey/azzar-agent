@@ -1,0 +1,86 @@
+@layer azzar-ui {
+  /* Old and new content overlap in one clip box while the box morphs; blurring both layers
+     during the crossfade turns the misaligned overlap into a soft smear instead of garbled text. */
+  .azzar-popover-viewport [data-previous],
+  .azzar-popover-viewport [data-current] {
+    transform: translateX(0);
+    opacity: 1;
+    filter: blur(0);
+    transition:
+      transform var(--azzar-popover-layout-duration) var(--azzar-popover-layout-ease),
+      opacity calc(var(--azzar-popover-layout-duration) / 2) var(--azzar-popover-animation-ease-out),
+      filter calc(var(--azzar-popover-layout-duration) / 2) var(--azzar-popover-animation-ease-out);
+  }
+
+  .azzar-popover-viewport [data-current] {
+    transition-delay:
+      0s, calc(var(--azzar-popover-layout-duration) / 6),
+      calc(var(--azzar-popover-layout-duration) / 6);
+  }
+
+  .azzar-popover-viewport [data-previous][data-ending-style],
+  .azzar-popover-viewport [data-current][data-starting-style] {
+    filter: blur(var(--azzar-popover-content-blur));
+  }
+
+  /* Freeze both layers at their own final width so neither re-wraps while the box morphs;
+     the viewport clip reveals the new content as the box grows over it. */
+  .azzar-popover-viewport [data-previous] {
+    position: absolute;
+    inset-block-start: 12px;
+    inset-inline-start: var(--azzar-popover-viewport-inline-padding);
+    width: calc(var(--popup-width) - var(--azzar-popover-viewport-inline-padding) * 2);
+  }
+
+  .azzar-popover-viewport[data-transitioning] [data-current] {
+    width: calc(var(--positioner-width) - var(--azzar-popover-viewport-inline-padding) * 2);
+  }
+
+  .azzar-popover-viewport[data-repop] [data-previous] {
+    display: none;
+  }
+
+  .azzar-popover-viewport[data-repop] [data-current] {
+    transition: none;
+  }
+
+  .azzar-popover-viewport[data-activation-direction~='right'] [data-previous][data-ending-style] {
+    transform: translateX(calc(var(--azzar-popover-content-shift) * -1));
+    opacity: 0;
+  }
+
+  .azzar-popover-viewport[data-activation-direction~='right'] [data-current][data-starting-style] {
+    transform: translateX(var(--azzar-popover-content-shift));
+    opacity: 0;
+  }
+
+  .azzar-popover-viewport[data-activation-direction~='left'] [data-previous][data-ending-style] {
+    transform: translateX(var(--azzar-popover-content-shift));
+    opacity: 0;
+  }
+
+  .azzar-popover-viewport[data-activation-direction~='left'] [data-current][data-starting-style] {
+    transform: translateX(calc(var(--azzar-popover-content-shift) * -1));
+    opacity: 0;
+  }
+
+  .azzar-popover-viewport[data-activation-direction~='down'] [data-previous][data-ending-style] {
+    transform: translateY(calc(var(--azzar-popover-content-shift) * -1));
+    opacity: 0;
+  }
+
+  .azzar-popover-viewport[data-activation-direction~='down'] [data-current][data-starting-style] {
+    transform: translateY(var(--azzar-popover-content-shift));
+    opacity: 0;
+  }
+
+  .azzar-popover-viewport[data-activation-direction~='up'] [data-previous][data-ending-style] {
+    transform: translateY(var(--azzar-popover-content-shift));
+    opacity: 0;
+  }
+
+  .azzar-popover-viewport[data-activation-direction~='up'] [data-current][data-starting-style] {
+    transform: translateY(calc(var(--azzar-popover-content-shift) * -1));
+    opacity: 0;
+  }
+}

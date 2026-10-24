@@ -1,0 +1,5 @@
+@layer azzar-ui {
+  .azzar-bento-card-body > * {
+    max-inline-size: 100%;
+  }
+}

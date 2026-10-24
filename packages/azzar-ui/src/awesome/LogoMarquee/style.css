@@ -1,0 +1,11 @@
+@layer azzar-ui {
+  .azzar-logo-marquee-caption a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 140ms ease;
+  }
+
+  .azzar-logo-marquee-caption a:hover {
+    color: var(--azzar-color-text);
+  }
+}

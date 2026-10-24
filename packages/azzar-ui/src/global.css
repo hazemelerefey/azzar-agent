@@ -1,0 +1,158 @@
+@layer azzar-base, azzar-popup, azzar-ui;
+
+@layer azzar-base {
+  :root {
+    --font-settings: 'cv01', 'tnum', 'kern';
+    --font-variations: 'opsz' auto, tabular-nums;
+
+    font-synthesis: style;
+    text-autospace: normal;
+  }
+
+  html {
+    overscroll-behavior: none;
+  }
+
+  body {
+    overflow: hidden auto;
+
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+
+    font-feature-settings: var(--font-settings);
+    font-variation-settings: var(--font-variations);
+    font-optical-sizing: auto;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+    font-variant-numeric: tabular-nums;
+    font-size-adjust: from-font;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-wrap: pretty;
+    text-size-adjust: 100%;
+    text-rendering: optimizelegibility;
+    overflow-wrap: anywhere;
+    vertical-align: baseline;
+
+    background-color: var(--azzar-color-bg-layout);
+
+    font-synthesis: style;
+
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+  }
+
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-block: 0 0.5em;
+    font-weight: 500;
+  }
+
+  p,
+  ol,
+  ul,
+  dl,
+  pre {
+    margin-block: 0 1em;
+  }
+
+  ol ol,
+  ul ul,
+  ol ul,
+  ul ol {
+    margin-block-end: 0;
+  }
+
+  dd {
+    margin-block-end: 0.5em;
+    margin-inline-start: 0;
+  }
+
+  blockquote,
+  figure {
+    margin-block: 0 1em;
+    margin-inline: 0;
+  }
+
+  img {
+    border-style: none;
+    vertical-align: middle;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  input,
+  button,
+  select,
+  optgroup,
+  textarea {
+    margin: 0;
+
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+    overflow: auto;
+  }
+
+  fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--azzar-font-family-code) !important;
+    font-feature-settings:
+      'liga' 0,
+      'calt' 0;
+    font-variant-ligatures: none;
+
+    span {
+      font-family: var(--azzar-font-family-code) !important;
+    }
+  }
+
+  ::selection {
+    color: #000;
+    background: var(--azzar-yellow-9);
+
+    -webkit-text-fill-color: unset !important;
+  }
+
+  * {
+    scrollbar-color: var(--azzar-color-fill) transparent;
+    scrollbar-width: thin;
+    box-sizing: border-box;
+    vertical-align: baseline;
+  }
+}

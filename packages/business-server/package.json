@@ -1,0 +1,17 @@
+{
+  "name": "@azzar/business-server",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@azzar/agent-gateway-client": "workspace:*",
+    "@azzar/const": "workspace:*",
+    "@azzar/database": "workspace:*",
+    "@azzar/model-runtime": "workspace:*",
+    "@azzar/trpc": "workspace:*",
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Business server for AZZAR deployments"
+}

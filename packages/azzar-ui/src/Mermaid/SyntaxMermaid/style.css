@@ -1,0 +1,34 @@
+@layer azzar-ui {
+  @keyframes azzar-mermaid-fade-in {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .azzar-mermaid img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .azzar-mermaid svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    max-height: 480px;
+    margin-inline: auto;
+  }
+
+  .azzar-mermaid-transparent img {
+    background: transparent !important;
+  }
+
+  .azzar-mermaid-animated img {
+    opacity: 1;
+    animation: azzar-mermaid-fade-in 0.5s ease-in-out;
+  }
+}

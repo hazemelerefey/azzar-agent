@@ -1,0 +1,14 @@
+{
+  "name": "@azzar/builtin-tool-skill-maintainer",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./executionRuntime": "./src/ExecutionRuntime/index.ts"
+  },
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Skill maintenance tool for AZZAR agents"
+}

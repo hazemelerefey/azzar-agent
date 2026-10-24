@@ -1,0 +1,50 @@
+name: audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  brand-sweep:
+    name: Brand sweep (zero lobe strings)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sweep source for brand leaks
+        run: |
+          hits=$(grep -rni "lobe" --include="*.ts" --include="*.tsx" --include="*.mts" --include="*.cts" --include="*.md" --exclude-dir=node_modules --exclude-dir=.github --exclude-dir=.git --exclude-dir=docs . | grep -viE "globe|global" || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "Brand sweep failed: brand leaks found"
+            exit 1
+          fi
+          echo "Brand sweep clean"
+
+  syntax:
+    name: Syntax check (tsc transpile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install TypeScript only
+        run: npm install --no-save --no-audit --no-fund typescript@5
+      - name: Transpile every file, fail on syntax errors
+        run: |
+          node -e "
+          const { transpileModule } = require('typescript');
+          const { execSync } = require('child_process');
+          const fs = require('fs');
+          const files = execSync('git ls-files \"*.ts\" \"*.tsx\" \"*.mts\" \"*.cts\"').toString().trim().split('\n').filter(Boolean);
+          let bad = 0;
+          for (const f of files) {
+            const src = fs.readFileSync(f, 'utf8');
+            const out = transpileModule(src, { compilerOptions: { target: 99, jsx: 1 }, reportDiagnostics: true });
+            const syn = (out.diagnostics || []).filter(x => x.code >= 1000 && x.code < 1200);
+            if (syn.length) { console.log(f + ': ' + syn.map(x => 'TS' + x.code).join(',')); bad++; }
+          }
+          if (bad) { console.error(bad + ' file(s) with syntax errors'); process.exit(1); }
+          console.log(files.length + ' files checked, syntax clean');
+          "

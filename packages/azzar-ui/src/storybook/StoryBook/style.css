@@ -1,0 +1,54 @@
+@layer azzar-ui {
+  .azzar-storybook-leva {
+    --leva-sizes-controlWidth: 66%;
+    --leva-colors-elevation1: var(--azzar-color-fill-secondary);
+    --leva-colors-elevation2: transparent;
+    --leva-colors-elevation3: var(--azzar-color-fill-secondary);
+    --leva-colors-accent1: var(--azzar-color-primary);
+    --leva-colors-accent2: var(--azzar-color-primary-hover);
+    --leva-colors-accent3: var(--azzar-color-primary-active);
+    --leva-colors-highlight1: var(--azzar-color-text-tertiary);
+    --leva-colors-highlight2: var(--azzar-color-text-secondary);
+    --leva-colors-highlight3: var(--azzar-color-text);
+    --leva-colors-vivid1: var(--azzar-color-warning);
+    --leva-shadows-level1: unset;
+    --leva-shadows-level2: unset;
+    --leva-fonts-mono: var(--azzar-font-family-code);
+
+    overflow: auto;
+
+    width: 100%;
+    height: 100%;
+    padding-block: 6px;
+    padding-inline: 0;
+  }
+
+  /* leva's stitches styles are unlayered, so only !important beats them from a layer */
+  .azzar-storybook-leva > div,
+  .azzar-storybook-leva > div > div {
+    background: transparent !important;
+  }
+
+  .azzar-storybook-leva input:checked + label > svg {
+    stroke: var(--azzar-color-bg-layout) !important;
+  }
+
+  .azzar-storybook-leva button {
+    --leva-colors-accent2: var(--azzar-color-fill-secondary);
+  }
+
+  /* The panel sets an inline height of 100%. That percentage does not
+     resolve while the preview height comes from min-height, so the
+     sidebar stays content-sized. Stretch it to the editor instead. */
+  .azzar-storybook-right {
+    align-self: stretch;
+    height: auto !important;
+    background: var(--azzar-color-bg-layout);
+  }
+
+  @media (width <= 575.98px) {
+    .azzar-storybook-right .draggable-panel-fixed {
+      width: 100% !important;
+    }
+  }
+}

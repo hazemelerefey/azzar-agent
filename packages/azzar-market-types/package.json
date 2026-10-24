@@ -1,0 +1,21 @@
+{
+  "name": "@azzar/market-types",
+  "version": "1.20.0",
+  "description": "Shared types for the AZZAR agent marketplace",
+  "homepage": "https://hazemelerefy.tech",
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "AZZAR <azzar@hazemelerefy.tech>",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  }
+}

@@ -1,0 +1,14 @@
+@layer azzar-ui {
+  .azzar-awesome-install-banner__command {
+    border-radius: 999px;
+  }
+
+  .azzar-install-banner-footnote a {
+    color: var(--azzar-color-primary);
+    text-decoration: none;
+  }
+
+  .azzar-install-banner-footnote a:hover {
+    text-decoration: underline;
+  }
+}

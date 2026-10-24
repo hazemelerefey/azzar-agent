@@ -1,0 +1,20 @@
+{
+  "name": "@azzar/editor-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/prompts": "workspace:*"
+  },
+  "devDependencies": {
+    "lexical": "0.42.0"
+  },
+  "peerDependencies": {
+    "@azzar/editor": "^5.0.0",
+    "debug": "*"
+  },
+  "description": "Runtime for the AZZAR editor"
+}

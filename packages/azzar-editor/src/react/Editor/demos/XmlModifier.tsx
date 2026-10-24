@@ -1,0 +1,101 @@
+/* eslint-disable sort-keys-fix/sort-keys-fix */
+import { StoryBook, useControls, useCreateStore } from '@azzar/ui/storybook';
+import { button } from 'leva';
+import { type FC, type ReactNode } from 'react';
+
+import {
+  DiffAction,
+  LITEXML_APPLY_COMMAND,
+  LITEXML_DIFFNODE_ALL_COMMAND,
+  LITEXML_INSERT_COMMAND,
+  LITEXML_MODIFY_COMMAND,
+  LITEXML_REMOVE_COMMAND,
+} from '../../../plugins/litexml';
+import type { IEditor } from '../../../types';
+
+interface XmlModifierProps {
+  children?: ReactNode;
+  editor?: IEditor;
+}
+
+const XmlModifier: FC<XmlModifierProps> = ({ children, editor }) => {
+  const store = useCreateStore();
+  useControls(
+    {
+      modifyContent: {
+        value: JSON.stringify(
+          [
+            {
+              action: 'insert',
+              afterId: 'n4t5',
+              litexml: '<h2>佐玩的研发流程</h2>',
+            },
+          ],
+          null,
+          2,
+        ),
+        rows: 6,
+      },
+      apply: button((get) => {
+        if (!editor) return;
+        editor.dispatchCommand(LITEXML_MODIFY_COMMAND, JSON.parse(get('modifyContent')));
+      }),
+      delay: true,
+      content: {
+        value: '<span id="n4t5" bold="true">@azzar/replace</span>',
+        rows: 4,
+      },
+      modify: button((get) => {
+        if (!editor) return;
+        editor.dispatchCommand(LITEXML_APPLY_COMMAND, {
+          delay: get('delay'),
+          litexml: [get('content')],
+        });
+      }),
+      removeId: 'lwap',
+      remove: button((get) => {
+        if (!editor) return;
+        editor.dispatchCommand(LITEXML_REMOVE_COMMAND, {
+          delay: get('delay'),
+          id: get('removeId'),
+        });
+      }),
+      afterId: 'll63',
+      insertAfter: button((get) => {
+        if (!editor) return;
+        editor.dispatchCommand(LITEXML_INSERT_COMMAND, {
+          afterId: get('afterId'),
+          delay: get('delay'),
+          litexml: get('content'),
+        });
+      }),
+      beforeId: 'll63',
+      insertBefore: button((get) => {
+        if (!editor) return;
+        editor.dispatchCommand(LITEXML_INSERT_COMMAND, {
+          beforeId: get('beforeId'),
+          delay: get('delay'),
+          litexml: get('content'),
+        });
+      }),
+      acceptAllDiffs: button(() => {
+        if (!editor) return;
+        editor.dispatchCommand(LITEXML_DIFFNODE_ALL_COMMAND, { action: DiffAction.Accept });
+      }),
+      rejectAllDiffs: button(() => {
+        if (!editor) return;
+        editor.dispatchCommand(LITEXML_DIFFNODE_ALL_COMMAND, { action: DiffAction.Reject });
+      }),
+    },
+    {
+      store,
+    },
+  );
+  return (
+    <StoryBook levaStore={store} paddingBlock={'0 24px'}>
+      {children}
+    </StoryBook>
+  );
+};
+
+export default XmlModifier;

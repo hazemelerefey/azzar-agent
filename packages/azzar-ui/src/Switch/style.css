@@ -1,0 +1,20 @@
+@layer azzar-ui {
+  .azzar-switch {
+    --switch-dir: 1;
+  }
+
+  .azzar-switch:dir(rtl),
+  [dir='rtl'] .azzar-switch {
+    --switch-dir: -1;
+  }
+
+  /* The thumb leaves the flow in text mode so its press animation never resizes the control. */
+  .azzar-switch-text > :last-child {
+    position: absolute;
+    inset-inline-start: 2px;
+  }
+
+  .azzar-switch-text > [aria-hidden] > * {
+    grid-area: 1 / 1;
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@azzar/canvas-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build && vite build --mode highlight && vite build --mode mermaid && node scripts/finalize.mjs",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@azzar/canvas": "workspace:*",
+    "pele": "^1.6.0",
+    "shiki": "^4.4.3"
+  },
+  "description": "Canvas runtime for AZZAR"
+}

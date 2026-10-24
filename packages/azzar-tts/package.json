@@ -1,0 +1,99 @@
+{
+  "name": "@azzar/tts",
+  "version": "1.25.1",
+  "description": "High-quality, reliable text-to-speech React hooks for AZZAR",
+  "homepage": "https://hazemelerefy.tech",
+  "bugs": {
+    "url": "https://github.com/azzar/azzar-tts/issues/new/choose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/azzar/azzar-tts.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "AZZAR <azzar@hazemelerefy.tech>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./core/index.d.ts",
+      "import": "./core/index.js",
+      "module": "./core/index.js"
+    },
+    "./server": {
+      "types": "./server/index.d.ts",
+      "import": "./server/index.js",
+      "module": "./server/index.js"
+    },
+    "./react": {
+      "types": "./react/index.d.ts",
+      "import": "./react/index.js",
+      "module": "./react/index.js"
+    }
+  },
+  "main": "./core/index.js",
+  "module": "./core/index.js",
+  "types": "./core/index.d.ts",
+  "files": [
+    "dist",
+    "core",
+    "react",
+    "server"
+  ],
+  "lint-staged": {
+    "*.md": [
+      "remark --quiet --output --",
+      "prettier --write --no-error-on-unmatched-pattern"
+    ],
+    "*.json": [
+      "prettier --write --no-error-on-unmatched-pattern"
+    ],
+    "*.{mjs,cjs}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{js,jsx}": [
+      "prettier --write",
+      "stylelint --fix",
+      "eslint --fix"
+    ],
+    "*.{ts,tsx}": [
+      "prettier --parser=typescript --write",
+      "stylelint --fix",
+      "eslint --fix"
+    ]
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 10"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.24.7",
+    "lodash-es": "^4.17.21",
+    "query-string": "^9.0.0",
+    "react-error-boundary": "^4.0.13",
+    "remark-gfm": "^3.0.1",
+    "remark-parse": "^10.0.2",
+    "swr": "^2.2.5",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0",
+    "url-join": "^5.0.0",
+    "uuid": "^10.0.0"
+  },
+  "peerDependencies": {
+    "@azzar/ui": "workspace:*",
+    "antd": ">=5",
+    "antd-style": ">=3",
+    "lucide-react": ">=0.396.0",
+    "openai": ">=4",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "react-layout-kit": ">=1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

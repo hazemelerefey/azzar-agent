@@ -1,0 +1,9 @@
+@layer azzar-ui {
+  .azzar-mdx-callout-content p {
+    color: inherit !important;
+  }
+
+  .azzar-mdx-callout-underline a {
+    text-decoration: underline;
+  }
+}

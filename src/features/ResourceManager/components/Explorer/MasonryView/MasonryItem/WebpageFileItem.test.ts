@@ -1,0 +1,21 @@
+import { describe, expect, it } from 'vitest';
+
+import { displayTitle } from './WebpageFileItem';
+
+describe('displayTitle', () => {
+  it('keeps a real page title unchanged', () => {
+    expect(displayTitle('Agent Skills Marketplace | AZZAR')).toBe(
+      'Agent Skills Marketplace | AZZAR',
+    );
+  });
+
+  it('falls back to the last path segment for URL-only titles', () => {
+    expect(displayTitle('https://raw.githubusercontent.com/azzar/azzar/main/SKILL.md')).toBe(
+      'SKILL.md',
+    );
+  });
+
+  it('falls back to the hostname when the URL has no path', () => {
+    expect(displayTitle('https://www.example.com/')).toBe('example.com');
+  });
+});

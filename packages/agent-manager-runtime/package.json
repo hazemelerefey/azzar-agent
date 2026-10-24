@@ -1,0 +1,20 @@
+{
+  "name": "@azzar/agent-manager-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage --silent='passed-only'",
+    "test:update": "vitest -u"
+  },
+  "dependencies": {
+    "@azzar/const": "workspace:*",
+    "@azzar/prompts": "workspace:*",
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Runtime for AZZAR department manager agents"
+}

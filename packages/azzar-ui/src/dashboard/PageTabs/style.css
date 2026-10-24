@@ -1,0 +1,14 @@
+@layer azzar-ui {
+  .azzar-dashboard-page-tabs__list {
+    gap: var(--azzar-padding-xxs);
+    padding: var(--azzar-padding-xxs);
+  }
+
+  .azzar-dashboard-page-tabs__tab {
+    gap: var(--azzar-padding-xs);
+  }
+
+  .azzar-dashboard-page-tabs__panel {
+    padding-block-start: 16px;
+  }
+}

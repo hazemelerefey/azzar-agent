@@ -1,0 +1,41 @@
+@layer azzar-ui {
+  .azzar-code-diff .language-title {
+    opacity: 0.5;
+    filter: grayscale(100%);
+    transition:
+      opacity,
+      grayscale 0.2s var(--azzar-motion-ease-in-out);
+  }
+
+  .azzar-code-diff .panel-actions {
+    opacity: 0;
+    transition: opacity 0.2s var(--azzar-motion-ease-in-out);
+  }
+
+  .azzar-code-diff:hover .language-title {
+    opacity: 1;
+    filter: grayscale(0%);
+  }
+
+  .azzar-code-diff:hover .panel-actions,
+  .azzar-code-diff:hover .azzar-code-diff-actions-compact,
+  .azzar-code-diff:hover .azzar-code-diff-lang {
+    opacity: 1;
+  }
+
+  .azzar-code-diff-lang {
+    position: absolute;
+    z-index: 2;
+    inset-block-end: 8px;
+    inset-inline-end: 8px;
+
+    font-family: var(--azzar-font-family-code);
+    color: var(--azzar-color-text-secondary);
+
+    opacity: 0;
+    background: var(--azzar-color-fill-quaternary);
+    backdrop-filter: saturate(150%) blur(10px);
+
+    transition: opacity 0.1s;
+  }
+}

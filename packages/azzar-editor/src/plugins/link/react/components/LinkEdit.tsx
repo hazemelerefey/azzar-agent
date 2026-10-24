@@ -1,0 +1,369 @@
+import { mergeRegister } from '@lexical/utils';
+import { Block, Button, cssVar, Flexbox, Hotkey, Icon, Input, Text } from '@azzar/ui';
+import type { LexicalEditor } from 'lexical';
+import {
+  COMMAND_PRIORITY_EDITOR,
+  COMMAND_PRIORITY_NORMAL,
+  createCommand,
+  KEY_ESCAPE_COMMAND,
+  KEY_TAB_COMMAND,
+} from 'lexical';
+import { BaselineIcon, LinkIcon } from 'lucide-react';
+import {
+  type ChangeEvent,
+  type FC,
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
+import { useLexicalEditor } from '../../../../editor-kernel/react';
+import { useTranslation } from '../../../../editor-kernel/react/useTranslation';
+import { cleanPosition, updatePosition } from '../../../../utils/updatePosition';
+
+import { UPDATE_LINK_TEXT_COMMAND } from '../../command';
+import type { LinkCardNode } from '../../node/LinkCardNode';
+import { EDIT_LINK_CARD_COMMAND } from '../../node/LinkCardNode';
+import type { LinkNode } from '../../node/LinkNode';
+import { styles } from '../style';
+
+export const EDIT_LINK_COMMAND = createCommand<{
+  linkNode: LinkNode | null;
+  linkNodeDOM: HTMLElement | null;
+}>();
+
+interface LinkEditProps {
+  editor: LexicalEditor;
+}
+
+const LinkEdit: FC<LinkEditProps> = ({ editor }) => {
+  const divRef = useRef<HTMLDivElement>(null);
+  const linkNodeRef = useRef<LinkNode | null>(null);
+  const cardNodeRef = useRef<LinkCardNode | null>(null);
+  const linkInputRef = useRef<HTMLInputElement | null>(null);
+  const linkTextInputRef = useRef<HTMLInputElement | null>(null);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkText, setLinkText] = useState('');
+  const [openTarget, setOpenTarget] = useState('_blank');
+  const [linkDom, setLinkDom] = useState<HTMLElement | null>(null);
+
+  const t = useTranslation();
+
+  // 取消编辑，不保存更改
+  const handleCancel = useCallback(() => {
+    if (!editor) return;
+    editor.focus();
+    cleanPosition(divRef.current);
+    linkNodeRef.current = null;
+    cardNodeRef.current = null;
+    setLinkUrl('');
+    setLinkText('');
+    setOpenTarget('_blank');
+    setLinkDom(null);
+  }, [editor]);
+
+  // 提取提交逻辑到独立函数
+  const handleSubmit = useCallback(() => {
+    if (!editor.isEditable()) return;
+    if (!linkInputRef.current || !linkTextInputRef.current || !editor) return;
+
+    const input = linkInputRef.current;
+    const inputDOM = input;
+    const textInput = linkTextInputRef.current;
+    const textInputDOM = textInput;
+
+    if (cardNodeRef.current) {
+      const cardNode = cardNodeRef.current;
+      editor.update(() => {
+        cardNode.setTitle(textInputDOM.value);
+        cardNode.setURL(inputDOM.value);
+        cardNode.setOpenTarget(openTarget);
+      });
+      editor.focus();
+      handleCancel();
+      return;
+    }
+
+    if (!linkNodeRef.current) return;
+
+    const linkNode = linkNodeRef.current;
+
+    // 更新链接URL
+    const currentURL = editor.getEditorState().read(() => linkNode.getURL());
+    if (currentURL !== inputDOM.value) {
+      editor.update(() => {
+        linkNode.setURL(inputDOM.value);
+      });
+    }
+
+    // 更新链接文本
+    const currentText = editor.getEditorState().read(() => linkNode.getTextContent());
+    if (currentText !== textInputDOM.value) {
+      editor.dispatchCommand(UPDATE_LINK_TEXT_COMMAND, {
+        key: linkNode.getKey(),
+        text: textInputDOM.value,
+      });
+    }
+
+    // 关闭编辑器并聚焦到编辑器
+    editor.focus();
+
+    // 隐藏编辑面板
+    handleCancel();
+  }, [editor, linkNodeRef, linkInputRef, linkTextInputRef, openTarget, handleCancel]);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (
+        (!linkNodeRef.current && !cardNodeRef.current) ||
+        !linkInputRef.current ||
+        !linkTextInputRef.current ||
+        !editor
+      ) {
+        return;
+      }
+
+      const linkNode = linkNodeRef.current;
+      const input = linkInputRef.current;
+      const inputDOM = input;
+      const textInput = linkTextInputRef.current;
+      const textInputDOM = textInput;
+      switch (event.key) {
+        case 'Enter': {
+          event.preventDefault();
+          if (event.currentTarget === textInputDOM) {
+            if (cardNodeRef.current) {
+              inputDOM.focus();
+              return;
+            }
+            if (!linkNode) return;
+            const currentText = editor.getEditorState().read(() => linkNode.getTextContent());
+            if (currentText !== textInputDOM.value) {
+              editor.dispatchCommand(UPDATE_LINK_TEXT_COMMAND, {
+                key: linkNode.getKey(),
+                text: textInputDOM.value,
+              });
+              // 更新文本后跳转到链接输入框
+              inputDOM.focus();
+            } else {
+              // 如果文本没有变化，直接跳转到链接输入框
+              inputDOM.focus();
+            }
+          } else if (event.currentTarget === inputDOM) {
+            // 在链接输入框按回车时提交所有更改
+            handleSubmit();
+          }
+          return;
+        }
+        case 'Tab': {
+          event.preventDefault();
+          if (event.currentTarget === textInputDOM) {
+            inputDOM.focus();
+          } else {
+            editor.focus();
+          }
+          return;
+        }
+        case 'Escape': {
+          event.preventDefault();
+          handleCancel();
+          return;
+        }
+        // No default
+      }
+    },
+    [linkNodeRef, linkInputRef, handleSubmit, handleCancel],
+  );
+
+  useEffect(() => {
+    if (linkDom) {
+      updatePosition({
+        floating: divRef.current,
+        reference: linkDom,
+      });
+      const focusTimer = setTimeout(() => {
+        linkInputRef.current?.focus();
+      });
+
+      return () => {
+        clearTimeout(focusTimer);
+      };
+    } else {
+      cleanPosition(divRef.current);
+    }
+  }, [linkDom]);
+
+  // 点击编辑器外部时关闭面板
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (!divRef.current) return;
+      const target = event.target as Node | null;
+      if (!target) return;
+      // 点击面板内部忽略
+      if (divRef.current.contains(target)) return;
+      // 面板打开时（存在 linkDom）才触发关闭
+      if (linkDom) handleCancel();
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+    };
+  }, [linkDom]);
+
+  useLexicalEditor(
+    (editor) => {
+      return mergeRegister(
+        editor.registerCommand(
+          EDIT_LINK_COMMAND,
+          (payload) => {
+            if (!editor.isEditable()) return false;
+            if (!payload.linkNode || !payload.linkNodeDOM) {
+              handleCancel();
+              return false;
+            }
+            linkNodeRef.current = payload.linkNode;
+            cardNodeRef.current = null;
+            setLinkUrl(payload.linkNode.getURL());
+            setLinkText(payload.linkNode.getTextContent());
+            setOpenTarget(payload.linkNode.getTarget() || '_blank');
+            setLinkDom(payload.linkNodeDOM);
+            return true;
+          },
+          COMMAND_PRIORITY_EDITOR,
+        ),
+        editor.registerCommand(
+          EDIT_LINK_CARD_COMMAND,
+          (payload) => {
+            if (!editor.isEditable()) return false;
+            if (!payload.cardNode || !payload.cardNodeDOM) {
+              handleCancel();
+              return false;
+            }
+            cardNodeRef.current = payload.cardNode;
+            linkNodeRef.current = null;
+            setLinkUrl(payload.cardNode.getURL());
+            setLinkText(payload.cardNode.getTitle());
+            setOpenTarget(payload.cardNode.getOpenTarget() || '_blank');
+            setLinkDom(payload.cardNodeDOM);
+            return true;
+          },
+          COMMAND_PRIORITY_EDITOR,
+        ),
+        editor.registerCommand(
+          KEY_ESCAPE_COMMAND,
+          () => {
+            if (!linkNodeRef.current && !cardNodeRef.current) return false;
+            handleCancel();
+            return true;
+          },
+          COMMAND_PRIORITY_EDITOR,
+        ),
+        editor.registerCommand(
+          KEY_TAB_COMMAND,
+          (payload) => {
+            if (linkNodeRef.current && linkTextInputRef.current) {
+              payload.stopImmediatePropagation();
+              payload.preventDefault();
+              linkTextInputRef.current.focus();
+              return true;
+            }
+            return false;
+          },
+          COMMAND_PRIORITY_NORMAL,
+        ),
+      );
+    },
+    [editor],
+  );
+
+  if (!linkNodeRef.current && !cardNodeRef.current) return null;
+  const isCardEdit = Boolean(cardNodeRef.current);
+
+  return (
+    <Block className={styles.linkEdit} ref={divRef} shadow variant={'outlined'}>
+      <Flexbox gap={8} padding={12}>
+        <Text weight={500}>{isCardEdit ? 'Title' : t('link.editTextTitle')}</Text>
+        <Input
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            // Handle link text change
+            setLinkText(e.target.value);
+          }}
+          onKeyDown={handleKeyDown}
+          prefix={<Icon color={cssVar.colorTextDescription} icon={BaselineIcon} />}
+          ref={linkTextInputRef}
+          value={linkText}
+        />
+        <Text weight={500}>{t('link.editLinkTitle')}</Text>
+        <Input
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            // Handle link URL change
+            setLinkUrl(e.target.value);
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder="https://enter-link-url"
+          prefix={<Icon color={cssVar.colorTextDescription} icon={LinkIcon} />}
+          ref={linkInputRef}
+          value={linkUrl}
+        />
+        {isCardEdit ? (
+          <>
+            <Text weight={500}>Open target</Text>
+            <select
+              onChange={(e) => {
+                setOpenTarget(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  handleCancel();
+                }
+              }}
+              style={{
+                border: `1px solid ${cssVar.colorBorder}`,
+                borderRadius: 6,
+                height: 32,
+                paddingInline: 8,
+              }}
+              value={openTarget}
+            >
+              <option value="_blank">New page</option>
+              <option value="_self">Current page</option>
+            </select>
+          </>
+        ) : null}
+      </Flexbox>
+      <Flexbox
+        className={styles.linkEditFooter}
+        horizontal
+        justify={'flex-end'}
+        padding={4}
+        width={'100%'}
+      >
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          size={'small'}
+          type={'fill'}
+        >
+          {t('confirm')}
+          <Hotkey compact keys="enter" variant={'borderless'} />
+        </Button>
+      </Flexbox>
+    </Block>
+  );
+};
+
+LinkEdit.displayName = 'LinkEdit';
+
+export default LinkEdit;

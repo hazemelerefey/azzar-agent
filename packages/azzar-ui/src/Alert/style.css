@@ -1,0 +1,6 @@
+@layer azzar-ui {
+  .azzar-alert-extra-header::-webkit-details-marker {
+    content: '';
+    display: none;
+  }
+}

@@ -1,0 +1,11 @@
+@layer azzar-ui {
+  [data-split-card='true'] .azzar-filter-sidebar-content > :last-child {
+    margin-inline: -16px;
+  }
+
+  @media (width <= 991.98px) {
+    .azzar-filter-sidebar-content > :last-child {
+      margin-inline: 0;
+    }
+  }
+}

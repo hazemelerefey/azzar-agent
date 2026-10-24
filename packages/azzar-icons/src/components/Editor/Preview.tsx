@@ -1,0 +1,48 @@
+import { Flexbox, Highlighter, Tag, createStaticStyles } from '@azzar/ui';
+import { Ref, memo } from 'react';
+
+import IconPreview from '../IconPreview';
+
+const styles = createStaticStyles(({ css }) => {
+  return {
+    code: css`
+      flex: 1;
+      height: 96px;
+
+      pre {
+        padding: 8px !important;
+      }
+
+      code {
+        font-size: 12px;
+        text-wrap: initial;
+      }
+    `,
+  };
+});
+
+interface PreviewProps {
+  precent?: string;
+  ref?: Ref<HTMLDivElement>;
+  svg: string;
+  title: string;
+}
+
+const Preview = memo<PreviewProps>(({ svg, title, precent, ref }) => {
+  return (
+    <Flexbox flex={'none'} gap={16} style={{ position: 'relative', width: '100%' }}>
+      <Flexbox align={'center'} gap={8} horizontal>
+        <h3 style={{ lineHeight: 1, margin: 0 }}>{title}</h3>
+        {precent && <Tag>{precent}</Tag>}
+      </Flexbox>
+      <Flexbox gap={8} horizontal ref={ref}>
+        <IconPreview>{svg}</IconPreview>
+        <Highlighter className={styles.code} language={'tsx'}>
+          {svg}
+        </Highlighter>
+      </Flexbox>
+    </Flexbox>
+  );
+});
+
+export default Preview;

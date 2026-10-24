@@ -1,0 +1,15 @@
+@layer azzar-ui {
+  .azzar-tree-switcher svg {
+    transition: transform 200ms var(--azzar-motion-ease-out);
+  }
+
+  [aria-expanded='true'] > .azzar-tree-switcher svg {
+    transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .azzar-tree-switcher svg {
+      transition-duration: 0s;
+    }
+  }
+}

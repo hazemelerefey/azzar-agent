@@ -1,0 +1,7 @@
+@layer azzar-ui {
+  .azzar-snippet-highlight pre {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+}

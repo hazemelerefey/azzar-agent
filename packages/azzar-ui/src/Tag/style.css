@@ -1,0 +1,6 @@
+@layer azzar-ui {
+  .azzar-tag span {
+    margin: 0;
+    line-height: inherit;
+  }
+}

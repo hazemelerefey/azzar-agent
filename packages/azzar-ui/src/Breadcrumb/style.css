@@ -1,0 +1,11 @@
+@layer azzar-ui {
+  .azzar-breadcrumb li a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .azzar-breadcrumb a:hover,
+  .azzar-breadcrumb button:hover {
+    color: var(--azzar-color-text);
+  }
+}

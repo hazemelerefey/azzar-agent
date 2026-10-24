@@ -1,0 +1,750 @@
+@layer azzar-ui {
+  .azzar-table {
+    /* Surface of the table and of its opaque cells. Override it where a transparent
+       variant (borderless / filled) sits on a different surface, e.g. a card. */
+    --azzar-table-border-color: var(--azzar-fill-border, var(--azzar-color-fill));
+    --azzar-table-border: 1px solid var(--azzar-table-border-color);
+    --azzar-table-z-fixed: 2;
+
+    /* Reset per root so nested tables never inherit a parent's variant vars. Outlined /
+       filled switch the cell to transparent in dark and set the fill to the dark surface. */
+    --azzar-table-cell: var(--azzar-table-bg, var(--azzar-color-bg-container));
+    --azzar-table-fill: transparent;
+    --azzar-table-hover-bg: var(--azzar-color-fill-tertiary);
+    --azzar-table-selected-bg: color-mix(in srgb, var(--azzar-color-primary) 6%, transparent);
+    --azzar-table-selected-hover-bg: color-mix(in srgb, var(--azzar-color-primary) 10%, transparent);
+
+    font-size: 14px;
+    color: var(--azzar-color-text);
+    background: var(--azzar-table-bg, var(--azzar-color-bg-container));
+
+    & table {
+      border-spacing: 0;
+      border-collapse: separate;
+      width: 100%;
+      text-align: start;
+    }
+
+    & .azzar-table-cell,
+    & .azzar-table-thead > tr > th,
+    & .azzar-table-tbody > tr > td,
+    & tfoot > tr > th,
+    & tfoot > tr > td {
+      position: relative;
+
+      padding-block: var(--azzar-table-padding-block);
+      padding-inline: var(--azzar-table-padding-inline);
+
+      overflow-wrap: break-word;
+
+      /* The global `* { vertical-align: baseline }` reset drops the UA's middle for cells. */
+      vertical-align: middle;
+    }
+
+    /* Row-merged body cells get vertical dividers so the block reads apart from the
+       neighbour rows' lines. ::before because ::after is the fixed-column scroll shadow. */
+    & .azzar-table-tbody > tr > td[rowspan]:not([rowspan='0'], [rowspan='1'])::before,
+    & .azzar-table-tbody-virtual .azzar-table-cell[rowspan]:not([rowspan='0'], [rowspan='1'])::before {
+      pointer-events: none;
+      content: '';
+
+      position: absolute;
+      inset: 0;
+
+      border-inline: var(--azzar-table-border);
+    }
+
+    & .azzar-table-tbody > tr > td[rowspan]:first-child::before,
+    & .azzar-table-tbody-virtual .azzar-table-cell[rowspan]:first-child::before {
+      border-inline-start: 0;
+    }
+
+    & .azzar-table-tbody > tr > td[rowspan]:last-child::before,
+    & .azzar-table-tbody-virtual .azzar-table-cell[rowspan]:last-child::before {
+      border-inline-end: 0;
+    }
+
+    & .azzar-table-thead > tr > th,
+    & .azzar-table-thead > tr > td {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--azzar-color-text-secondary);
+      text-align: start;
+
+      background: var(--azzar-table-cell);
+      box-shadow:
+        inset 0 -1px 0 var(--azzar-table-border-color),
+        inset 0 999px 0 var(--azzar-color-fill-quaternary);
+
+      &[colspan]:not([colspan='1']) {
+        text-align: center;
+      }
+    }
+
+    & .azzar-table-tbody > tr > td,
+    & .azzar-table-tbody > tr > th {
+      border-block-end: var(--azzar-table-border);
+
+      font-weight: inherit;
+      font-variant-numeric: tabular-nums;
+      text-align: start;
+
+      background: var(--azzar-table-cell);
+
+      transition: background-color var(--azzar-motion-duration-mid);
+    }
+
+    /* Filled's fill is its edge and outlined's container draws the frame bottom (which
+       scroll.y / virtual cannot scroll away). Borderless keeps the closing rule. */
+    &.azzar-table-filled .azzar-table-tbody > tr:last-child > td,
+    &.azzar-table-filled .azzar-table-tbody > tr:last-child > th,
+    &.azzar-table-outlined .azzar-table-tbody > tr:last-child > td,
+    &.azzar-table-outlined .azzar-table-tbody > tr:last-child > th,
+    &.azzar-table-borderless table:has(> tfoot) > .azzar-table-tbody > tr:last-child > td,
+    &.azzar-table-borderless table:has(> tfoot) > .azzar-table-tbody > tr:last-child > th {
+      border-block-end: 0;
+    }
+
+    & .azzar-table-tbody > tr.azzar-table-placeholder > td {
+      padding-block: 32px;
+      color: var(--azzar-color-text-description);
+      text-align: center;
+    }
+
+    & .azzar-table-tbody > tr.azzar-table-placeholder > td:has([data-table-skeleton]) {
+      padding: 0;
+      color: inherit;
+      text-align: start;
+      vertical-align: top;
+    }
+
+    & .azzar-table-tbody > tr.azzar-table-row-clickable {
+      cursor: pointer;
+    }
+
+    & .azzar-table-tbody > tr > td.azzar-table-column-sort {
+      background: var(--azzar-color-fill-quaternary);
+    }
+
+    & .azzar-table-cell-ellipsis {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: keep-all;
+      white-space: nowrap;
+
+      &.azzar-table-cell-fix-start-shadow,
+      &.azzar-table-cell-fix-end-shadow {
+        overflow: visible;
+
+        & .azzar-table-cell-content {
+          overflow: hidden;
+          display: block;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+
+    & > .azzar-table-title,
+    & > .azzar-table-footer {
+      padding-block: var(--azzar-table-padding-block);
+      padding-inline: var(--azzar-table-padding-inline);
+    }
+
+    & > .azzar-table-footer {
+      color: var(--azzar-color-text);
+      background: var(--azzar-color-fill-quaternary);
+    }
+
+    & .azzar-table-container {
+      position: relative;
+
+      &::before,
+      &::after {
+        pointer-events: none;
+        content: '';
+
+        position: absolute;
+        z-index: calc(var(--columns-count, 1) * 2 + var(--azzar-table-z-fixed) + 1);
+        inset-block: 0 -1px;
+
+        width: 30px;
+
+        transition: box-shadow var(--azzar-motion-duration-slow);
+      }
+
+      &::before {
+        inset-inline-start: 0;
+      }
+
+      &::after {
+        inset-inline-end: 0;
+      }
+    }
+
+    &.azzar-table-has-fix-start > .azzar-table-container::before,
+    &.azzar-table-has-fix-end > .azzar-table-container::after {
+      display: none;
+    }
+
+    &.azzar-table-fix-start-shadow-show > .azzar-table-container::before {
+      box-shadow: inset 10px 0 8px -8px var(--azzar-color-split);
+    }
+
+    &.azzar-table-fix-end-shadow-show > .azzar-table-container::after {
+      box-shadow: inset -10px 0 8px -8px var(--azzar-color-split);
+    }
+
+    & .azzar-table-thead > tr > th.azzar-table-cell-fix,
+    & .azzar-table-tbody > tr > td.azzar-table-cell-fix,
+    & tfoot > tr > td.azzar-table-cell-fix,
+    & .azzar-table-cell.azzar-table-cell-fix {
+      position: sticky;
+      z-index: calc(var(--z-offset-reverse) + var(--azzar-table-z-fixed));
+    }
+
+    /* See-through: FixedFrost paints one continuous frosted pane per fixed side. */
+    & .azzar-table-cell-fix {
+      background: transparent;
+
+      &::after {
+        pointer-events: none;
+        content: '';
+
+        position: absolute;
+        inset-block: 0 -1px;
+
+        width: 30px;
+
+        transition: box-shadow var(--azzar-motion-duration-slow);
+      }
+    }
+
+    & .azzar-table-cell-fix-start::after {
+      inset-inline-start: 100%;
+    }
+
+    & .azzar-table-cell-fix-end::after {
+      inset-inline-end: 100%;
+    }
+
+    &.azzar-table-fix-start-shadow-show .azzar-table-cell-fix-start-shadow::after {
+      box-shadow: inset 10px 0 8px -8px var(--azzar-color-split);
+    }
+
+    &.azzar-table-fix-end-shadow-show .azzar-table-cell-fix-end-shadow::after {
+      box-shadow: inset -10px 0 8px -8px var(--azzar-color-split);
+    }
+
+    & .azzar-table-sticky-holder {
+      position: sticky;
+      z-index: calc(var(--columns-count, 1) * 2 + var(--azzar-table-z-fixed) + 1);
+      background: transparent;
+      backdrop-filter: blur(16px);
+    }
+
+    & .azzar-table-sticky-scroll {
+      position: sticky;
+      z-index: calc(var(--columns-count, 1) * 2 + var(--azzar-table-z-fixed) + 1);
+      inset-block-end: 0;
+    }
+
+    & .azzar-table-sticky-scroll-bar {
+      position: absolute;
+      inset-block-end: 0;
+    }
+
+    & .azzar-table-selection-col {
+      width: 32px;
+
+      &.azzar-table-selection-col-with-dropdown {
+        width: 56px;
+      }
+    }
+
+    &.azzar-table-outlined .azzar-table-selection-col {
+      width: 48px;
+
+      &.azzar-table-selection-col-with-dropdown {
+        width: 72px;
+      }
+    }
+
+    & .azzar-table-selection-column {
+      padding-inline: 8px;
+      text-align: center;
+
+      & > * {
+        vertical-align: middle;
+      }
+    }
+
+    /* Repeated root class: outranks hover and the variants' transparent fixed cells. */
+    &.azzar-table.azzar-table.azzar-table .azzar-table-tbody > tr.azzar-table-row-selected > td {
+      background: var(--azzar-table-selected-bg);
+
+      &.azzar-table-cell-row-hover {
+        background: var(--azzar-table-selected-hover-bg);
+      }
+    }
+
+    & .azzar-table-expand-icon-col {
+      width: 48px;
+    }
+
+    & .azzar-table-row-expand-icon-cell {
+      text-align: center;
+
+      & .azzar-table-row-expand-icon {
+        float: none;
+        display: inline-flex;
+        vertical-align: sub;
+      }
+    }
+
+    & .azzar-table-row-indent {
+      float: inline-start;
+      height: 1px;
+    }
+
+    & .azzar-table-row-expand-icon {
+      float: inline-start;
+      flex: none;
+      vertical-align: middle;
+
+      &.azzar-table-row-expand-icon-spaced {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        visibility: hidden;
+      }
+    }
+
+    & .azzar-table-row-indent + .azzar-table-row-expand-icon {
+      margin-block: -1px;
+      margin-inline-end: 8px;
+    }
+
+    & tr.azzar-table-expanded-row > td,
+    & tr.azzar-table-expanded-row:hover > td {
+      background: var(--azzar-color-fill-quaternary);
+    }
+
+    & .azzar-table-expanded-row-fixed {
+      position: sticky;
+      inset-inline-start: 0;
+
+      overflow: hidden;
+
+      width: var(--azzar-table-component-width, auto);
+      margin-block: calc(var(--azzar-table-padding-block) * -1);
+      margin-inline: calc(var(--azzar-table-padding-inline) * -1);
+      padding-block: var(--azzar-table-padding-block);
+      padding-inline: var(--azzar-table-padding-inline);
+    }
+
+    & .azzar-table-tbody > tr > td > .azzar-table-wrapper:only-child,
+    &
+      .azzar-table-tbody
+      > tr
+      > td
+      > .azzar-table-expanded-row-fixed
+      > .azzar-table-wrapper:only-child {
+      & .azzar-table {
+        margin-block: calc(var(--azzar-table-padding-block) * -1);
+        margin-inline: calc(48px - var(--azzar-table-padding-inline))
+          calc(var(--azzar-table-padding-inline) * -1);
+      }
+
+      & .azzar-table-tbody > tr:last-child > td {
+        border-block-end: 0;
+      }
+
+      & .azzar-table.azzar-table-outlined {
+        & > .azzar-table-title,
+        & > .azzar-table-container,
+        & > .azzar-table-footer {
+          border-block: 0;
+          border-inline-end: 0;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        & > .azzar-table-title + .azzar-table-container {
+          border-block-start: var(--azzar-table-border);
+        }
+
+        &:has(> .azzar-table-footer) > .azzar-table-container {
+          border-block-end: var(--azzar-table-border);
+        }
+      }
+    }
+
+    &.azzar-table-outlined .azzar-table-tbody > tr > td > .azzar-table-expanded-row-fixed {
+      margin-inline: calc((var(--azzar-table-padding-inline) + 1px) * -1);
+    }
+
+    & .azzar-table-summary {
+      position: relative;
+      z-index: var(--azzar-table-z-fixed);
+
+      /* See-through; a sticky summary is a sticky holder and gets its frost there. */
+      background: transparent;
+
+      & > tr > th,
+      & > tr > td {
+        border-block-end: var(--azzar-table-border);
+      }
+    }
+
+    & div.azzar-table-summary {
+      box-shadow: 0 -1px 0 var(--azzar-table-border-color);
+    }
+
+    & .azzar-table-summary.azzar-table-sticky-holder {
+      position: sticky;
+      z-index: calc(var(--columns-count, 1) * 2 + var(--azzar-table-z-fixed) + 1);
+    }
+
+    & tfoot > tr > th,
+    & tfoot > tr > td {
+      border-block-start: var(--azzar-table-border);
+    }
+
+    & .azzar-table-tbody-virtual {
+      & .azzar-table-tbody-virtual-holder-inner .azzar-table-row {
+        display: flex;
+        box-sizing: border-box;
+        width: 100%;
+
+        /* Locked to the integer row estimate, so a rowSpan cell (summed row sizes) ends
+           exactly on the neighbour rows' divider instead of drifting by sub-pixels. */
+        &:not(.azzar-table-row-extra, .azzar-table-expanded-row) {
+          height: var(--azzar-table-virtual-row-height);
+        }
+
+        & > .azzar-table-cell {
+          align-content: center;
+        }
+      }
+
+      & .azzar-table-cell {
+        border-block-end: var(--azzar-table-border);
+        background: var(--azzar-table-cell);
+        transition: background-color var(--azzar-motion-duration-mid);
+      }
+
+      & .azzar-table-expanded-row-cell-fixed {
+        position: sticky;
+        inset-inline-start: 0;
+        overflow: hidden;
+        width: calc(var(--virtual-width) - 1px);
+      }
+    }
+  }
+
+  .azzar-table-small {
+    /* VIRTUAL_ROW_HEIGHT in constants.ts: padding * 2 + 22px line + 1px divider. */
+    --azzar-table-virtual-row-height: calc(8px * 2 + 23px);
+    --azzar-table-padding-block: 8px;
+    --azzar-table-padding-inline: 12px;
+  }
+
+  .azzar-table-medium {
+    /* VIRTUAL_ROW_HEIGHT in constants.ts: padding * 2 + 22px line + 1px divider. */
+    --azzar-table-virtual-row-height: calc(12px * 2 + 23px);
+    --azzar-table-padding-block: 12px;
+    --azzar-table-padding-inline: 16px;
+  }
+
+  .azzar-table-large {
+    /* VIRTUAL_ROW_HEIGHT in constants.ts: padding * 2 + 22px line + 1px divider. */
+    --azzar-table-virtual-row-height: calc(16px * 2 + 23px);
+    --azzar-table-padding-block: 16px;
+    --azzar-table-padding-inline: 16px;
+  }
+
+  /* Repeated root class: outranks the variants' clear and transparent fixed cells. */
+  .azzar-table.azzar-table.azzar-table-hoverable {
+    & .azzar-table-tbody > tr > .azzar-table-cell-row-hover,
+    & .azzar-table-tbody-virtual .azzar-table-row:hover > .azzar-table-cell {
+      background: var(--azzar-table-hover-bg);
+    }
+  }
+
+  .azzar-table.azzar-table-outlined {
+    --azzar-table-cell: var(
+      --azzar-table-cell-bg,
+      var(--azzar-table-bg, var(--azzar-color-bg-container))
+    );
+    --azzar-table-fill: var(--azzar-table-surface, transparent);
+
+    /* The square root must not paint behind the rounded frame: the clipped container is
+       the one layer carrying the body (light colorBgContainer, dark colorFillQuaternary). */
+    background: transparent;
+
+    /* Corner fixed cells, header washes and the FixedFrost panes composite on their own layers,
+       and WebKit paints them square past the container's overflow: clip radius, so they carry
+       the inner radius themselves. A clip-path would become a backdrop root and kill the blur. */
+    & > .azzar-table-container > .azzar-table-content > table > thead > tr:first-child > :first-child,
+    & > .azzar-table-container > .azzar-table-header > table > thead > tr:first-child > :first-child,
+    & > .azzar-table-container > .azzar-table-body > table > thead > tr:first-child > :first-child,
+    & > .azzar-table-container > .azzar-table-summary > table > thead > tr:first-child > :first-child {
+      border-start-start-radius: var(--azzar-table-radius-top);
+    }
+
+    & > .azzar-table-container > .azzar-table-content > table > thead > tr:first-child > :last-child,
+    & > .azzar-table-container > .azzar-table-header > table > thead > tr:first-child > :last-child,
+    & > .azzar-table-container > .azzar-table-body > table > thead > tr:first-child > :last-child,
+    & > .azzar-table-container > .azzar-table-summary > table > thead > tr:first-child > :last-child {
+      border-start-end-radius: var(--azzar-table-radius-top);
+    }
+
+    & > .azzar-table-container > .azzar-table-content > table > tbody > tr:last-child > :first-child,
+    & > .azzar-table-container > .azzar-table-header > table > tbody > tr:last-child > :first-child,
+    & > .azzar-table-container > .azzar-table-body > table > tbody > tr:last-child > :first-child,
+    & > .azzar-table-container > .azzar-table-summary > table > tbody > tr:last-child > :first-child {
+      border-end-start-radius: var(--azzar-table-radius-bottom);
+    }
+
+    & > .azzar-table-container > .azzar-table-content > table > tbody > tr:last-child > :last-child,
+    & > .azzar-table-container > .azzar-table-header > table > tbody > tr:last-child > :last-child,
+    & > .azzar-table-container > .azzar-table-body > table > tbody > tr:last-child > :last-child,
+    & > .azzar-table-container > .azzar-table-summary > table > tbody > tr:last-child > :last-child {
+      border-end-end-radius: var(--azzar-table-radius-bottom);
+    }
+
+    & > .azzar-table-title,
+    & > .azzar-table-footer {
+      background: var(--azzar-table-surface, var(--azzar-table-bg, var(--azzar-color-bg-container)));
+    }
+
+    & > .azzar-table-title {
+      border: var(--azzar-table-border);
+      border-block-end: 0;
+      border-start-start-radius: var(--azzar-border-radius-lg);
+      border-start-end-radius: var(--azzar-border-radius-lg);
+    }
+
+    /* The container draws the full frame: with scroll.y / virtual the last row sits inside
+       the body viewport, where overflow: clip + radius would eat a last-row bottom edge. */
+    & > .azzar-table-container {
+      --azzar-table-radius-top: calc(var(--azzar-border-radius-lg) - 1px);
+      --azzar-table-radius-bottom: calc(var(--azzar-border-radius-lg) - 1px);
+
+      overflow: clip;
+
+      border: var(--azzar-table-border);
+      border-radius: var(--azzar-border-radius-lg);
+
+      background: var(--azzar-table-surface, var(--azzar-table-bg, var(--azzar-color-bg-container)));
+      box-shadow: rgb(0 0 0 / 4%) 0 1px 2px 0;
+    }
+
+    & > .azzar-table-title + .azzar-table-container {
+      --azzar-table-radius-top: 0px;
+
+      border-start-start-radius: 0;
+      border-start-end-radius: 0;
+    }
+
+    &:has(> .azzar-table-footer) > .azzar-table-container {
+      --azzar-table-radius-bottom: 0px;
+
+      border-block-end: 0;
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+    }
+
+    & > .azzar-table-footer {
+      border: var(--azzar-table-border);
+      border-block-start: 0;
+      border-end-start-radius: var(--azzar-border-radius-lg);
+      border-end-end-radius: var(--azzar-border-radius-lg);
+    }
+
+    & > .azzar-table-container > * > table > thead > tr > th {
+      border-block-end: var(--azzar-table-border);
+      background: var(--azzar-table-cell);
+      box-shadow: inset 0 999px 0 var(--azzar-color-fill-quaternary);
+    }
+
+    & .azzar-table-tbody > tr > td.azzar-table-cell-fix,
+    & .azzar-table-tbody-virtual .azzar-table-cell.azzar-table-cell-fix {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    & .azzar-table-thead > tr > th.azzar-table-cell-fix,
+    & .azzar-table-thead > tr > td.azzar-table-cell-fix {
+      background: transparent;
+      box-shadow: inset 0 999px 0 var(--azzar-color-fill-quaternary);
+    }
+  }
+
+  /* Mirrors Block filled: one fill on the clipped container (light colorFillTertiary,
+     dark colorFillQuaternary), the page behind it as the base, no frame border. */
+  .azzar-table.azzar-table-filled {
+    --azzar-table-cell: var(
+      --azzar-table-cell-bg,
+      var(--azzar-table-bg, var(--azzar-color-bg-container))
+    );
+    --azzar-table-fill: var(--azzar-table-surface, var(--azzar-color-fill-tertiary));
+
+    background: transparent;
+
+    & > .azzar-table-container > .azzar-table-content > table > thead > tr:first-child > :first-child,
+    & > .azzar-table-container > .azzar-table-header > table > thead > tr:first-child > :first-child,
+    & > .azzar-table-container > .azzar-table-body > table > thead > tr:first-child > :first-child,
+    & > .azzar-table-container > .azzar-table-summary > table > thead > tr:first-child > :first-child {
+      border-start-start-radius: var(--azzar-table-radius-top);
+    }
+
+    & > .azzar-table-container > .azzar-table-content > table > thead > tr:first-child > :last-child,
+    & > .azzar-table-container > .azzar-table-header > table > thead > tr:first-child > :last-child,
+    & > .azzar-table-container > .azzar-table-body > table > thead > tr:first-child > :last-child,
+    & > .azzar-table-container > .azzar-table-summary > table > thead > tr:first-child > :last-child {
+      border-start-end-radius: var(--azzar-table-radius-top);
+    }
+
+    & > .azzar-table-container > .azzar-table-content > table > tbody > tr:last-child > :first-child,
+    & > .azzar-table-container > .azzar-table-header > table > tbody > tr:last-child > :first-child,
+    & > .azzar-table-container > .azzar-table-body > table > tbody > tr:last-child > :first-child,
+    & > .azzar-table-container > .azzar-table-summary > table > tbody > tr:last-child > :first-child {
+      border-end-start-radius: var(--azzar-table-radius-bottom);
+    }
+
+    & > .azzar-table-container > .azzar-table-content > table > tbody > tr:last-child > :last-child,
+    & > .azzar-table-container > .azzar-table-header > table > tbody > tr:last-child > :last-child,
+    & > .azzar-table-container > .azzar-table-body > table > tbody > tr:last-child > :last-child,
+    & > .azzar-table-container > .azzar-table-summary > table > tbody > tr:last-child > :last-child {
+      border-end-end-radius: var(--azzar-table-radius-bottom);
+    }
+
+    & > .azzar-table-title,
+    & > .azzar-table-footer {
+      border-radius: var(--azzar-border-radius-lg);
+      background: var(--azzar-table-fill);
+    }
+
+    & > .azzar-table-title {
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+    }
+
+    & > .azzar-table-footer {
+      border-start-start-radius: 0;
+      border-start-end-radius: 0;
+    }
+
+    & > .azzar-table-container {
+      --azzar-table-radius-top: var(--azzar-border-radius-lg);
+      --azzar-table-radius-bottom: var(--azzar-border-radius-lg);
+
+      overflow: clip;
+      border-radius: var(--azzar-border-radius-lg);
+      background: var(--azzar-table-fill);
+    }
+
+    & > .azzar-table-title + .azzar-table-container {
+      --azzar-table-radius-top: 0px;
+
+      border-start-start-radius: 0;
+      border-start-end-radius: 0;
+    }
+
+    &:has(> .azzar-table-footer) > .azzar-table-container {
+      --azzar-table-radius-bottom: 0px;
+
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+    }
+
+    & .azzar-table-thead > tr > th,
+    & .azzar-table-thead > tr > td {
+      background: transparent;
+      box-shadow:
+        inset 0 -1px 0 var(--azzar-table-border-color),
+        inset 0 999px 0 var(--azzar-color-fill-quaternary);
+    }
+
+    & .azzar-table-tbody > tr > td,
+    & .azzar-table-tbody > tr > th,
+    & .azzar-table-tbody-virtual .azzar-table-cell {
+      background: transparent;
+    }
+
+    & .azzar-table-thead > tr > th.azzar-table-cell-fix,
+    & .azzar-table-thead > tr > td.azzar-table-cell-fix {
+      background: transparent;
+      box-shadow:
+        inset 0 -1px 0 var(--azzar-table-border-color),
+        inset 0 999px 0 var(--azzar-color-fill-quaternary);
+    }
+
+    & .azzar-table-tbody > tr > td.azzar-table-cell-fix {
+      background: transparent;
+      box-shadow: none;
+    }
+  }
+
+  .azzar-table.azzar-table-borderless {
+    background: transparent;
+
+    & .azzar-table-tbody > tr > td,
+    & .azzar-table-tbody > tr > th,
+    & .azzar-table-tbody-virtual .azzar-table-cell,
+    & tfoot.azzar-table-summary,
+    & .azzar-table-summary > tr > td,
+    & .azzar-table-summary > tr > th,
+    & > .azzar-table-footer {
+      background: transparent;
+    }
+
+    & .azzar-table-tbody > tr > td.azzar-table-cell-row-hover,
+    & .azzar-table-tbody-virtual .azzar-table-row:hover > .azzar-table-cell {
+      background: var(--azzar-table-hover-bg);
+    }
+
+    & .azzar-table-tbody > tr > td.azzar-table-cell-fix,
+    & .azzar-table-tbody > tr > th.azzar-table-cell-fix,
+    & .azzar-table-tbody-virtual .azzar-table-cell.azzar-table-cell-fix {
+      background: transparent;
+    }
+
+    & .azzar-table-tbody > tr > td.azzar-table-cell-fix.azzar-table-cell-row-hover {
+      background: var(--azzar-table-hover-bg);
+    }
+  }
+
+  .azzar-table.azzar-table-grouped {
+    & > .azzar-table-container > * > table > * > tr > th,
+    & > .azzar-table-container > * > table > * > tr > td {
+      border-inline-end: var(--azzar-table-border);
+    }
+
+    & .azzar-table-tbody-virtual .azzar-table-cell {
+      border-inline-end: var(--azzar-table-border);
+    }
+
+    & .azzar-table-tbody > tr > td:last-child,
+    & .azzar-table-thead > tr:first-child > th:last-child {
+      border-inline-end: 0;
+    }
+  }
+
+  .azzar-table-filter-dropdown {
+    & [role='group'] > div:not(:first-child) {
+      padding-inline-start: 20px;
+    }
+
+    & .azzar-table-filter-dropdown-item > label {
+      cursor: pointer;
+      flex: 1;
+    }
+  }
+
+  .azzar-table-wrapper [data-table-loading] {
+    z-index: calc(var(--columns-count, 1) * 2 + 4);
+  }
+}

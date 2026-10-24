@@ -1,0 +1,7 @@
+{
+  "name": "@azzar/business-const",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "description": "Business constants for AZZAR"
+}

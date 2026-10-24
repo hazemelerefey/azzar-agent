@@ -1,0 +1,11 @@
+@layer azzar-ui {
+  .azzar-html-preview-loading-source [data-code-type='highlighter'] {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .azzar-html-preview-loading-source pre,
+  .azzar-html-preview-loading-source code {
+    background: transparent !important;
+  }
+}

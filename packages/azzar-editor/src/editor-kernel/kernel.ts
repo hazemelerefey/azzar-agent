@@ -1,0 +1,1090 @@
+import { createHeadlessEditor as createLexicalHeadlessEditor } from '@lexical/headless';
+import type { HistoryState } from '@lexical/history';
+import { createEmptyHistoryState } from '@lexical/history';
+import { $createTableSelection, $isTableNode, $isTableSelection } from '@lexical/table';
+import { get, merge, template, templateSettings } from 'es-toolkit/compat';
+import EventEmitter from 'eventemitter3';
+import type {
+  CommandListener,
+  CommandListenerPriority,
+  CommandPayloadType,
+  LexicalCommand,
+  LexicalEditor,
+  LexicalNodeConfig,
+} from 'lexical';
+import {
+  $createNodeSelection,
+  $createRangeSelection,
+  $getNodeByKey,
+  $getSelection,
+  $isElementNode,
+  $isNodeSelection,
+  $isRangeSelection,
+  $setSelection,
+  COMMAND_PRIORITY_CRITICAL,
+  createEditor,
+  KEY_DOWN_COMMAND,
+} from 'lexical';
+
+import defaultLocale from '../locale';
+import { $isRootTextContentEmpty } from '../plugins/common/utils';
+import type { HotkeyId } from '../types/hotkey';
+import type {
+  Commands,
+  IBeforeEditorInitLifecycle,
+  IDecorator,
+  IDocumentOptions,
+  IEditor,
+  IEditorKernel,
+  IEditorPlugin,
+  IEditorPluginConstructor,
+  INodeRegistrationTransform,
+  IPlugin,
+  ISelectionObject,
+  IServiceID,
+} from '../types/kernel';
+import type { ILocaleKeys } from '../types/locale';
+import { createDebugLogger } from '../utils/debug';
+import type { HotkeyOptions, HotkeysEvent } from '../utils/hotkey/registerHotkey';
+import { getHotkeyById, registerHotkey } from '../utils/hotkey/registerHotkey';
+
+import type DataSource from './data-source';
+import { registerEvent } from './event';
+import { KernelPlugin } from './plugin';
+import {
+  $closest,
+  createEmptyEditorState,
+  EDITOR_THEME_KEY,
+  generateEditorId,
+  noop,
+  registerEditorKernel,
+  unregisterEditorKernel,
+} from './utils';
+
+templateSettings.interpolate = /{{([\S\s]+?)}}/g;
+
+export class Kernel extends EventEmitter implements IEditorKernel {
+  // Global hot reload flag
+  private static globalHotReloadMode: boolean | undefined = undefined;
+  private dataTypeMap: Map<string, DataSource>;
+  private plugins: Array<IEditorPluginConstructor<any>> = [];
+  private pluginsConfig: Map<IEditorPluginConstructor<any>, any> = new Map();
+  private pluginsInstances: Array<IEditorPlugin<any>> = [];
+  private beforeEditorInitHooks: Array<IBeforeEditorInitLifecycle> = [];
+  private nodeTransforms: Array<INodeRegistrationTransform> = [];
+  private rootClassNames: Set<string> = new Set();
+  private nodes: Array<LexicalNodeConfig> = [];
+  private themes: Record<string, any> = {
+    [EDITOR_THEME_KEY]: generateEditorId(),
+  }; // Used to store theme configuration
+  private decorators: Record<string, IDecorator> = {};
+  private serviceMap: Map<string, any> = new Map();
+  private localeMap: Record<keyof ILocaleKeys, string> = defaultLocale as unknown as Record<
+    keyof ILocaleKeys,
+    string
+  >;
+  private hotReloadMode: boolean = false;
+  private logger = createDebugLogger('kernel');
+
+  private historyState = createEmptyHistoryState();
+
+  /**
+   * Root-scoped resources are attached to the Lexical editor's root listener
+   * so direct Lexical setRootElement(null) calls are safe as well.
+   */
+  private unregisterRootLifecycle?: () => void;
+
+  private editor?: LexicalEditor;
+  private headlessEditor = false;
+
+  constructor() {
+    super();
+    this.dataTypeMap = new Map<string, DataSource>();
+    // Enable hot reload mode in development
+    this.hotReloadMode = this.detectDevelopmentMode();
+    this.logger.info(`🚀 Kernel initialized (hot reload: ${this.hotReloadMode})`);
+  }
+
+  cloneNodeEditor(): IEditorKernel {
+    const newKernel = new Kernel();
+    newKernel.registerPlugins(this.plugins);
+    newKernel.initNodeEditor();
+    newKernel.setDocument('json', this.getDocument('json') || '{}', { keepId: true });
+    return newKernel;
+  }
+
+  getHistoryState(): HistoryState {
+    return this.historyState;
+  }
+
+  isEditable(): boolean {
+    return this.editor?.isEditable() || false;
+  }
+
+  private detectDevelopmentMode(): boolean {
+    // Check global override first
+    if (Kernel.globalHotReloadMode !== undefined) {
+      return Kernel.globalHotReloadMode;
+    }
+
+    // Multiple ways to detect development mode
+    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+      return true;
+    }
+
+    // Check for common development indicators
+    if (typeof window !== 'undefined') {
+      // Webpack HMR
+      if ((window as any).webpackHotUpdate) {
+        return true;
+      }
+      // Vite HMR
+      if ((window as any).__vite_plugin_react_preamble_installed__) {
+        return true;
+      }
+      // Next.js development
+      if ((window as any).__NEXT_DATA__?.buildId === 'development') {
+        return true;
+      }
+    }
+
+    // Check for localhost or development URLs
+    if (typeof window !== 'undefined' && window.location) {
+      const hostname = window.location.hostname;
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')) {
+        return true;
+      }
+    }
+
+    // Default to development mode for better DX
+    return true;
+  }
+
+  /**
+   * Globally enable or disable hot reload mode for all kernel instances
+   * @param enabled Whether to enable hot reload mode globally
+   */
+  static setGlobalHotReloadMode(enabled: boolean): void {
+    Kernel.globalHotReloadMode = enabled;
+  }
+
+  /**
+   * Reset global hot reload mode to automatic detection
+   */
+  static resetGlobalHotReloadMode(): void {
+    Kernel.globalHotReloadMode = undefined;
+  }
+
+  getLexicalEditor(): LexicalEditor | null {
+    return this.editor || null;
+  }
+
+  destroy() {
+    const editor = this.editor;
+    const editorId = this.getEditorId();
+    this.logger.info(`🗑️ Destroying editor with ${this.pluginsInstances.length} plugins`);
+
+    // Detach first. This invokes every root listener cleanup (including
+    // @lexical/dragon) and releases the EditorMap entry before plugin teardown.
+    if (editor) {
+      try {
+        editor.setRootElement(null);
+      } catch (error) {
+        this.logger.warn('Failed to detach editor root during destroy:', error);
+      }
+    }
+    unregisterEditorKernel(editorId);
+
+    try {
+      editor?.setEditorState(createEmptyEditorState());
+    } catch (error) {
+      this.logger.warn('Failed to reset editor state during destroy:', error);
+    }
+
+    this.unregisterRootLifecycle?.();
+    this.unregisterRootLifecycle = undefined;
+
+    // Run all plugin cleanups even when one plugin reports an error. The
+    // kernel remains reusable after destroy; callers still receive the first
+    // cleanup error after state has been reset below.
+    let destroyError: unknown;
+    this.pluginsInstances.forEach((plugin) => {
+      try {
+        plugin.destroy?.();
+      } catch (error) {
+        destroyError ??= error;
+      }
+    });
+    this.pluginsInstances = [];
+
+    // Plugin constructors are retained as declarative configuration, while
+    // all constructor-owned runtime registrations are rebuilt on the next
+    // initialization. Resetting these collections also prevents duplicate
+    // Lexical node registrations after destroy() followed by re-attach.
+    this.dataTypeMap.clear();
+    this.decorators = {};
+    this.nodeTransforms = [];
+    this.nodes = [];
+    this.beforeEditorInitHooks = [];
+    this.rootClassNames.clear();
+    this.serviceMap.clear();
+    this.themes = { [EDITOR_THEME_KEY]: generateEditorId() };
+    this.historyState = createEmptyHistoryState();
+    this._commands.clear();
+    this._commandsClean.clear();
+    this.editor = undefined;
+    this.headlessEditor = false;
+    this.logger.info('✅ Editor destroyed');
+
+    if (destroyError) {
+      throw destroyError;
+    }
+  }
+
+  getRootElement(): HTMLElement | null {
+    if (this.headlessEditor) {
+      return null;
+    }
+    return this.editor?.getRootElement() || null;
+  }
+
+  setRootElement(dom: HTMLElement, editable?: boolean): LexicalEditor;
+  setRootElement(dom: null, editable?: boolean): LexicalEditor | null;
+  setRootElement(dom: HTMLElement | null, editable: boolean = true): LexicalEditor | null {
+    // Check if editor is already initialized to prevent re-initialization
+    if (this.editor) {
+      if (this.headlessEditor) {
+        if (dom === null) {
+          return this.editor;
+        }
+        throw new Error('Headless editor cannot be attached to a root element.');
+      }
+      this.logger.warn('[Editor] Editor is already initialized, updating root element only');
+      if (dom) {
+        // Lexical may invoke root listeners while reconciling the new root;
+        // make the kernel discoverable before that reconciliation starts.
+        registerEditorKernel(this.getEditorId(), this);
+      }
+      this.editor.setRootElement(dom);
+      if (dom) {
+        this.editor.setEditable(editable);
+        this.applyRootClassNames(dom);
+      }
+      return this.editor;
+    }
+
+    if (dom === null) {
+      // useEditor() can be cleaned up even when no descendant ever mounted a
+      // root. There is nothing to detach in that case.
+      unregisterEditorKernel(this.getEditorId());
+      return null;
+    }
+
+    // Initialize plugins if not already done
+    if (this.pluginsInstances.length === 0) {
+      this.logger.info(`🔌 Initializing ${this.plugins.length} plugins`);
+      for (const plugin of this.plugins) {
+        const instance = new plugin(this, this.pluginsConfig.get(plugin));
+        this.pluginsInstances.push(instance);
+      }
+    }
+
+    this.runBeforeEditorInitLifecycle();
+    const resolvedNodes = this.resolveNodesForInitialization();
+    this.logger.info(`📝 Creating editor with ${resolvedNodes.length} nodes`);
+    registerEditorKernel(this.getEditorId(), this);
+    const editor = (this.editor = createEditor({
+      // @ts-expect-error Inject into lexical editor instance
+      __kernel: this,
+      editable,
+      namespace: 'azzar',
+      nodes: resolvedNodes,
+      onError: (error: Error) => {
+        this.logger.error('❌ Lexical editor error:', error);
+        this.emit('error', error);
+      },
+      theme: this.themes,
+    }));
+    this.headlessEditor = false;
+    this.registerRootLifecycle(editor);
+    this.editor.setRootElement(dom);
+    this.applyRootClassNames(dom);
+
+    this.pluginsInstances.forEach((plugin) => {
+      plugin.onInit?.(editor);
+    });
+    this.logger.info(`✅ Editor ready with ${this.pluginsInstances.length} plugins`);
+    this.emit('initialized', editor);
+    return this.editor;
+  }
+
+  setEditable(editable: boolean): void {
+    if (!this.editor) {
+      this.logger.error('❌ Editor not initialized');
+      throw new Error(`Editor is not initialized.`);
+    }
+    this.editor.setEditable(editable);
+    this.emit('editableChange', editable);
+    this.logger.debug(`✏️ Editor editable set to ${editable}`);
+  }
+
+  initNodeEditor() {
+    if (this.editor) {
+      return this.editor;
+    }
+    // Initialize plugins if not already done
+    if (this.pluginsInstances.length === 0) {
+      this.logger.info(`🔌 Initializing ${this.plugins.length} plugins`);
+      for (const plugin of this.plugins) {
+        const instance = new plugin(this, this.pluginsConfig.get(plugin));
+        this.pluginsInstances.push(instance);
+      }
+    }
+
+    this.runBeforeEditorInitLifecycle();
+    const resolvedNodes = this.resolveNodesForInitialization();
+    this.logger.info(`📝 Creating editor with ${resolvedNodes.length} nodes`);
+    const editor = (this.editor = createEditor({
+      // @ts-expect-error Inject into lexical editor instance
+      __kernel: this,
+      namespace: 'azzar',
+      nodes: resolvedNodes,
+      onError: (error: Error) => {
+        this.logger.error('❌ Lexical editor error:', error);
+        this.emit('error', error);
+      },
+      theme: this.themes,
+    }));
+    this.headlessEditor = false;
+    this.registerRootLifecycle(editor);
+
+    this.pluginsInstances.forEach((plugin) => {
+      plugin.onInit?.(editor);
+    });
+    this.logger.info(`✅ Editor ready with ${this.pluginsInstances.length} plugins`);
+    this.emit('initialized', editor);
+
+    return editor || null;
+  }
+
+  initHeadlessEditor() {
+    if (this.editor) {
+      return this.editor;
+    }
+    // Initialize plugins if not already done
+    if (this.pluginsInstances.length === 0) {
+      this.logger.info(`🔌 Initializing ${this.plugins.length} plugins`);
+      for (const plugin of this.plugins) {
+        const instance = new plugin(this, this.pluginsConfig.get(plugin));
+        this.pluginsInstances.push(instance);
+      }
+    }
+
+    this.runBeforeEditorInitLifecycle();
+    const resolvedNodes = this.resolveNodesForInitialization();
+    this.logger.info(`📝 Creating headless editor with ${resolvedNodes.length} nodes`);
+    const editor = (this.editor = createLexicalHeadlessEditor({
+      // @ts-expect-error Inject into lexical editor instance
+      __kernel: this,
+      namespace: 'azzar-headless',
+      nodes: resolvedNodes,
+      onError: (error: Error) => {
+        this.logger.error('❌ Lexical headless editor error:', error);
+        this.emit('error', error);
+      },
+      theme: this.themes,
+    }));
+    this.headlessEditor = true;
+
+    this.pluginsInstances.forEach((plugin) => {
+      plugin.onInit?.(editor);
+    });
+    this.logger.info(`✅ Headless editor ready with ${this.pluginsInstances.length} plugins`);
+    this.emit('initialized', editor);
+
+    return editor || null;
+  }
+
+  setDocument(type: string, content: any, options?: IDocumentOptions): void {
+    const datasource = this.dataTypeMap.get(type);
+    if (!datasource) {
+      this.logger.error(`❌ DataSource for type "${type}" not found`);
+      throw new Error(`DataSource for type "${type}" is not registered.`);
+    }
+    if (!this.editor) {
+      this.logger.error('❌ Editor not initialized');
+      throw new Error(`Editor is not initialized.`);
+    }
+    // Clear history if not keeping history
+    if (!options?.keepHistory) {
+      this.historyState.redoStack = [];
+      this.historyState.undoStack = [];
+      this.historyState.current = null;
+    }
+    datasource.read(this.editor, content, options);
+    this.pluginsInstances.forEach((plugin) => {
+      plugin.onDocumentChange?.(type, content, options);
+    });
+    this.emit('documentChange', type, content);
+    this.logger.debug(`📥 Set ${type} document`);
+  }
+
+  setSelection(
+    selection: ISelectionObject,
+    opt?: {
+      collapseToEnd?: boolean;
+      collapseToStart?: boolean;
+    },
+  ): Promise<boolean> {
+    if (!this.editor) {
+      this.logger.error('❌ Editor not initialized');
+      throw new Error(`Editor is not initialized.`);
+    }
+    const editor = this.editor;
+    return new Promise((resolve) => {
+      editor.update(() => {
+        try {
+          if (selection.type === 'range') {
+            const startNodeId = opt?.collapseToEnd ? selection.endNodeId : selection.startNodeId;
+            const endNodeId = opt?.collapseToStart ? selection.startNodeId : selection.endNodeId;
+            const startOffset = opt?.collapseToEnd ? selection.endOffset : selection.startOffset;
+            const endOffset = opt?.collapseToStart ? selection.startOffset : selection.endOffset;
+            const anchorNode = $getNodeByKey(startNodeId);
+            const focusNode = $getNodeByKey(endNodeId);
+            if (!anchorNode || !focusNode) {
+              this.logger.error('❌ Nodes for selection not found');
+              resolve(false);
+              return;
+            }
+            const rng = $createRangeSelection();
+            rng.anchor.set(
+              anchorNode.getKey(),
+              startOffset,
+              $isElementNode(anchorNode) ? 'element' : 'text',
+            );
+            rng.focus.set(
+              focusNode.getKey(),
+              endOffset,
+              $isElementNode(focusNode) ? 'element' : 'text',
+            );
+            $setSelection(rng);
+            resolve(true);
+            return;
+          }
+          if (selection.type === 'node') {
+            const node = $getNodeByKey(selection.startNodeId);
+            if (!node) {
+              this.logger.error('❌ Node for selection not found');
+              resolve(false);
+              return;
+            }
+            const nodeSel = $createNodeSelection();
+            nodeSel.add(selection.startNodeId);
+            $setSelection(nodeSel);
+            resolve(true);
+            return;
+          }
+          if (selection.type === 'table') {
+            const startNode = $getNodeByKey(selection.startNodeId);
+            if (!startNode) {
+              this.logger.error('❌ Node for selection not found');
+              resolve(false);
+              return;
+            }
+            const endNode = $getNodeByKey(selection.endNodeId);
+            if (!endNode) {
+              this.logger.error('❌ Node for selection not found');
+              resolve(false);
+              return;
+            }
+            const table1 = $closest(startNode, (n) => $isTableNode(n));
+            const table2 = $closest(endNode, (n) => $isTableNode(n));
+            if (!table1 || !table2 || table1 !== table2) {
+              this.logger.error('❌ Table nodes for selection not found or do not match');
+              resolve(false);
+              return;
+            }
+
+            const rng = $createTableSelection();
+            rng.set(table1.getKey(), selection.startNodeId, selection.endNodeId);
+            $setSelection(rng);
+            resolve(true);
+            return;
+          }
+          resolve(false);
+        } catch (error) {
+          this.logger.error('❌ Error setting selection:', error);
+          resolve(false);
+        }
+      });
+    });
+  }
+
+  getSelection(): ISelectionObject | null {
+    if (!this.editor) {
+      this.logger.error('❌ Editor not initialized');
+      throw new Error(`Editor is not initialized.`);
+    }
+    return this.editor.read(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        return {
+          endNodeId: selection.focus.getNode().getKey(),
+          endOffset: selection.focus.offset,
+          startNodeId: selection.anchor.getNode().getKey(),
+          startOffset: selection.anchor.offset,
+          type: 'range',
+        };
+      }
+      if ($isNodeSelection(selection)) {
+        return {
+          endNodeId: selection.getNodes()[0].getKey(),
+          endOffset: 0,
+          startNodeId: selection.getNodes()[0].getKey(),
+          startOffset: 0,
+          type: 'node',
+        };
+      }
+      if ($isTableSelection(selection)) {
+        const [start, end] = selection.getStartEndPoints();
+        return {
+          endNodeId: end.getNode().getKey(),
+          endOffset: end.offset,
+          startNodeId: start.getNode().getKey(),
+          startOffset: start.offset,
+          type: 'table',
+        };
+      }
+      return null;
+    });
+  }
+
+  focus() {
+    if (this.headlessEditor) {
+      return;
+    }
+    this.editor?.focus();
+  }
+
+  blur(): void {
+    if (this.headlessEditor) {
+      return;
+    }
+    this.editor?.blur();
+  }
+
+  getDocument(type: string): DataSource | undefined {
+    const datasource = this.dataTypeMap.get(type);
+    if (!datasource) {
+      this.logger.error(`❌ DataSource for type "${type}" not found`);
+      throw new Error(`DataSource for type "${type}" is not registered.`);
+    }
+    if (!this.editor) {
+      this.logger.error('❌ Editor not initialized');
+      throw new Error(`Editor is not initialized.`);
+    }
+    const result = datasource.write(this.editor);
+    return result;
+  }
+
+  getSelectionDocument(type: string): unknown | null {
+    const datasource = this.dataTypeMap.get(type);
+    if (!datasource) {
+      throw new Error(`DataSource for type "${type}" is not registered.`);
+    }
+    if (!this.editor) {
+      throw new Error(`Editor is not initialized.`);
+    }
+    return datasource.write(this.editor, {
+      selection: true,
+    });
+  }
+
+  registerDecorator(name: string, decorator: IDecorator) {
+    if (this.decorators[name]) {
+      if (this.hotReloadMode) {
+        // In hot reload mode, allow decorator override with warning
+        this.logger.warn(`🔄 Hot reload: decorator "${name}"`);
+        this.decorators[name] = decorator;
+        return this;
+      } else {
+        // Check if it's the same decorator function
+        const existingDecorator = this.decorators[name];
+        if (existingDecorator === decorator) {
+          // Same decorator function, no need to re-register
+          this.logger.warn(
+            `[Editor] Decorator "${name}" is already registered with the same function`,
+          );
+          return this;
+        }
+
+        // Different decorator function in production mode
+        this.logger.error(
+          `[Editor] Attempting to register duplicate decorator "${name}". Enable hot reload mode if this is intended.`,
+        );
+        throw new Error(`Decorator with name "${name}" is already registered.`);
+      }
+    }
+
+    this.decorators[name] = decorator;
+    this.logger.debug(`🎭 Decorator: ${name}`);
+    return this;
+  }
+
+  getDecorator(name: string): IDecorator | undefined {
+    return this.decorators[name];
+  }
+
+  /**
+   * Unregister a decorator
+   * @param name Decorator name
+   */
+  unregisterDecorator(name: string): boolean {
+    if (this.decorators[name]) {
+      delete this.decorators[name];
+      this.logger.debug(`🗑️ Removed decorator: ${name}`);
+      return true;
+    }
+    this.logger.warn(`⚠️ Decorator "${name}" not found`);
+    return false;
+  }
+
+  /**
+   * Get all registered decorator names
+   */
+  getRegisteredDecorators(): string[] {
+    return Object.keys(this.decorators);
+  }
+
+  /**
+   * Support registering target data source
+   * @param dataSource Data source
+   */
+  registerDataSource(dataSource: DataSource) {
+    this.dataTypeMap.set(dataSource.type, dataSource);
+    this.logger.debug(`📄 Data source: ${dataSource.type}`);
+  }
+
+  registerThemes(themes: Record<string, any>) {
+    this.themes = merge(this.themes, themes);
+  }
+
+  registerPlugin<T>(plugin: IEditorPluginConstructor<T>, config?: T): IEditor {
+    const findPlugin = this.plugins.find((p) => p.pluginName === plugin.pluginName);
+    if (findPlugin) {
+      // Error if same name but different plugin
+      if (findPlugin !== plugin) {
+        if (this.hotReloadMode) {
+          this.logger.warn(`🔄 Hot reload: plugin "${plugin.pluginName}"`);
+          // Remove old plugin
+          const index = this.plugins.findIndex((p) => p.pluginName === plugin.pluginName);
+          if (index !== -1) {
+            this.plugins.splice(index, 1);
+            // Also remove corresponding plugin instance if it exists
+            const instanceIndex = this.pluginsInstances.findIndex((instance) => {
+              return (instance.constructor as any).pluginName === plugin.pluginName;
+            });
+            if (instanceIndex !== -1) {
+              const oldInstance = this.pluginsInstances[instanceIndex];
+              // Clean up decorators registered by the old plugin instance
+              if (oldInstance instanceof KernelPlugin) {
+                const decoratorNames = oldInstance.getRegisteredDecorators();
+                for (const decoratorName of decoratorNames) {
+                  this.unregisterDecorator(decoratorName);
+                  this.logger.debug(`🧨 Cleanup: decorator "${decoratorName}"`);
+                }
+              }
+              if (oldInstance.destroy) {
+                oldInstance.destroy();
+              }
+              this.pluginsInstances.splice(instanceIndex, 1);
+            }
+          }
+        } else {
+          throw new Error(
+            `Plugin with name "${plugin.pluginName}" is already registered with a different implementation.`,
+          );
+        }
+      } else {
+        // Same plugin, just update config if provided
+        if (config !== undefined) {
+          this.pluginsConfig.set(plugin, config);
+        }
+        return this; // If plugin already exists, don't register again
+      }
+    }
+    this.pluginsConfig.set(plugin, config || {});
+    this.plugins.push(plugin);
+    this.logger.debug(`🔌 Plugin: ${plugin.pluginName}`);
+    return this;
+  }
+
+  registerPlugins(plugins: Array<IPlugin>): IEditor {
+    for (const plugin of plugins) {
+      if (Array.isArray(plugin)) {
+        this.registerPlugin(plugin[0], plugin[1]);
+      } else {
+        this.registerPlugin(plugin);
+      }
+    }
+    this.logger.debug(`🔌 Registered ${plugins.length} plugins`);
+    return this;
+  }
+
+  registerNodes(nodes: Array<LexicalNodeConfig>) {
+    const nodeTypes = nodes
+      .map((node) => {
+        // Handle both node classes and node replacements
+        if (typeof node === 'function' && node.getType) {
+          return node.getType();
+        } else if (
+          typeof node === 'object' &&
+          node.replace &&
+          typeof node.replace === 'function' &&
+          node.replace.getType
+        ) {
+          return node.replace.getType();
+        }
+        return 'unknown';
+      })
+      .filter((type) => type !== 'unknown');
+    this.nodes.push(...nodes);
+
+    if (nodeTypes.length > 3) {
+      this.logger.debug(`🧩 Nodes: ${nodeTypes.length} types`);
+    } else {
+      this.logger.debug(`🧩 Nodes: ${nodeTypes.join(', ')}`);
+    }
+  }
+
+  registerNodeTransform(transform: INodeRegistrationTransform): () => void {
+    this.nodeTransforms.push(transform);
+
+    return () => {
+      this.nodeTransforms = this.nodeTransforms.filter((item) => item !== transform);
+    };
+  }
+
+  registerBeforeEditorInit(hook: IBeforeEditorInitLifecycle): () => void {
+    this.beforeEditorInitHooks.push(hook);
+
+    return () => {
+      this.beforeEditorInitHooks = this.beforeEditorInitHooks.filter((item) => item !== hook);
+    };
+  }
+
+  registerRootClassName(className: string): () => void {
+    const classNames = className.split(/\s+/).filter(Boolean);
+
+    for (const item of classNames) {
+      this.rootClassNames.add(item);
+    }
+
+    const rootElement = this.editor?.getRootElement();
+    if (rootElement) {
+      rootElement.classList.add(...classNames);
+    }
+
+    return () => {
+      for (const item of classNames) {
+        this.rootClassNames.delete(item);
+      }
+
+      const currentRootElement = this.editor?.getRootElement();
+      if (currentRootElement) {
+        currentRootElement.classList.remove(...classNames);
+      }
+    };
+  }
+
+  registerRootListener(listener: (rootElement: HTMLElement | null) => void): () => void {
+    if (!this.editor || this.headlessEditor) {
+      return noop;
+    }
+
+    return this.editor.registerRootListener(listener);
+  }
+
+  private getEditorId(): string {
+    return this.themes[EDITOR_THEME_KEY] as string;
+  }
+
+  private registerRootLifecycle(editor: LexicalEditor): void {
+    this.unregisterRootLifecycle?.();
+    let rootEventCleanup: (() => void) | undefined;
+    const clearRootEvent = () => {
+      rootEventCleanup?.();
+      rootEventCleanup = undefined;
+    };
+    const unregisterRootListener = editor.registerRootListener((rootElement) => {
+      clearRootEvent();
+      if (!rootElement) {
+        unregisterEditorKernel(this.getEditorId());
+        return;
+      }
+
+      // Root listeners can be triggered by callers using the Lexical editor
+      // directly, so registration must happen here as well as in the kernel
+      // setRootElement wrapper.
+      registerEditorKernel(this.getEditorId(), this);
+      rootEventCleanup = registerEvent(editor, rootElement);
+    });
+    this.unregisterRootLifecycle = () => {
+      clearRootEvent();
+      unregisterRootListener();
+    };
+  }
+
+  private runBeforeEditorInitLifecycle(): void {
+    for (const hook of this.beforeEditorInitHooks) {
+      hook();
+    }
+  }
+
+  private applyRootClassNames(dom: HTMLElement): void {
+    if (this.rootClassNames.size === 0) {
+      return;
+    }
+
+    dom.classList.add(...Array.from(this.rootClassNames));
+  }
+
+  private resolveNodesForInitialization(): Array<LexicalNodeConfig> {
+    const resolvedNodes = this.nodes.flatMap((node, index) => {
+      let transformedNode: LexicalNodeConfig | null | undefined = node;
+
+      for (const transform of this.nodeTransforms) {
+        transformedNode = transform(transformedNode as LexicalNodeConfig, index);
+        if (!transformedNode) {
+          return [];
+        }
+      }
+
+      return [transformedNode];
+    });
+
+    if (resolvedNodes.length !== this.nodes.length) {
+      this.logger.debug(
+        `🧩 Node transform filtered ${this.nodes.length - resolvedNodes.length} nodes before editor initialization`,
+      );
+    }
+
+    return resolvedNodes;
+  }
+
+  registerService<T>(serviceId: IServiceID<T>, service: T): void {
+    const serviceIdString = serviceId.__serviceId;
+
+    if (this.serviceMap.has(serviceIdString)) {
+      if (this.hotReloadMode) {
+        // In hot reload mode, allow service override with warning
+        this.logger.warn(`🔄 Hot reload: service "${serviceIdString}"`);
+        this.serviceMap.set(serviceIdString, service);
+        return;
+      } else {
+        // Check if it's the same service instance
+        const existingService = this.serviceMap.get(serviceIdString);
+        if (existingService === service) {
+          // Same service instance, no need to re-register
+          this.logger.warn(
+            `[Editor] Service "${serviceIdString}" is already registered with the same instance`,
+          );
+          return;
+        }
+
+        // Different service instance in production mode
+        this.logger.error(
+          `[Editor] Attempting to register duplicate service "${serviceIdString}". Enable hot reload mode if this is intended.`,
+        );
+        throw new Error(`Service with ID "${serviceIdString}" is already registered.`);
+      }
+    }
+
+    this.serviceMap.set(serviceIdString, service);
+    this.logger.debug(`🔧 Service: ${serviceIdString}`);
+  }
+
+  /**
+   * Register service with hot reload support - allows overriding existing services
+   * @param serviceId Service identifier
+   * @param service Service instance
+   */
+  registerServiceHotReload<T>(serviceId: IServiceID<T>, service: T): void {
+    this.serviceMap.set(serviceId.__serviceId, service);
+    this.logger.debug(`🔄 Hot-reload service: ${serviceId.__serviceId}`);
+  }
+
+  /**
+   * Enable or disable hot reload mode
+   * @param enabled Whether to enable hot reload mode
+   */
+  setHotReloadMode(enabled: boolean): void {
+    this.hotReloadMode = enabled;
+  }
+
+  /**
+   * Check if hot reload mode is enabled
+   */
+  isHotReloadMode(): boolean {
+    return this.hotReloadMode;
+  }
+
+  /**
+   * Get service
+   * @param serviceId Service ID
+   */
+  requireService<T>(serviceId: IServiceID<T>): T | null {
+    const service = this.serviceMap.get(serviceId.__serviceId);
+    if (!service) {
+      return null;
+    }
+    return service as T;
+  }
+
+  dispatchCommand<TCommand extends LexicalCommand<unknown>>(
+    type: TCommand,
+    payload: CommandPayloadType<TCommand>,
+  ): boolean {
+    if (!this.editor) {
+      throw new Error('Editor is not initialized.');
+    }
+    return this.editor.dispatchCommand(type, payload);
+  }
+
+  getTheme() {
+    return this.themes;
+  }
+
+  updateTheme(key: string, value: string | Record<string, string>): void {
+    this.themes[key] = value;
+  }
+
+  registerLocale(locale: Partial<Record<keyof ILocaleKeys, string>>): void {
+    const localeKeys = Object.keys(locale);
+    this.localeMap = merge(this.localeMap, locale);
+    this.logger.debug(`🌐 Locale: ${localeKeys.length} keys`);
+  }
+
+  t<K extends keyof ILocaleKeys>(key: K, params?: Record<string, any>): string {
+    let translation = get(this.localeMap, key) || key;
+    if (params) {
+      const compiled = template(translation);
+      translation = compiled(params);
+    }
+    return translation;
+  }
+
+  get isEmpty(): boolean {
+    if (!this.editor) {
+      return true;
+    }
+
+    return this.editor.getEditorState().read(() => {
+      return $isRootTextContentEmpty(this.editor!.isComposing(), true);
+    });
+  }
+
+  get isSelected(): boolean {
+    if (!this.editor) {
+      return false;
+    }
+
+    return this.editor.getEditorState().read(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        return !!selection._cachedNodes;
+      }
+      return false;
+    });
+  }
+
+  cleanDocument(): void {
+    this.setDocument('text', '');
+  }
+
+  private _commands: Commands = new Map();
+  private _commandsClean: Map<LexicalCommand<unknown>, () => void> = new Map();
+
+  registerHotkey(
+    hotkeyId: HotkeyId,
+    callback: (event: KeyboardEvent, handler: HotkeysEvent) => void,
+    options: HotkeyOptions = {},
+  ): () => void {
+    const lexicalEditor = this.editor;
+    if (!lexicalEditor) {
+      throw new Error('Editor is not initialized.');
+    }
+
+    const hotkey = getHotkeyById(hotkeyId);
+    if (!hotkey) return () => false;
+    if (options.enabled === false) return () => false;
+
+    this.logger.debug(`⌨️ Hotkey: ${hotkey.id}`);
+
+    return lexicalEditor.registerCommand(
+      KEY_DOWN_COMMAND,
+      registerHotkey(hotkey, callback, options),
+      hotkey.priority,
+    );
+  }
+
+  registerHighCommand<P>(
+    command: LexicalCommand<P>,
+    listener: CommandListener<P>,
+    priority: CommandListenerPriority,
+  ): () => void {
+    const lexicalEditor = this.editor;
+    if (!lexicalEditor) {
+      throw new Error('Editor is not initialized.');
+    }
+    const commandsMap = this._commands;
+
+    if (!commandsMap.has(command)) {
+      commandsMap.set(command, [new Set(), new Set(), new Set(), new Set(), new Set()]);
+      this._commandsClean.set(
+        command,
+        lexicalEditor.registerCommand(
+          command,
+          (payload: any) => {
+            for (let i = 4; i >= 0; i--) {
+              const listenerInPriorityOrder = this._commands.get(command);
+
+              if (listenerInPriorityOrder !== undefined) {
+                const listenersSet = listenerInPriorityOrder[i];
+                for (const listener of listenersSet) {
+                  if (listener(payload, lexicalEditor)) {
+                    return true;
+                  }
+                }
+              }
+            }
+            return false;
+          },
+          COMMAND_PRIORITY_CRITICAL,
+        ),
+      );
+      // Only log non-keyboard commands to reduce noise
+      if (!command.type?.includes('KEY')) {
+        this.logger.debug(`⚡ Command: ${command.type || 'unknown'}`);
+      }
+    }
+
+    const listenersInPriorityOrder = commandsMap.get(command);
+
+    if (listenersInPriorityOrder === undefined) {
+      return noop;
+    }
+
+    const listeners = listenersInPriorityOrder[priority];
+    listeners.add(listener as CommandListener<unknown>);
+
+    return () => {
+      listeners.delete(listener as CommandListener<unknown>);
+
+      if (listenersInPriorityOrder.every((listenersSet) => listenersSet.size === 0)) {
+        commandsMap.delete(command);
+        this._commandsClean.get(command)?.();
+      }
+    };
+  }
+}

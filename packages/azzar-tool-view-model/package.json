@@ -1,0 +1,19 @@
+{
+  "name": "@azzar/tool-view-model",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@azzar/const": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "View models for AZZAR agent tools"
+}

@@ -1,0 +1,78 @@
+export default {
+  block: {
+    copy: 'Copy',
+    delete: 'Delete block',
+    select: 'Select',
+  },
+  cancel: 'Cancel',
+  codemirror: {
+    copySuccess: 'Code copied to clipboard',
+    preview: 'Preview',
+    selectLanguage: 'Select language',
+    selectTheme: 'Select theme',
+    showLineNumbers: 'Show Line Numbers',
+    tabSize: 'Tab Size',
+    theme: 'Theme',
+    useTabs: 'Use Tabs',
+  },
+  confirm: 'Confirm',
+  file: {
+    error: 'Error: {{message}}',
+    uploading: 'Uploading file...',
+  },
+  image: {
+    broken: 'Broken image',
+    preview: 'Preview image',
+    replace: 'Replace',
+  },
+  link: {
+    copy: 'Copy Link',
+    copySuccess: 'Link copied',
+    convertToCard: 'Convert to Card',
+    convertToIframe: 'Convert to Iframe',
+    convertToLink: 'Convert to Link',
+    convertToSchema: 'Convert to Schema',
+    edit: 'Edit Link',
+    editLinkTitle: 'Link',
+    editTextTitle: 'Text',
+    open: 'Open Link',
+    placeholder: 'Enter link URL',
+    unlink: 'Unlink Link',
+  },
+  markdown: {
+    autoFormatMessage:
+      'Markdown was converted automatically. Use Command/Ctrl + Z to undo this conversion.',
+    autoFormatTitle: 'Markdown Converted',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    parseMessage:
+      'Convert to markdown format, existing content will be overwritten, confirm? (Auto close in 5 seconds)',
+    parseTitle: 'Parse Markdown',
+  },
+  math: {
+    placeholder: 'Enter TeX formula',
+  },
+  modifier: {
+    accept: 'Accept',
+    acceptAll: 'Accept All',
+    reject: 'Reject',
+    rejectedAll: 'Reject All',
+  },
+  table: {
+    delete: 'Delete table',
+    deleteColumn: 'Delete column',
+    deleteRow: 'Delete row',
+    insertColumnLeft: 'Insert {{count}} column(s) to the left',
+    insertColumnRight: 'Insert {{count}} column(s) to the right',
+    insertRowAbove: 'Insert {{count}} row(s) above',
+    insertRowBelow: 'Insert {{count}} row(s) below',
+  },
+  toc: {
+    ariaLabel: 'Table of contents',
+    empty: 'No headings',
+    expand: 'Expand table of contents',
+    pin: 'Pin table of contents',
+    title: 'TOC',
+    unpin: 'Unpin table of contents',
+  },
+};

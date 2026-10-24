@@ -1,0 +1,115 @@
+---
+title: AZZAR
+description: https://hazemelerefy.tech
+category: Provider
+---
+
+import { AZZAR } from '@azzar/icons';
+import { Flexbox } from '@azzar/ui';
+
+import ColorPreview from '../components/ColorPreview';
+import DocsPreview from '../components/DocsPreview';
+
+## Icons
+
+<DocsPreview>
+  {
+    <Flexbox gap={16} horizontal>
+      <AZZAR size={64} />
+      <AZZAR.Color size={64} />
+      <AZZAR.Morden size={64} />
+    </Flexbox>
+  }
+</DocsPreview>
+
+```tsx
+import { AZZAR } from '@azzar/icons';
+import { Flexbox } from '@azzar/ui';
+
+export default () => (
+  <Flexbox gap={16} horizontal>
+    <AZZAR size={64} />
+    <AZZAR.Color size={64} />
+    <AZZAR.Morden size={64} />
+  </Flexbox>
+);
+```
+
+## Text
+
+<DocsPreview>{<AZZAR.Text size={48} />}</DocsPreview>
+
+```tsx
+import { AZZAR } from '@azzar/icons';
+
+export default () => <AZZAR.Text size={48} />;
+```
+
+## Combine
+
+<DocsPreview>
+  {
+    <Flexbox gap={16} align={'flex-start'}>
+      <AZZAR.Combine size={64} />
+      <AZZAR.Combine size={64} type={'color'} />
+    </Flexbox>
+  }
+</DocsPreview>
+
+```tsx
+import { AZZAR } from '@azzar/icons';
+import { Flexbox } from '@azzar/ui';
+
+export default () => (
+  <Flexbox gap={16} align={'flex-start'}>
+    <AZZAR.Combine size={64} />
+    <AZZAR.Combine size={64} type={'color'} />
+  </Flexbox>
+);
+```
+
+## Avatars
+
+<DocsPreview>
+  {
+    <Flexbox gap={16} horizontal>
+      <AZZAR.Avatar size={64} />
+      <AZZAR.Avatar size={64} shape={'square'} />
+    </Flexbox>
+  }
+</DocsPreview>
+
+```tsx
+import { AZZAR } from '@azzar/icons';
+import { Flexbox } from '@azzar/ui';
+
+export default () => (
+  <Flexbox gap={16} horizontal>
+    <AZZAR.Avatar size={64} />
+    <AZZAR.Avatar size={64} shape={'square'} />
+  </Flexbox>
+);
+```
+
+## Colors
+
+<DocsPreview>
+  {
+    <Flexbox gap={16} horizontal>
+      <ColorPreview color={AZZAR.colorPrimary} />
+    </Flexbox>
+  }
+</DocsPreview>
+
+```tsx
+import { AZZAR } from '@azzar/icons';
+import { Flexbox } from '@azzar/ui';
+
+import ColorPreview from '../components/ColorPreview';
+
+export default () => (
+  <Flexbox gap={16} horizontal>
+    <ColorPreview color={AZZAR.colorPrimary} />
+  </Flexbox>
+);
+```

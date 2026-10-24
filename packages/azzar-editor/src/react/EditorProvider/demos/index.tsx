@@ -1,0 +1,47 @@
+import { EditorProvider } from '@azzar/editor/react';
+
+import Editor from '../../Editor/demos';
+
+// Custom locale package
+const customLocale = {
+  file: {
+    error: '错误：{{message}}',
+    uploading: '正在上传文件...',
+  },
+  image: {
+    broken: '图片损坏',
+    preview: '预览图片',
+    replace: '替换',
+  },
+  link: {
+    copy: '复制链接',
+    copySuccess: '链接已复制',
+    convertToCard: '转为卡片',
+    convertToIframe: '转为嵌入',
+    convertToLink: '转为链接',
+    convertToSchema: '转为协议组件',
+    edit: '编辑链接',
+    editLinkTitle: '链接',
+    editTextTitle: '文本',
+    open: '打开链接',
+    placeholder: '输入链接 URL',
+    unlink: '取消链接',
+  },
+  table: {
+    delete: '删除表格',
+    deleteColumn: '删除列',
+    deleteRow: '删除行',
+    insertColumnLeft: '在左侧插入 {{count}} 列',
+    insertColumnRight: '在右侧插入 {{count}} 列',
+    insertRowAbove: '在上方插入 {{count}} 行',
+    insertRowBelow: '在下方插入 {{count}} 行',
+  },
+};
+
+export default function BasicDemo() {
+  return (
+    <EditorProvider config={{ locale: customLocale }}>
+      <Editor />
+    </EditorProvider>
+  );
+}

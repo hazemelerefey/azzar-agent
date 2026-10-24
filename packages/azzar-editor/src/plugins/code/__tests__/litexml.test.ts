@@ -1,0 +1,37 @@
+import { describe, expect, it, vi } from 'vitest';
+
+import Editor, { resetRandomKey } from '../../../editor-kernel';
+import { CommonPlugin } from '../../common';
+import { LitexmlPlugin } from '../../litexml';
+import { MarkdownPlugin } from '../../markdown';
+import { IEditor } from '../../../types';
+
+import { normalizeOpaqueIds } from '../../litexml/__test__/normalize-opaque-ids';
+import { CodePlugin } from '../plugin';
+
+describe('codeblock litexml', () => {
+  let editor: IEditor;
+
+  beforeEach(() => {
+    resetRandomKey();
+    editor = Editor.createEditor();
+    editor.registerPlugins([LitexmlPlugin, MarkdownPlugin, CommonPlugin, CodePlugin]);
+    editor.initNodeEditor();
+  });
+
+  it('reader should work', () => {
+    editor.setDocument('litexml', '<codeInline id="1"><span>123</span></codeInline>');
+    const markdown = editor.getDocument('markdown') as unknown as string;
+    expect(markdown).toBe('`123`\n');
+  });
+
+  it('writer should work', () => {
+    editor.setDocument('markdown', '`123`');
+    const xml = editor.getDocument('litexml') as unknown as string;
+    expect(normalizeOpaqueIds(xml.replace(/>\n\s*?</g, '><'))).toBe(
+      normalizeOpaqueIds(
+        `<?xml version="1.0" encoding="UTF-8"?><root><p id="ll63"><codeInline id="lqqe"><span id="m7fb">123</span></codeInline></p></root>`,
+      ),
+    );
+  });
+});

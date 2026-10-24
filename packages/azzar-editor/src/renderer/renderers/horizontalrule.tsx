@@ -1,0 +1,27 @@
+import { createStaticStyles } from '@azzar/ui';
+import { createElement, type ReactNode } from 'react';
+
+const useStyles = createStaticStyles(
+  ({ css, cssVar }) => css`
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    height: calc(var(--azzar-markdown-margin-multiple) * 1em);
+    margin-block: calc(var(--azzar-markdown-margin-multiple) * 1em);
+
+    hr {
+      width: 100%;
+      border-color: ${cssVar.colorBorder};
+      border-style: dashed;
+      border-width: 1px;
+      border-block-start: none;
+      border-inline-start: none;
+      border-inline-end: none;
+    }
+  `,
+);
+
+export function renderHR(_node: Record<string, any>, key: string): ReactNode {
+  return createElement('div', { className: useStyles, key }, createElement('hr'));
+}

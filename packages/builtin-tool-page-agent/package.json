@@ -1,0 +1,27 @@
+{
+  "name": "@azzar/builtin-tool-page-agent",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./client/executor": "./src/client/executor/index.ts",
+    "./executionRuntime": "./src/ExecutionRuntime/index.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/editor-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@azzar/ui": "^6.0.4",
+    "debug": "*",
+    "lucide-react": "*",
+    "polished": "*",
+    "react": "*",
+    "react-i18next": "*"
+  },
+  "description": "Page agent tool for AZZAR"
+}

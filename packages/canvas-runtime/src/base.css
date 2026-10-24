@@ -1,0 +1,193 @@
+@layer azzar-canvas-base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    margin: 0;
+    padding: 24px;
+    font-family: var(--azzar-font-family);
+    font-size: var(--azzar-font-size);
+    line-height: var(--azzar-line-height);
+    color: var(--azzar-color-text);
+    background: var(--azzar-color-bg-layout, var(--azzar-color-bg-container));
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Models wrap pages in <main>/<section> and stack blocks inside tabs, so block
+     spacing cannot rely on being a direct child of <body>. Flex and grid
+     components space their items with gap and are left out. */
+  :where(body, main, section, article, header, footer, aside, [data-azzar-canvas-flow]) > * + * {
+    margin-block-start: 16px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin-block: 24px 8px;
+    font-weight: var(--azzar-font-weight-strong);
+    color: var(--azzar-color-text-heading, var(--azzar-color-text));
+  }
+
+  h1 {
+    font-size: var(--azzar-font-size-heading-3);
+    line-height: var(--azzar-line-height-heading-3);
+  }
+
+  h2 {
+    font-size: var(--azzar-font-size-heading-4);
+    line-height: var(--azzar-line-height-heading-4);
+  }
+
+  h3 {
+    font-size: var(--azzar-font-size-heading-5);
+    line-height: var(--azzar-line-height-heading-5);
+  }
+
+  h4 {
+    font-size: var(--azzar-font-size);
+  }
+
+  p,
+  ul,
+  ol,
+  blockquote {
+    margin-block: 8px;
+  }
+
+  a {
+    color: var(--azzar-color-link, var(--azzar-color-primary));
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  blockquote {
+    margin-inline: 0;
+    padding-inline-start: 12px;
+    border-inline-start: 3px solid var(--azzar-color-border);
+    color: var(--azzar-color-text-secondary);
+  }
+
+  code {
+    font-family: var(--azzar-font-family-code);
+    font-size: 0.9em;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-block-end: 1px solid var(--azzar-color-border-secondary);
+    text-align: start;
+  }
+
+  th {
+    font-weight: 500;
+    color: var(--azzar-color-text-secondary);
+  }
+
+  azzar-flex,
+  azzar-grid,
+  azzar-card,
+  azzar-tabs,
+  azzar-accordion,
+  azzar-alert,
+  azzar-table,
+  azzar-steps,
+  azzar-descriptions,
+  azzar-code,
+  azzar-mermaid,
+  azzar-area-chart,
+  azzar-bar-chart,
+  azzar-line-chart,
+  azzar-scatter-chart,
+  azzar-radar-chart,
+  azzar-donut-chart,
+  azzar-bar-list,
+  azzar-tracker,
+  azzar-heatmap,
+  azzar-funnel-chart,
+  azzar-divider {
+    display: block;
+  }
+
+  [data-azzar-canvas-slot] {
+    display: contents;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  [data-azzar-canvas-root] {
+    display: contents;
+  }
+}
+
+@layer azzar-canvas-base {
+  pre {
+    overflow: auto;
+    margin: 0;
+    padding: 12px 16px;
+    border: 1px solid var(--azzar-color-border-secondary);
+    border-radius: var(--azzar-border-radius);
+    background: var(--azzar-color-fill-quaternary);
+  }
+
+  pre code {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+@layer azzar-canvas-base {
+  [data-azzar-canvas-code] {
+    overflow: hidden;
+    border: 1px solid var(--azzar-color-border-secondary);
+    border-radius: var(--azzar-border-radius);
+    background: var(--azzar-color-fill-quaternary);
+  }
+
+  [data-azzar-canvas-code-header] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 4px;
+    padding-inline: 12px 4px;
+    border-block-end: 1px solid var(--azzar-color-border-secondary);
+    font-family: var(--azzar-font-family-code);
+    font-size: 12px;
+    color: var(--azzar-color-text-description);
+  }
+
+  /* shiki writes the theme background on the <pre> as an inline style */
+  [data-azzar-canvas-code] pre {
+    border: 0;
+    border-radius: 0;
+    background: transparent !important;
+  }
+
+  [data-azzar-canvas-mermaid] {
+    overflow-x: auto;
+    padding: 16px;
+    border: 1px solid var(--azzar-color-border-secondary);
+    border-radius: var(--azzar-border-radius);
+  }
+
+  /* pele caps the SVG at max-width:100% inline; a wide diagram shrunk to the pane leaves
+     unreadable text, so keep its natural size and scroll instead */
+  [data-azzar-canvas-mermaid] svg {
+    display: block;
+    max-width: none !important;
+    margin-inline: auto;
+  }
+}

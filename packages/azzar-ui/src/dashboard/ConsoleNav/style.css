@@ -1,0 +1,7 @@
+@layer azzar-ui {
+  @starting-style {
+    .azzar-console-nav-rail-link {
+      background: transparent;
+    }
+  }
+}

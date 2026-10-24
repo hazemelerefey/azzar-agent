@@ -1,0 +1,57 @@
+import { SendButton, type SendButtonProps } from '@azzar/editor/react';
+import { Flexbox, Grid, createStaticStyles } from '@azzar/ui';
+
+const styles = createStaticStyles(({ css, cssVar }) => ({
+  container: css`
+    background-color: ${cssVar.colorBgContainer};
+  `,
+}));
+
+const menu: SendButtonProps['menu'] = {
+  items: [
+    {
+      key: 'send',
+      label: 'Send',
+      onClick: () => {
+        console.log('Send clicked');
+      },
+    },
+    {
+      key: 'send-and-translate',
+      label: 'Send and Translate',
+      onClick: () => {
+        console.log('Send and Translate clicked');
+      },
+    },
+  ],
+};
+export default () => {
+  return (
+    <Flexbox className={styles.container} gap={24} padding={24} width={'100%'}>
+      <Grid gap={16} maxItemWidth={64} rows={4} width={'100%'}>
+        <SendButton />
+        <SendButton disabled />
+        <SendButton loading />
+        <SendButton generating />
+      </Grid>
+      <Grid gap={16} maxItemWidth={64} rows={4} width={'100%'}>
+        <SendButton shape={'round'} />
+        <SendButton disabled shape={'round'} />
+        <SendButton loading shape={'round'} />
+        <SendButton generating shape={'round'} />
+      </Grid>
+      <Grid gap={16} maxItemWidth={64} rows={4} width={'100%'}>
+        <SendButton menu={menu} />
+        <SendButton disabled menu={menu} />
+        <SendButton loading menu={menu} />
+        <SendButton generating menu={menu} />
+      </Grid>
+      <Grid gap={16} maxItemWidth={64} rows={4} width={'100%'}>
+        <SendButton menu={menu} shape={'round'} />
+        <SendButton disabled menu={menu} shape={'round'} />
+        <SendButton loading menu={menu} shape={'round'} />
+        <SendButton generating menu={menu} shape={'round'} />
+      </Grid>
+    </Flexbox>
+  );
+};

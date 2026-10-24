@@ -1,0 +1,463 @@
+'use client';
+
+import { mergeRegister } from '@lexical/utils';
+import { ActionIcon, Block, cx } from '@azzar/ui';
+import { debounce } from 'es-toolkit/compat';
+import type { LexicalEditor } from 'lexical';
+import { $getSelection, $setSelection, COMMAND_PRIORITY_CRITICAL, KEY_DOWN_COMMAND } from 'lexical';
+import { CodeXml, Eye } from 'lucide-react';
+import { type FC, type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { azzarTheme, styles, Toolbar } from '../../../codemirror';
+import { useLexicalNodeSelection } from '../../../editor-kernel/react/useLexicalNodeSelection';
+import { useTranslation } from '../../../editor-kernel/react/useTranslation';
+
+import { SELECT_AFTER_CODEMIRROR_COMMAND, SELECT_BEFORE_CODEMIRROR_COMMAND } from '../command';
+import { loadCodeMirror } from '../lib';
+import type { CodeMirrorNode } from '../node/CodeMirrorNode';
+import MermaidPreview from './MermaidPreview';
+import { useCodemirrorEditLock } from './useCodemirrorEditLock';
+
+interface ReactCodemirrorNodeProps {
+  className?: string;
+  editor: LexicalEditor;
+  node: CodeMirrorNode;
+}
+
+const ReactCodemirrorNode: FC<ReactCodemirrorNodeProps> = ({ node, className, editor }) => {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const keydownRef = useRef('');
+  const instanceRef = useRef<any>(null);
+  const isEmptyRef = useRef<boolean>(false);
+  const hasLocalEditLockRef = useRef(false);
+  const releaseLockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t = useTranslation();
+  const [isSelected, setSelected, clearSelection, isNodeSelected] = useLexicalNodeSelection(
+    node.getKey(),
+  );
+  const [selectedLang, setSelectedLang] = useState(node.lang || 'javascript');
+  // use any to avoid strict typing on optional persistence fields
+  const [tabSize, setTabSize] = useState<number>(node.options.tabSize ?? 2);
+  const [useTabs, setUseTabs] = useState<boolean>(node.options.indentWithTabs ?? false);
+  const [showLineNumbers, setShowLineNumbers] = useState<boolean>(
+    node.options.lineNumbers ?? false,
+  );
+  const [expand, setExpand] = useState<boolean>(true);
+  const [preview, setPreview] = useState<boolean>(false);
+  const [code, setCode] = useState<string>(node.code);
+  const { acquireLock, isLockedByRemote, lockOwnerName, releaseLock } = useCodemirrorEditLock(
+    node.getKey(),
+    'CodeMirror block',
+  );
+  const editLockRef = useRef({ acquireLock, isLockedByRemote, releaseLock });
+
+  useEffect(() => {
+    editLockRef.current = { acquireLock, isLockedByRemote, releaseLock };
+  }, [acquireLock, isLockedByRemote, releaseLock]);
+
+  const clearReleaseLockTimer = useCallback(() => {
+    if (!releaseLockTimerRef.current) return;
+    clearTimeout(releaseLockTimerRef.current);
+    releaseLockTimerRef.current = null;
+  }, []);
+
+  const acquireEditLock = useCallback(() => {
+    clearReleaseLockTimer();
+    const acquired = editLockRef.current.acquireLock();
+    if (acquired) hasLocalEditLockRef.current = true;
+    return acquired;
+  }, [clearReleaseLockTimer]);
+
+  const releaseEditLock = useCallback(() => {
+    clearReleaseLockTimer();
+    if (!hasLocalEditLockRef.current) return;
+    editLockRef.current.releaseLock();
+    hasLocalEditLockRef.current = false;
+  }, [clearReleaseLockTimer]);
+
+  const scheduleReleaseEditLock = useCallback(() => {
+    clearReleaseLockTimer();
+    releaseLockTimerRef.current = setTimeout(() => {
+      releaseLockTimerRef.current = null;
+      if (document.visibilityState === 'hidden' || instanceRef.current?.view.hasFocus) return;
+      releaseEditLock();
+    }, 100);
+  }, [clearReleaseLockTimer, releaseEditLock]);
+
+  const handleCopy = useCallback(async () => {
+    if (instanceRef.current) {
+      const code = instanceRef.current.getValue();
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch {
+        /* swallow */
+      }
+    }
+  }, []);
+
+  const labels = useMemo(
+    () => ({
+      preview: t('codemirror.preview'),
+      selectLanguage: t('codemirror.selectLanguage'),
+      showLineNumbers: t('codemirror.showLineNumbers'),
+      tabSize: t('codemirror.tabSize'),
+      useTabs: t('codemirror.useTabs'),
+    }),
+    [t],
+  );
+
+  // 更改语言
+  const handleLanguageChange = useCallback(
+    (value: string) => {
+      setSelectedLang(value);
+      if (value !== 'mermaid') {
+        setPreview(false);
+      }
+      if (instanceRef.current) {
+        instanceRef.current.setOption('mode', value);
+      }
+      editor.update(() => {
+        node.setLang(value);
+      });
+    },
+    [editor, node],
+  );
+
+  // 更改 tab 大小
+  const handleTabSizeChange = useCallback(
+    (value: number | null = 2) => {
+      const v = value === null ? 2 : value;
+      setTabSize(v);
+      if (instanceRef.current) {
+        instanceRef.current.setOption('tabSize', v);
+      }
+      editor.update(() => {
+        node.setTabSize(v);
+      });
+    },
+    [editor, node],
+  );
+
+  // 更改是否使用制表符
+  const handleUseTabsChange = useCallback(
+    (checked: boolean) => {
+      setUseTabs(checked);
+      if (instanceRef.current) {
+        instanceRef.current.setOption('indentWithTabs', checked);
+      }
+      editor.update(() => {
+        node.setIndentWithTabs(checked);
+      });
+    },
+    [editor, node],
+  );
+
+  const handleShowLineNumbersChange = useCallback(
+    (checked: boolean) => {
+      setShowLineNumbers(checked);
+      if (instanceRef.current) {
+        instanceRef.current.setOption('lineNumbers', checked);
+      }
+      editor.update(() => {
+        node.setLineNumbers(checked);
+      });
+    },
+    [editor, node],
+  );
+
+  useEffect(() => {
+    const sel = editor.getEditorState().read(() => $getSelection());
+    // 鼠标主动点击导致的选中，不处理
+    if (instanceRef.current?.view.hasFocus && sel === null) {
+      return;
+    }
+    // 选区移走
+    if (!isSelected || !isNodeSelected) {
+      if (instanceRef.current) {
+        instanceRef.current.blur();
+      }
+      return;
+    }
+    // 选中状态下，聚焦 CodeMirror
+    if (isSelected && instanceRef.current && isNodeSelected) {
+      if (!acquireEditLock()) {
+        clearSelection();
+        return;
+      }
+      // 已经聚焦不在处理
+      if (instanceRef.current?.view.hasFocus) {
+        return;
+      }
+      instanceRef.current.focus();
+      if (keydownRef.current === 'end') {
+        instanceRef.current.setSelectionToEnd();
+      }
+    }
+  }, [acquireEditLock, clearSelection, editor, isNodeSelected, isSelected]);
+
+  useEffect(() => {
+    // 防止重复初始化：如果已经有实例，直接返回
+    if (instanceRef.current) {
+      return;
+    }
+
+    if (ref.current) {
+      const dom = ref.current;
+      loadCodeMirror().then((CodeMirror) => {
+        // 双重检查：在异步操作后再次确认没有重复初始化
+        if (instanceRef.current) {
+          return;
+        }
+
+        const instance = CodeMirror.fromTextArea(dom, {
+          // keep options alphabetically ordered
+          indentWithTabs: useTabs,
+          lineNumbers: showLineNumbers,
+          mode: node.lang,
+          readOnly: editLockRef.current.isLockedByRemote,
+          tabSize,
+          theme: 'default',
+          value: node.code,
+        });
+
+        console.info(instance);
+
+        instance.view.dispatch({
+          effects: instance.optionHelper.theme.reconfigure(
+            instance.view.constructor.theme(azzarTheme, {
+              dark: false,
+            }),
+          ),
+        });
+
+        // 初始化 isEmptyRef 的值
+        isEmptyRef.current = !node.code.trim();
+
+        instance.on('keydown', (instance, e) => {
+          e.stopPropagation();
+
+          // Cmd+Enter / Ctrl+Enter: exit codeblock (move caret after the block)
+          if ((e.key === 'Enter' || e.keyCode === 13) && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            instanceRef.current?.blur();
+            editor.dispatchCommand(SELECT_AFTER_CODEMIRROR_COMMAND, { key: node.getKey() });
+            queueMicrotask(() => {
+              editor.focus();
+            });
+            return;
+          }
+
+          // 当代码块为空且按退格键时，删除代码块节点
+          if (e.key === 'Backspace' || e.keyCode === 8) {
+            // 检查代码内容是否为空（使用 ref 中存储的状态）
+            if (!isEmptyRef.current) {
+              return;
+            }
+
+            e.preventDefault();
+            editor.update(() => {
+              const prevNode = node.getPreviousSibling();
+              node.remove();
+              // 如果有前一个节点，选择它的末尾
+              if (prevNode) {
+                const prevSelection = prevNode.selectEnd();
+                if (prevSelection) {
+                  $setSelection(prevSelection);
+                }
+              }
+            });
+            // 将焦点返回到编辑器
+            queueMicrotask(() => {
+              editor.focus();
+            });
+          }
+        });
+
+        instance.on('leftOut', () => {
+          instanceRef.current?.blur();
+          editor.dispatchCommand(SELECT_BEFORE_CODEMIRROR_COMMAND, { key: node.getKey() });
+          queueMicrotask(() => {
+            editor.focus();
+          });
+        });
+        instance.on('rightOut', () => {
+          instanceRef.current?.blur();
+          editor.dispatchCommand(SELECT_AFTER_CODEMIRROR_COMMAND, { key: node.getKey() });
+          queueMicrotask(() => {
+            editor.focus();
+          });
+        });
+
+        instance.on('change', () => {
+          const currentValue = instance.getValue();
+          // 立即检查代码是否为空（trim 后为空），用于 keydown 事件判断
+          isEmptyRef.current = !currentValue.trim();
+          setCode(currentValue);
+        });
+
+        instance.on(
+          'change',
+          debounce(() => {
+            const currentValue = instance.getValue();
+            // 更新代码内容
+            editor.update(() => {
+              node.setCode(currentValue);
+            });
+          }),
+        );
+        instance.on('focus', () => {
+          if (!acquireEditLock()) {
+            instanceRef.current?.blur();
+            clearSelection();
+            return;
+          }
+
+          if (
+            editor.getEditorState().read(() => {
+              const sel = $getSelection();
+              if (!sel) return false;
+              if (sel?.getNodes().length > 1 || !sel?.getNodes().includes(node)) {
+                return true;
+              }
+              return false;
+            })
+          ) {
+            setSelected(true);
+          }
+        });
+        instance.on('blur', scheduleReleaseEditLock);
+
+        instanceRef.current = instance;
+        if (isSelected && acquireEditLock()) {
+          instanceRef.current.focus();
+        }
+      });
+    }
+
+    return () => {
+      releaseEditLock();
+      if (instanceRef.current) {
+        instanceRef.current.destroy();
+        instanceRef.current = null;
+      }
+    };
+  }, [ref]);
+
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerCommand(
+        KEY_DOWN_COMMAND,
+        (payload) => {
+          // console.info('KEY_DOWN_COMMAND:', payload, keydownRef.current);
+          if (payload.key === 'ArrowLeft' || payload.key === 'ArrowUp') {
+            keydownRef.current = 'end';
+          } else {
+            keydownRef.current = '';
+          }
+          return false;
+        },
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+    );
+  }, [clearSelection, editor, isSelected, node, setSelected]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !instanceRef.current?.view.hasFocus) {
+        releaseEditLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [releaseEditLock]);
+
+  useEffect(() => {
+    instanceRef.current?.setOption('readOnly', isLockedByRemote);
+    if (isLockedByRemote) {
+      releaseEditLock();
+      instanceRef.current?.blur();
+      clearSelection();
+    }
+  }, [clearSelection, isLockedByRemote, releaseEditLock]);
+
+  const handleBlockMouseDown = useCallback(
+    (event: MouseEvent) => {
+      event.stopPropagation();
+      if (!isLockedByRemote) return;
+      event.preventDefault();
+      instanceRef.current?.blur();
+      clearSelection();
+    },
+    [clearSelection, isLockedByRemote],
+  );
+
+  return (
+    <Block
+      className={cx(
+        styles,
+        isSelected && !isNodeSelected && 'selected',
+        isLockedByRemote && 'collab-locked',
+        className,
+      )}
+      onMouseDown={handleBlockMouseDown}
+      onMouseUp={(e) => e.stopPropagation()}
+      onSelect={(e) => e.stopPropagation()}
+      variant={'filled'}
+    >
+      {isLockedByRemote && (
+        <div className={'cm-collab-lock'} contentEditable={false}>
+          {lockOwnerName || 'Someone'} editing
+        </div>
+      )}
+
+      {/* 工具条 */}
+      <Toolbar
+        expand={expand}
+        extra={
+          selectedLang === 'mermaid' ? (
+            <ActionIcon
+              className={'cm-hidden-actions'}
+              icon={preview ? CodeXml : Eye}
+              onClick={() => setPreview(!preview)}
+              size="small"
+              title={labels.preview}
+            />
+          ) : undefined
+        }
+        labels={labels}
+        onClick={() => setExpand(!expand)}
+        onCopy={handleCopy}
+        onLanguageChange={handleLanguageChange}
+        onShowLineNumbersChange={handleShowLineNumbersChange}
+        onTabSizeChange={handleTabSizeChange}
+        onUseTabsChange={handleUseTabsChange}
+        selectedLang={selectedLang}
+        showLineNumbers={showLineNumbers}
+        tabSize={tabSize}
+        toggleExpand={() => setExpand(!expand)}
+        useTabs={useTabs}
+      />
+
+      {/* CodeMirror 编辑器容器 */}
+      <div
+        className={cx(
+          'cm-container',
+          (!expand || (preview && selectedLang === 'mermaid')) && 'cm-container-collapsed',
+        )}
+      >
+        <textarea className={'cm-textarea'} ref={ref} />
+      </div>
+
+      {expand && preview && selectedLang === 'mermaid' && (
+        <div className={'cm-container'} onMouseDown={(e) => e.stopPropagation()}>
+          <MermaidPreview code={code} />
+        </div>
+      )}
+    </Block>
+  );
+};
+
+ReactCodemirrorNode.displayName = 'ReactCodemirrorNode';
+
+export default ReactCodemirrorNode;

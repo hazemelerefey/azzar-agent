@@ -1,0 +1,5 @@
+@layer azzar-ui {
+  .azzar-accordion-header-inline > .accordion-action {
+    padding-block: 4px;
+  }
+}

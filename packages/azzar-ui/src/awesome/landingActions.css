@@ -1,0 +1,7 @@
+@layer azzar-ui {
+  @media (width <= 479.98px) {
+    .azzar-landing-actions[data-size='large'] > * {
+      flex: 1;
+    }
+  }
+}

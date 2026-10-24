@@ -1,0 +1,36 @@
+{
+  "name": "@azzar/trpc",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage --silent='passed-only'"
+  },
+  "dependencies": {
+    "@azzar/const": "workspace:*",
+    "@azzar/database": "workspace:*",
+    "@azzar/desktop-bridge": "workspace:*",
+    "@azzar/env": "workspace:*",
+    "@azzar/observability-otel": "workspace:*",
+    "@azzar/types": "workspace:*",
+    "@azzar/utils": "workspace:*",
+    "@trpc/client": "^11.18.0",
+    "@trpc/react-query": "^11.18.0",
+    "@trpc/server": "^11.18.0",
+    "cookie": "^1.1.1",
+    "debug": "^4.4.3",
+    "jose": "^6.2.3",
+    "model-bank": "workspace:*",
+    "superjson": "^2.2.6"
+  },
+  "devDependencies": {
+    "vite-tsconfig-paths": "^6.1.1"
+  },
+  "peerDependencies": {
+    "next": "^16.3.0"
+  },
+  "description": "tRPC layer for AZZAR"
+}

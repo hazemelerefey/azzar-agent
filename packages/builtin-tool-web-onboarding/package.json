@@ -1,0 +1,30 @@
+{
+  "name": "@azzar/builtin-tool-web-onboarding",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./agentMarketplace": "./src/agentMarketplace/index.ts",
+    "./agentMarketplace/client": "./src/agentMarketplace/client/index.ts",
+    "./client": "./src/client/index.ts",
+    "./executionRuntime": "./src/ExecutionRuntime/index.ts",
+    "./utils": "./src/ExecutionRuntime/utils.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/const": "workspace:*",
+    "@azzar/markdown-patch": "workspace:*",
+    "@azzar/prompts": "workspace:*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@azzar/ui": "^6.0.4",
+    "react": "*",
+    "react-i18next": "*",
+    "swr": "^2"
+  },
+  "description": "Web onboarding tool for AZZAR"
+}

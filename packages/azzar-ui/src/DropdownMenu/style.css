@@ -1,0 +1,51 @@
+@layer azzar-ui {
+  .azzar-menu-positioner > * {
+    will-change: opacity, transform;
+    transform-origin: var(--transform-origin);
+    animation: none;
+  }
+
+  .azzar-menu-positioner[data-open] > * {
+    transform: scaleY(1);
+    opacity: 1;
+    transition:
+      opacity var(--azzar-dropdown-animation-duration) var(--azzar-dropdown-animation-ease-out),
+      transform var(--azzar-dropdown-animation-duration) var(--azzar-dropdown-animation-ease-out);
+  }
+
+  .azzar-menu-positioner[data-open] > [data-starting-style],
+  .azzar-menu-positioner[data-closed] > * {
+    transform: scaleY(var(--azzar-dropdown-animation-scale-y));
+    opacity: 0;
+  }
+
+  .azzar-menu-positioner[data-closed] > * {
+    transition:
+      opacity var(--azzar-dropdown-animation-duration) var(--azzar-dropdown-animation-ease-in),
+      transform var(--azzar-dropdown-animation-duration) var(--azzar-dropdown-animation-ease-in);
+  }
+
+  /* Base UI moves data-highlighted with the arrow keys, but :hover keeps painting
+     whatever the resting cursor sits on, so two items light up at once. */
+  .azzar-menu-popup:has([data-highlighted])
+    :is([role^='menuitem'], [role='option']):hover:not([data-highlighted]) {
+    background: transparent !important;
+  }
+
+  .azzar-menu-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .azzar-menu-submenu-arrow svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .azzar-menu-label a,
+  .azzar-menu-label a:visited,
+  .azzar-menu-label a:hover,
+  .azzar-menu-label a:active {
+    color: inherit;
+  }
+}

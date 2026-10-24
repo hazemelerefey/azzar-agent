@@ -1,0 +1,86 @@
+import { Popover } from '@azzar/ui';
+import { TokenTag } from '@azzar/ui/chat';
+import {
+  GlobeIcon,
+  LibraryBigIcon,
+  Mic,
+  PaperclipIcon,
+  SlidersHorizontalIcon,
+  TimerOff,
+} from 'lucide-react';
+
+import { ChatInputActionBar, ChatInputActions, SendButton } from '../..';
+
+export default () => {
+  return (
+    <ChatInputActionBar
+      left={
+        <ChatInputActions
+          items={[
+            {
+              icon: GlobeIcon,
+              key: 'search',
+              wrapper: (node) => {
+                return <Popover content={'Test Popover'}>{node}</Popover>;
+              },
+            },
+            {
+              icon: PaperclipIcon,
+              key: 'file',
+              label: 'File',
+            },
+            {
+              icon: LibraryBigIcon,
+              key: 'library',
+              label: 'Library',
+            },
+            {
+              type: 'divider',
+            },
+            {
+              children: [
+                {
+                  icon: SlidersHorizontalIcon,
+                  key: 'options',
+                  label: 'Options',
+                },
+                {
+                  disabled: true,
+                  icon: TimerOff,
+                  key: 'history',
+                  label: 'History',
+                },
+                {
+                  icon: Mic,
+                  key: 'voice',
+                  label: 'Voice',
+                },
+              ],
+              type: 'collapse',
+            },
+            {
+              alwaysDisplay: true,
+              children: <TokenTag maxValue={2048} value={1024} />,
+              key: 'token',
+            },
+          ]}
+        />
+      }
+      right={
+        <SendButton
+          menu={{
+            items: [
+              {
+                key: 'send',
+                label: 'Send',
+                onClick: () => {
+                  console.log('Send clicked');
+                },
+              },
+            ],
+          }}
+        />
+      }
+    />
+  );
+};

@@ -1,0 +1,1312 @@
+@layer azzar-ui {
+  .azzar-picker.azzar-picker-underlined {
+    border-block-end-color: var(--azzar-color-border);
+    border-radius: 0;
+
+    &:hover:not(:focus-within, .azzar-picker-disabled) {
+      border-block-end-color: var(--azzar-color-primary-hover);
+    }
+
+    &:focus-within {
+      border-block-end-color: var(--azzar-color-primary);
+    }
+  }
+
+  .azzar-picker-root {
+    /* ---------------------------------------------------------------- input box */
+
+    /* Size to content like antd: the shared Input root is width: 100%, which made the
+         picker stretch in a flex row and squeeze its siblings. Default to auto width (capped by
+         the container); a style / className width (e.g. 100%) still wins and the inputs grow. */
+    &.azzar-picker {
+      position: relative;
+      width: auto;
+      max-width: 100%;
+    }
+
+    /* flex-basis auto, not 0: the input keeps its natural width from rc-picker's size
+         attribute (format length + 2) instead of collapsing when the root is auto width. */
+    &.azzar-picker .azzar-picker-input {
+      position: relative;
+
+      display: inline-flex;
+      flex: 1 1 auto;
+      gap: 8px;
+      align-items: center;
+
+      min-width: 0;
+    }
+
+    &.azzar-picker .azzar-picker-input > input {
+      flex: 1 1 auto;
+
+      width: auto;
+      min-width: 0;
+      padding: 0;
+      border: none;
+
+      font: inherit;
+      font-variant-numeric: tabular-nums;
+      color: inherit;
+      text-overflow: ellipsis;
+
+      appearance: none;
+      background: transparent;
+      outline: none;
+
+      &::placeholder {
+        color: var(--azzar-color-text-placeholder);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+      }
+    }
+
+    /*
+       * `disabled: [boolean, boolean]`: Input greys the whole root on `:has(input:disabled)`;
+       * while one end stays editable (rc adds `-disabled` only when both are), grey just that end.
+       */
+    &.azzar-picker-range:not(.azzar-picker-disabled):has(input:disabled) {
+      cursor: auto;
+      color: var(--azzar-color-text);
+      opacity: 1;
+    }
+
+    &.azzar-picker-range:not(.azzar-picker-disabled) .azzar-picker-input:has(> input:disabled) {
+      cursor: not-allowed;
+      color: var(--azzar-color-text-quaternary);
+    }
+
+    /* hover preview text from presets / cells */
+    &.azzar-picker .azzar-picker-input-placeholder > input {
+      color: var(--azzar-color-text-placeholder);
+    }
+
+    &.azzar-picker .azzar-picker-prefix {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      color: var(--azzar-color-text-tertiary);
+    }
+
+    &.azzar-picker .azzar-picker-suffix {
+      pointer-events: none;
+
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+
+      width: 16px;
+
+      color: var(--azzar-color-text-tertiary);
+
+      transition: opacity 150ms var(--azzar-motion-ease-out);
+    }
+
+    /* the clear button sits on top of the suffix icon (16px wide + 8px gap) */
+    &.azzar-picker .azzar-picker-clear {
+      cursor: pointer;
+
+      position: relative;
+      z-index: 1;
+
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+
+      width: 16px;
+      height: 16px;
+      margin-inline-start: -24px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+
+      color: var(--azzar-color-bg-container);
+
+      opacity: 0;
+      background: var(--azzar-color-text-quaternary);
+
+      transition: opacity 150ms var(--azzar-motion-ease-out);
+
+      &:hover {
+        background: var(--azzar-color-text-tertiary);
+      }
+    }
+
+    &.azzar-picker:not(.azzar-picker-disabled):hover .azzar-picker-clear {
+      opacity: 1;
+    }
+
+    &.azzar-picker:not(.azzar-picker-disabled):hover .azzar-picker-suffix:not(:last-child) {
+      opacity: 0;
+    }
+
+    &.azzar-picker-disabled .azzar-picker-clear {
+      display: none;
+    }
+
+    /*
+       * multiple: rc-picker's tags (`-selection-item`, also the `+ N ...` rest) in base-ui Tag's
+       * filled look, sized as antd (control height - 8px) and wrapping the box when they overflow.
+       */
+    &.azzar-picker-multiple {
+      --azzar-picker-tag-height: 24px;
+
+      cursor: pointer;
+      padding-block: 1px;
+    }
+
+    &.azzar-picker-multiple.azzar-picker-small {
+      --azzar-picker-tag-height: 16px;
+    }
+
+    &.azzar-picker-multiple.azzar-picker-large {
+      --azzar-picker-tag-height: 32px;
+    }
+
+    &.azzar-picker-multiple .azzar-picker-selector {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+    }
+
+    &.azzar-picker-multiple .azzar-picker-selection-overflow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      max-width: 100%;
+    }
+
+    &.azzar-picker-multiple .azzar-picker-selection-overflow-item {
+      flex: none;
+      max-width: 100%;
+    }
+
+    &.azzar-picker-multiple .azzar-picker-selection-item {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+
+      box-sizing: border-box;
+      max-width: 100%;
+      height: var(--azzar-picker-tag-height);
+      margin-block: 2px;
+      margin-inline-end: 4px;
+      padding-inline: 8px 4px;
+      border-radius: var(--azzar-border-radius-sm);
+
+      font-size: var(--azzar-font-size-sm);
+      line-height: var(--azzar-picker-tag-height);
+      color: var(--azzar-color-text);
+      white-space: nowrap;
+
+      background: var(--azzar-color-fill-secondary);
+    }
+
+    &.azzar-picker-multiple.azzar-picker-large .azzar-picker-selection-item {
+      font-size: var(--azzar-font-size);
+    }
+
+    &.azzar-picker-multiple
+      .azzar-picker-selection-item:not(:has(.azzar-picker-selection-item-remove)) {
+      padding-inline-end: 8px;
+    }
+
+    &.azzar-picker-multiple .azzar-picker-selection-item-content {
+      overflow: hidden;
+      font-variant-numeric: tabular-nums;
+      text-overflow: ellipsis;
+    }
+
+    &.azzar-picker-multiple .azzar-picker-selection-item-remove {
+      cursor: pointer;
+
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+
+      color: var(--azzar-color-icon);
+
+      &:hover {
+        color: var(--azzar-color-text-heading);
+      }
+    }
+
+    &.azzar-picker-multiple .azzar-picker-selection-placeholder {
+      overflow: hidden;
+      display: block;
+
+      line-height: calc(var(--azzar-picker-tag-height) + 4px);
+      color: var(--azzar-color-text-placeholder);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* the selector shows the value; rc-picker keeps this readonly input only for focus */
+    &.azzar-picker-multiple .azzar-picker-multiple-input {
+      position: absolute;
+      z-index: -1;
+
+      width: 0;
+      height: 0;
+      padding: 0;
+      border: 0;
+
+      opacity: 0;
+    }
+
+    &.azzar-picker-multiple.azzar-picker-disabled {
+      cursor: not-allowed;
+      color: var(--azzar-color-text-quaternary);
+      opacity: 0.66;
+    }
+
+    /* status: border + focus ring per variant, as antd's genStatusStyle */
+    &.azzar-picker-status-error {
+      --azzar-picker-status: var(--azzar-color-error);
+      --azzar-picker-status-hover: var(--azzar-color-error-border-hover);
+      --azzar-picker-status-bg: var(--azzar-color-error-bg);
+      --azzar-picker-status-bg-hover: var(--azzar-color-error-bg-hover);
+    }
+
+    &.azzar-picker-status-warning {
+      --azzar-picker-status: var(--azzar-color-warning);
+      --azzar-picker-status-hover: var(--azzar-color-warning-border-hover);
+      --azzar-picker-status-bg: var(--azzar-color-warning-bg);
+      --azzar-picker-status-bg-hover: var(--azzar-color-warning-bg-hover);
+    }
+
+    &:is(.azzar-picker-status-error, .azzar-picker-status-warning):not(.azzar-picker-disabled) {
+      &.azzar-picker-outlined {
+        border-color: var(--azzar-picker-status);
+
+        &:hover:not(:focus-within) {
+          border-color: var(--azzar-picker-status-hover);
+        }
+
+        &:focus-within {
+          border-color: var(--azzar-picker-status);
+          box-shadow: 0 0 0 2px var(--azzar-picker-status-bg);
+        }
+      }
+
+      &.azzar-picker-filled {
+        background: var(--azzar-picker-status-bg);
+
+        &:hover:not(:focus-within) {
+          background: var(--azzar-picker-status-bg-hover);
+        }
+
+        &:focus-within {
+          border-color: var(--azzar-picker-status);
+          background: var(--azzar-color-bg-container);
+        }
+      }
+
+      &.azzar-picker-underlined {
+        border-block-end-color: var(--azzar-picker-status);
+      }
+
+      &:is(.azzar-picker-borderless, .azzar-picker-underlined) .azzar-picker-input > input {
+        color: var(--azzar-picker-status);
+      }
+
+      .azzar-picker-prefix {
+        color: var(--azzar-picker-status);
+      }
+    }
+
+    /* rtl: rc-picker adds the -rtl modifier to the box and the popup; lucide arrows are mirrored */
+    &.azzar-picker-rtl,
+    &.azzar-picker-dropdown-rtl {
+      direction: rtl;
+    }
+
+    &.azzar-picker-rtl .azzar-picker-range-separator .lucide,
+    &.azzar-picker-dropdown-rtl .azzar-picker-header > button .lucide {
+      transform: scaleX(-1);
+    }
+
+    /* range: two inputs, a separator and the bar under the active field */
+    &.azzar-picker-range .azzar-picker-input {
+      flex: 1 1 auto;
+    }
+
+    &.azzar-picker-range .azzar-picker-range-separator {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      color: var(--azzar-color-text-tertiary);
+    }
+
+    &.azzar-picker-range .azzar-picker-active-bar {
+      pointer-events: none;
+
+      position: absolute;
+      inset-block-end: -1px;
+
+      height: 2px;
+
+      opacity: 0;
+      background: var(--azzar-color-primary);
+
+      transition:
+        inset-inline-start 200ms var(--azzar-motion-ease-out),
+        width 200ms var(--azzar-motion-ease-out),
+        opacity 200ms var(--azzar-motion-ease-out);
+    }
+
+    &.azzar-picker-range.azzar-picker-focused .azzar-picker-active-bar {
+      opacity: 1;
+    }
+
+    /* ---------------------------------------------------------------- popup */
+    &.azzar-picker-dropdown {
+      /* nested in a base-ui Modal / Popover layer that sets pointer-events: none */
+      pointer-events: auto;
+      font-size: 14px;
+      color: var(--azzar-color-text);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-range-arrow {
+      display: none;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-panel-container {
+      overflow: hidden;
+      display: inline-block;
+
+      border-radius: 16px;
+
+      vertical-align: top;
+
+      background: var(--azzar-color-bg-elevated);
+      box-shadow: var(--azzar-box-shadow), var(--azzar-ring);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-panel-layout {
+      display: flex;
+      align-items: stretch;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-panels {
+      display: flex;
+      flex-wrap: nowrap;
+    }
+
+    /* presets: a sidebar on the start side of the panels, as in antd */
+    &.azzar-picker-dropdown .azzar-picker-presets {
+      display: flex;
+      flex-direction: column;
+
+      min-width: 120px;
+      max-width: 200px;
+
+      /* divider one step lighter than the panel borders: light colorFillSecondary,
+           dark colorFillTertiary (see the -dropdown-dark rule below) */
+      border-inline-end: 1px solid var(--azzar-color-fill-secondary);
+
+      /* slightly tinted; the panel container's radius + overflow clip it */
+      background: var(--azzar-color-fill-quaternary);
+
+      ul {
+        overflow: auto;
+        flex: auto;
+
+        height: 0;
+        margin: 0;
+        padding: 6px;
+
+        list-style: none;
+      }
+
+      li {
+        cursor: pointer;
+
+        overflow: hidden;
+
+        padding-block: 4px;
+        padding-inline: 8px;
+        border-radius: 6px;
+
+        font-size: 13px;
+        line-height: 20px;
+        color: var(--azzar-color-text);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        transition: background-color 150ms var(--azzar-motion-ease-out);
+
+        &:hover {
+          background: var(--azzar-color-fill-tertiary);
+        }
+
+        &:has(> .azzar-picker-preset-active) {
+          font-weight: 500;
+          background: var(--azzar-color-fill-secondary);
+        }
+      }
+
+      li + li {
+        margin-block-start: 2px;
+      }
+    }
+
+    /* dark: fill tokens are white-alpha and would lighten the sidebar, so darken it */
+    &.azzar-picker-dropdown.azzar-picker-dropdown-dark .azzar-picker-presets {
+      border-inline-end-color: var(--azzar-color-fill-tertiary);
+      background: rgb(0 0 0 / 12%);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-panel {
+      display: inline-flex;
+      flex-direction: column;
+      outline: none;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-panels > .azzar-picker-panel + .azzar-picker-panel {
+      border-inline-start: 1px solid var(--azzar-color-border-secondary);
+    }
+
+    &.azzar-picker-dropdown
+      :is(
+        .azzar-picker-date-panel,
+        .azzar-picker-week-panel,
+        .azzar-picker-month-panel,
+        .azzar-picker-quarter-panel,
+        .azzar-picker-year-panel,
+        .azzar-picker-decade-panel
+      ) {
+      width: 288px;
+    }
+
+    /* header: << < [month year] > >> */
+    &.azzar-picker-dropdown .azzar-picker-header {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+
+      padding-block: 12px 4px;
+      padding-inline: 12px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-header > button {
+      cursor: pointer;
+
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+
+      color: var(--azzar-color-text-secondary);
+
+      background: none;
+
+      &:focus-visible:not([data-azzar-focus-ring='managed']) {
+        --azzar-focus-ring-color: var(--azzar-color-info);
+
+        outline: 2px solid color-mix(in srgb, var(--azzar-color-info) 90%, transparent);
+        outline-offset: 2px;
+        animation: azzar-picker-ring-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+
+        @media (prefers-reduced-motion: reduce) {
+          animation: none;
+        }
+
+        @media (forced-colors: active) {
+          outline-color: CanvasText;
+          animation: none;
+        }
+      }
+
+      &:hover:not(:disabled) {
+        color: var(--azzar-color-text);
+        background: var(--azzar-color-fill-tertiary);
+      }
+    }
+
+    &.azzar-picker-dropdown
+      :is(
+        .azzar-picker-header-prev-btn-disabled,
+        .azzar-picker-header-next-btn-disabled,
+        .azzar-picker-header-super-prev-btn-disabled,
+        .azzar-picker-header-super-next-btn-disabled
+      ) {
+      cursor: not-allowed;
+      opacity: 0.3;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-header-view {
+      display: flex;
+      flex: 1;
+      gap: 4px;
+      align-items: center;
+      justify-content: center;
+
+      min-width: 0;
+
+      font-weight: 600;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-header-view > button {
+      cursor: pointer;
+
+      padding-block: 2px;
+      padding-inline: 4px;
+      border: 0;
+      border-radius: 6px;
+
+      font: inherit;
+      color: inherit;
+
+      background: none;
+
+      &:focus-visible:not([data-azzar-focus-ring='managed']) {
+        --azzar-focus-ring-color: var(--azzar-color-info);
+
+        outline: 2px solid color-mix(in srgb, var(--azzar-color-info) 90%, transparent);
+        outline-offset: 2px;
+        animation: azzar-picker-ring-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+
+        @media (prefers-reduced-motion: reduce) {
+          animation: none;
+        }
+
+        @media (forced-colors: active) {
+          outline-color: CanvasText;
+          animation: none;
+        }
+      }
+
+      &:hover:not(:disabled) {
+        color: var(--azzar-color-primary);
+      }
+
+      &:disabled {
+        cursor: default;
+      }
+    }
+
+    /* body + cells */
+    &.azzar-picker-dropdown .azzar-picker-body {
+      padding-block: 4px 12px;
+      padding-inline: 12px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-content {
+      table-layout: fixed;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-content th {
+      height: 28px;
+      padding: 0;
+
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--azzar-color-text-tertiary);
+      text-align: center;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-cell {
+      cursor: pointer;
+
+      position: relative;
+
+      padding-block: 2px;
+      padding-inline: 0;
+
+      color: var(--azzar-color-text-quaternary);
+      text-align: center;
+
+      &::before {
+        content: '';
+
+        position: absolute;
+        z-index: 0;
+        inset-block-start: 50%;
+        inset-inline: 0;
+        transform: translateY(-50%);
+
+        height: 32px;
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-cell-in-view {
+      color: var(--azzar-color-text);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-cell-inner {
+      position: relative;
+      z-index: 1;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      box-sizing: border-box;
+      min-width: 32px;
+      height: 32px;
+      border-radius: 999px;
+
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+
+      transition:
+        background 150ms var(--azzar-motion-ease-out),
+        color 150ms var(--azzar-motion-ease-out);
+    }
+
+    &.azzar-picker-dropdown
+      .azzar-picker-cell:not(
+        .azzar-picker-cell-disabled,
+        .azzar-picker-cell-selected,
+        .azzar-picker-cell-range-start,
+        .azzar-picker-cell-range-end
+      ):hover
+      .azzar-picker-cell-inner {
+      background: var(--azzar-color-fill-tertiary);
+    }
+
+    /* today: bold only, no ring, fill or border */
+    &.azzar-picker-dropdown
+      .azzar-picker-cell-in-view.azzar-picker-cell-today
+      .azzar-picker-cell-inner {
+      font-weight: var(--azzar-font-weight-strong);
+    }
+
+    &.azzar-picker-dropdown
+      :is(
+        .azzar-picker-cell-in-view.azzar-picker-cell-selected,
+        .azzar-picker-cell-in-view.azzar-picker-cell-range-start,
+        .azzar-picker-cell-in-view.azzar-picker-cell-range-end
+      )
+      .azzar-picker-cell-inner {
+      font-weight: 600;
+      color: var(--azzar-color-bg-container);
+      background: var(--azzar-color-text);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-cell-in-view.azzar-picker-cell-in-range::before {
+      background: var(--azzar-color-fill-secondary);
+    }
+
+    &.azzar-picker-dropdown
+      .azzar-picker-cell-in-view.azzar-picker-cell-range-start:not(
+        .azzar-picker-cell-range-end
+      )::before {
+      inset-inline-start: 50%;
+      background: var(--azzar-color-fill-secondary);
+    }
+
+    &.azzar-picker-dropdown
+      .azzar-picker-cell-in-view.azzar-picker-cell-range-end:not(
+        .azzar-picker-cell-range-start
+      )::before {
+      inset-inline-end: 50%;
+      background: var(--azzar-color-fill-secondary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-cell-disabled {
+      cursor: not-allowed;
+      color: var(--azzar-color-text-quaternary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-cell-disabled::before {
+      background: transparent;
+    }
+
+    /* month / quarter / year / decade: wider pills in a 3-column grid */
+    &.azzar-picker-dropdown
+      :is(
+        .azzar-picker-month-panel,
+        .azzar-picker-quarter-panel,
+        .azzar-picker-year-panel,
+        .azzar-picker-decade-panel
+      )
+      .azzar-picker-cell {
+      padding-block: 8px;
+    }
+
+    &.azzar-picker-dropdown
+      :is(
+        .azzar-picker-month-panel,
+        .azzar-picker-quarter-panel,
+        .azzar-picker-year-panel,
+        .azzar-picker-decade-panel
+      )
+      .azzar-picker-cell::before {
+      height: 36px;
+    }
+
+    &.azzar-picker-dropdown
+      :is(
+        .azzar-picker-month-panel,
+        .azzar-picker-quarter-panel,
+        .azzar-picker-year-panel,
+        .azzar-picker-decade-panel
+      )
+      .azzar-picker-cell-inner {
+      min-width: 64px;
+      height: 36px;
+      padding-inline: 8px;
+      font-size: 14px;
+    }
+
+    /* decade labels ("2020-2029") stay on one line */
+    &.azzar-picker-dropdown .azzar-picker-decade-panel .azzar-picker-cell-inner {
+      padding-inline: 6px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    /* week number column: always on the week panel, on the date panel with showWeek */
+    &.azzar-picker-dropdown :is(.azzar-picker-week-panel, .azzar-picker-date-panel-show-week) {
+      width: 320px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-cell-week {
+      font-size: 12px;
+      color: var(--azzar-color-text-tertiary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-date-panel-show-week .azzar-picker-cell-week {
+      cursor: default;
+    }
+
+    /* week panel: the whole row is one tile, painted through each cell's band */
+    &.azzar-picker-dropdown .azzar-picker-week-panel .azzar-picker-cell:hover .azzar-picker-cell-inner {
+      background: none;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-week-panel .azzar-picker-cell:first-child::before {
+      inset-inline-start: 2px;
+      border-start-start-radius: 999px;
+      border-end-start-radius: 999px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-week-panel .azzar-picker-cell:last-child::before {
+      inset-inline-end: 2px;
+      border-start-end-radius: 999px;
+      border-end-end-radius: 999px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-week-panel-row:hover .azzar-picker-cell::before {
+      background: var(--azzar-color-fill-tertiary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-week-panel-row-range-hover .azzar-picker-cell::before,
+    &.azzar-picker-dropdown .azzar-picker-week-panel-row-hover .azzar-picker-cell::before {
+      background: var(--azzar-color-fill-secondary);
+    }
+
+    /* multiple: rc-picker marks every picked week but the first with `-row-hover` */
+    &.azzar-picker-dropdown
+      :is(
+        .azzar-picker-week-panel-row-selected,
+        .azzar-picker-dropdown-multiple .azzar-picker-week-panel-row-hover,
+        .azzar-picker-week-panel-row-range-start,
+        .azzar-picker-week-panel-row-range-end
+      )
+      .azzar-picker-cell {
+      color: var(--azzar-color-bg-container);
+
+      &::before {
+        background: var(--azzar-color-text);
+      }
+
+      .azzar-picker-cell-inner {
+        font-weight: 600;
+        box-shadow: none;
+      }
+    }
+
+    /* keyboard: the tile arrow keys moved to on month / quarter / year / decade panels */
+    &.azzar-picker-dropdown .azzar-picker-cell-keyboard-active {
+      display: none;
+    }
+
+    &.azzar-picker-dropdown
+      .azzar-picker-cell-in-view:has(> .azzar-picker-cell-keyboard-active)
+      .azzar-picker-cell-inner {
+      outline: 2px solid var(--azzar-color-primary);
+      outline-offset: 1px;
+    }
+
+    /* time: hour / minute / second / meridiem columns, beside the date panel with showTime */
+    &.azzar-picker-dropdown .azzar-picker-datetime-panel {
+      display: flex;
+      align-items: stretch;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-datetime-panel > .azzar-picker-time-panel {
+      border-inline-start: 1px solid var(--azzar-color-border-secondary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-panel {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-panel .azzar-picker-header-view {
+      height: 28px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-panel .azzar-picker-content {
+      display: flex;
+      flex: auto;
+
+      height: 224px;
+      padding-block: 4px 12px;
+      padding-inline: 4px;
+    }
+
+    /* next to the date panel the columns take its height instead */
+    &.azzar-picker-dropdown
+      .azzar-picker-datetime-panel
+      .azzar-picker-time-panel
+      .azzar-picker-content {
+      flex: 1 1 0;
+      height: auto;
+      min-height: 0;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-panel-column {
+      scrollbar-width: thin;
+
+      overflow-y: hidden;
+      flex: none;
+
+      width: 56px;
+      margin: 0;
+      padding: 0;
+
+      list-style: none;
+
+      /* lets the last option scroll up to the top, as in antd */
+      &::after {
+        content: '';
+        display: block;
+        height: calc(100% - 28px);
+      }
+
+      &:hover {
+        overflow-y: auto;
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-panel-column + .azzar-picker-time-panel-column {
+      border-inline-start: 1px solid var(--azzar-color-border-secondary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-panel-cell {
+      cursor: pointer;
+      padding-block: 1px;
+      padding-inline: 4px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-panel-cell-inner {
+      height: 26px;
+      border-radius: 6px;
+
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      line-height: 26px;
+      color: var(--azzar-color-text);
+      text-align: center;
+
+      transition:
+        background 150ms var(--azzar-motion-ease-out),
+        color 150ms var(--azzar-motion-ease-out);
+    }
+
+    &.azzar-picker-dropdown
+      .azzar-picker-time-panel-cell:not(
+        .azzar-picker-time-panel-cell-disabled,
+        .azzar-picker-time-panel-cell-selected
+      ):hover
+      .azzar-picker-time-panel-cell-inner {
+      background: var(--azzar-color-fill-tertiary);
+    }
+
+    &.azzar-picker-dropdown
+      .azzar-picker-time-panel-cell-selected
+      .azzar-picker-time-panel-cell-inner {
+      font-weight: 600;
+      color: var(--azzar-color-bg-container);
+      background: var(--azzar-color-text);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-panel-cell-disabled {
+      cursor: not-allowed;
+
+      .azzar-picker-time-panel-cell-inner {
+        color: var(--azzar-color-text-quaternary);
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-header {
+      display: flex;
+      flex: 1;
+      gap: 2px;
+      align-items: center;
+      justify-content: center;
+
+      min-height: 28px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-segment {
+      cursor: pointer;
+
+      padding-block: 2px;
+      padding-inline: 6px;
+      border: 0;
+      border-radius: 8px;
+
+      font-family: inherit;
+      font-size: 22px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+      color: var(--azzar-color-text-tertiary);
+
+      background: none;
+
+      transition:
+        background 150ms var(--azzar-motion-ease-out),
+        color 150ms var(--azzar-motion-ease-out);
+
+      &:hover:not(:disabled) {
+        color: var(--azzar-color-text);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-segment-active {
+      color: var(--azzar-color-text);
+      background: var(--azzar-color-fill-tertiary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-colon {
+      font-size: 22px;
+      line-height: 1.2;
+      color: var(--azzar-color-text-quaternary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-stepper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      > button {
+        cursor: pointer;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 24px;
+        height: 14px;
+        padding: 0;
+        border: 0;
+        border-radius: 4px;
+
+        color: var(--azzar-color-text-tertiary);
+
+        background: none;
+
+        &:hover {
+          color: var(--azzar-color-text);
+          background: var(--azzar-color-fill-tertiary);
+        }
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-stepper-value {
+      cursor: ns-resize;
+
+      font-size: 15px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+      color: var(--azzar-color-text-secondary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-meridiem {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-inline-start: 6px;
+
+      .azzar-picker-time-clock-segment {
+        padding-block: 1px;
+        padding-inline: 6px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-body {
+      display: flex;
+      justify-content: center;
+      padding-block: 8px 14px;
+      padding-inline: 14px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-dial {
+      touch-action: none;
+      cursor: pointer;
+      user-select: none;
+
+      position: relative;
+
+      flex: none;
+
+      border-radius: 50%;
+
+      background: var(--azzar-color-fill-quaternary);
+      outline: none;
+
+      &:focus-visible {
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--azzar-color-info) 90%, transparent);
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-hand {
+      position: absolute;
+      z-index: 1;
+      inset-inline-start: calc(50% - 1px);
+      transform-origin: 50% 100%;
+
+      width: 2px;
+
+      background: var(--azzar-color-text);
+
+      /* the dial is a physical clock face: it never mirrors in RTL */
+      /* stylelint-disable-next-line liberty/use-logical-spec */
+      transition:
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        top 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        height 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-center {
+      position: absolute;
+      z-index: 1;
+      inset-block-start: calc(50% - 3px);
+      inset-inline-start: calc(50% - 3px);
+
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+
+      background: var(--azzar-color-text);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-knob {
+      position: absolute;
+      z-index: 1;
+      transform: translate(-50%, -50%);
+
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+
+      background: var(--azzar-color-text);
+
+      /* stylelint-disable-next-line liberty/use-logical-spec */
+      transition:
+        left 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        top 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-knob-inner {
+      width: 26px;
+      height: 26px;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-knob-off-tick {
+      box-shadow:
+        inset 0 0 0 12px var(--azzar-color-text),
+        inset 0 0 0 15px var(--azzar-color-bg-container);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-dial-dragging :is(
+        .azzar-picker-time-clock-hand,
+        .azzar-picker-time-clock-knob
+      ) {
+      transition: none;
+    }
+
+    &.azzar-picker-dropdown :is(.azzar-picker-time-clock-hand, .azzar-picker-time-clock-knob) {
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-number {
+      pointer-events: none;
+
+      position: absolute;
+      z-index: 2;
+      transform: translate(-50%, -50%);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+
+      font-family: inherit;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      color: var(--azzar-color-text);
+
+      background: none;
+
+      transition: color 120ms var(--azzar-motion-ease-out);
+
+      &:disabled {
+        color: var(--azzar-color-text-quaternary);
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-number-inner {
+      width: 26px;
+      height: 26px;
+      font-size: 11px;
+      color: var(--azzar-color-text-tertiary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-time-clock-number-selected {
+      font-weight: 600;
+      color: var(--azzar-color-bg-container);
+    }
+
+    /* footer: no background of its own; dividers match the presets sidebar divider */
+
+    /* footer: ONE row in one container — renderExtraFooter content on the start side,
+         Today / Now / OK on the end side — under a single divider. No background. */
+    &.azzar-picker-dropdown .azzar-picker-footer {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      min-width: 0;
+      border-block-start: 1px solid var(--azzar-color-fill-secondary);
+
+      background: none;
+    }
+
+    &.azzar-picker-dropdown.azzar-picker-dropdown-dark .azzar-picker-footer {
+      border-block-start-color: var(--azzar-color-fill-tertiary);
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-footer-extra {
+      flex: 1;
+
+      min-width: 0;
+      padding-block: 8px;
+      padding-inline: 12px;
+
+      font-size: 13px;
+      line-height: 20px;
+      color: var(--azzar-color-text-secondary);
+      text-align: start;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-footer-extra + .azzar-picker-ranges {
+      flex: none;
+      padding-inline-start: 0;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-ranges {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+
+      margin: 0;
+      padding-block: 8px;
+      padding-inline: 12px;
+
+      list-style: none;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-ranges > .azzar-picker-now {
+      margin-inline: auto;
+    }
+
+    /* Now on the start side, OK on the end side */
+    &.azzar-picker-dropdown .azzar-picker-ranges > .azzar-picker-now:has(+ .azzar-picker-ok) {
+      margin-inline: 0;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-ranges > .azzar-picker-ok {
+      margin-inline-start: auto;
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-now-btn {
+      cursor: pointer;
+
+      padding-block: 2px;
+      padding-inline: 8px;
+      border-radius: 6px;
+
+      font-size: 13px;
+      color: var(--azzar-color-text);
+
+      &:focus-visible:not([data-azzar-focus-ring='managed']) {
+        --azzar-focus-ring-color: var(--azzar-color-info);
+
+        outline: 2px solid color-mix(in srgb, var(--azzar-color-info) 90%, transparent);
+        outline-offset: 2px;
+        animation: azzar-picker-ring-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+
+        @media (prefers-reduced-motion: reduce) {
+          animation: none;
+        }
+
+        @media (forced-colors: active) {
+          outline-color: CanvasText;
+          animation: none;
+        }
+      }
+
+      &:hover {
+        background: var(--azzar-color-fill-tertiary);
+      }
+    }
+
+    &.azzar-picker-dropdown .azzar-picker-now-btn-disabled {
+      cursor: not-allowed;
+      color: var(--azzar-color-text-quaternary);
+    }
+  }
+}
+
+@keyframes azzar-picker-ring-in {
+  from {
+    outline-color: transparent;
+    outline-offset: 5px;
+  }
+}

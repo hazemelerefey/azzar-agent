@@ -1,0 +1,30 @@
+export const getProjectAgentPath = (agentId: string) => `/agent/${agentId}`;
+
+export const getProjectConversationPath = (projectId: string, topicId?: string) =>
+  topicId ? `/project/${projectId}/conversation/${topicId}` : `/project/${projectId}/conversation`;
+
+export const getProjectConversationStartPath = (projectId: string, message: string) =>
+  `${getProjectConversationPath(projectId)}?message=${encodeURIComponent(message)}`;
+
+export const getProjectLibraryPath = (projectId: string, libraryId: string) =>
+  `/project/${projectId}/library/${libraryId}`;
+
+export const getProjectTasksPath = (projectId: string) => `/project/${projectId}/tasks`;
+
+export const getProjectGoalsPath = (projectId: string) => `/project/${projectId}/goals`;
+
+export const getProjectDashboardPath = (projectId: string, dashboardId?: string) =>
+  dashboardId
+    ? `/project/${projectId}/dashboard/${dashboardId}`
+    : `/project/${projectId}/dashboard`;
+
+export type ProjectSettingsSection = 'general' | 'knowledge' | 'members';
+
+export const getProjectSettingsPath = (projectId: string, section: ProjectSettingsSection) =>
+  `/project/${projectId}/settings/${section}`;
+
+export const getProjectAcceptancePath = (projectId: string) => `/project/${projectId}/acceptance`;
+
+/** A section stays active on its own pages too — a board, an acceptance record. */
+export const isProjectSectionActive = (pathname: string, sectionPath: string) =>
+  pathname === sectionPath || pathname.startsWith(`${sectionPath}/`);

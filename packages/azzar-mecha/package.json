@@ -1,0 +1,51 @@
+{
+  "name": "@azzar/mecha",
+  "version": "0.0.1",
+  "description": "Host-agnostic layer resolving an agent's run configuration and context",
+  "exports": {
+    ".": "./src/index.ts",
+    "./builtinSkillGate": "./src/toolSet/builtinSkillGate.ts"
+  },
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage --silent='passed-only'"
+  },
+  "dependencies": {
+    "@azzar/agent-runtime": "workspace:*",
+    "@azzar/builtin-agents": "workspace:*",
+    "@azzar/builtin-skills": "workspace:*",
+    "@azzar/builtin-tool-agent-builder": "workspace:*",
+    "@azzar/builtin-tool-agent-management": "workspace:*",
+    "@azzar/builtin-tool-attachments": "workspace:*",
+    "@azzar/builtin-tool-auv": "workspace:*",
+    "@azzar/builtin-tool-browser": "workspace:*",
+    "@azzar/builtin-tool-cloud-sandbox": "workspace:*",
+    "@azzar/builtin-tool-creds": "workspace:*",
+    "@azzar/builtin-tool-group-agent-builder": "workspace:*",
+    "@azzar/builtin-tool-image-generation": "workspace:*",
+    "@azzar/builtin-tool-knowledge-base": "workspace:*",
+    "@azzar/builtin-tool-azzar-agent": "workspace:*",
+    "@azzar/builtin-tool-local-system": "workspace:*",
+    "@azzar/builtin-tool-memory": "workspace:*",
+    "@azzar/builtin-tool-message": "workspace:*",
+    "@azzar/builtin-tool-page-agent": "workspace:*",
+    "@azzar/builtin-tool-remote-device": "workspace:*",
+    "@azzar/builtin-tool-skills": "workspace:*",
+    "@azzar/builtin-tool-task": "workspace:*",
+    "@azzar/builtin-tool-video-generation": "workspace:*",
+    "@azzar/builtin-tool-web-browsing": "workspace:*",
+    "@azzar/builtin-tool-web-onboarding": "workspace:*",
+    "@azzar/builtin-tools": "workspace:*",
+    "@azzar/business-const": "workspace:*",
+    "@azzar/const": "workspace:*",
+    "@azzar/context-engine": "workspace:*",
+    "@azzar/model-runtime": "workspace:*",
+    "@azzar/prompts": "workspace:*",
+    "@azzar/types": "workspace:*",
+    "debug": "^4.4.3",
+    "immer": "^10.1.3",
+    "model-bank": "workspace:*",
+    "p-map": "^7.0.6"
+  }
+}

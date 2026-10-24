@@ -1,0 +1,15 @@
+@layer azzar-ui {
+  .azzar-awesome-agent-skill-card__code {
+    inline-size: 100%;
+    text-align: start;
+  }
+
+  .azzar-agent-skill-card-footer a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .azzar-agent-skill-card-footer a:hover {
+    color: var(--azzar-color-text);
+  }
+}

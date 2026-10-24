@@ -1,0 +1,28 @@
+{
+  "name": "@azzar/builtin-tool-local-system",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./client/displayControls": "./src/client/displayControls.ts",
+    "./client/executor": "./src/client/executor/index.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/electron-client-ipc": "workspace:*",
+    "@azzar/shared-tool-ui": "workspace:*",
+    "@azzar/tool-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@azzar/ui": "^6.0.4",
+    "lucide-react": "*",
+    "path-browserify-esm": "*",
+    "react": "*",
+    "react-i18next": "*"
+  },
+  "description": "Local system access tool for AZZAR agents"
+}

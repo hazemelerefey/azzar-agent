@@ -1,0 +1,9 @@
+@layer azzar-ui {
+  .azzar-mdx-citation a {
+    color: inherit;
+  }
+
+  .azzar-mdx-citation-link :hover {
+    color: var(--azzar-color-text);
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@azzar/builtin-tool-agent-signal",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./executionRuntime": "./src/shared/ExecutionRuntime.ts"
+  },
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Agent signal tool for AZZAR"
+}

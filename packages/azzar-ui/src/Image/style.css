@@ -1,0 +1,5 @@
+@layer azzar-ui {
+  .azzar-image-viewer-image {
+    -webkit-user-drag: none;
+  }
+}

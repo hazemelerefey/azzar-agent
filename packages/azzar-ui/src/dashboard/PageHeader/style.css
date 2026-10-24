@@ -1,0 +1,20 @@
+@layer azzar-ui {
+  .azzar-dashboard-page-header__title {
+    margin: 0;
+    font-size: var(--azzar-font-size-heading-3);
+    line-height: var(--azzar-line-height-heading-3);
+  }
+
+  .azzar-dashboard-page-header__description {
+    max-inline-size: 68ch;
+    line-height: 1.6;
+    color: var(--azzar-color-text-secondary);
+  }
+
+  @media (width <= 479.98px) {
+    .azzar-page-header-actions button,
+    .azzar-page-header-actions a {
+      min-block-size: 44px;
+    }
+  }
+}

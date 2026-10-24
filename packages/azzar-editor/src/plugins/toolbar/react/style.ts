@@ -1,0 +1,63 @@
+import { createStaticStyles } from '@azzar/ui';
+
+const FLOATING_TOOLBAR_Z_INDEX = 1001;
+
+export const styles = createStaticStyles(({ css, cssVar }) => ({
+  anchor: css`
+    position: relative;
+  `,
+  portalAnchor: css`
+    pointer-events: none;
+    position: fixed;
+    z-index: 1100;
+    inset: 0;
+  `,
+  toolbarDark: css`
+    pointer-events: auto;
+    will-change: transform;
+
+    position: absolute;
+    z-index: ${FLOATING_TOOLBAR_Z_INDEX};
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    transform: translate(-10000px, -10000px);
+
+    display: flex;
+
+    border-color: ${cssVar.colorFillSecondary};
+
+    vertical-align: middle;
+
+    opacity: 0;
+    background: ${cssVar.colorBgElevated};
+    box-shadow:
+      0 14px 28px -6px color-mix(in srgb, #000 18.75%, transparent),
+      0 2px 4px -1px color-mix(in srgb, #000 12.19%, transparent);
+
+    transition: opacity 0.12s ${cssVar.motionEaseOut};
+  `,
+  toolbarLight: css`
+    pointer-events: auto;
+    will-change: transform;
+
+    position: absolute;
+    z-index: ${FLOATING_TOOLBAR_Z_INDEX};
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    transform: translate(-10000px, -10000px);
+
+    display: flex;
+
+    border-color: ${cssVar.colorFillSecondary};
+
+    vertical-align: middle;
+
+    opacity: 0;
+    background: ${cssVar.colorBgElevated};
+    box-shadow:
+      0 14px 28px -6px color-mix(in srgb, #000 10.2%, transparent),
+      0 2px 4px -1px color-mix(in srgb, #000 5.88%, transparent);
+
+    transition: opacity 0.12s ${cssVar.motionEaseOut};
+  `,
+}));

@@ -1,0 +1,44 @@
+@layer azzar-ui {
+  :where(.azzar-code-editor) pre,
+  :where(.azzar-code-editor) textarea {
+    margin: 0;
+    padding: 16px;
+  }
+
+  :where(.azzar-code-editor) textarea,
+  :where(.azzar-code-editor) pre,
+  :where(.azzar-code-editor) code {
+    overflow: hidden;
+
+    font-family: var(--azzar-font-family-code);
+    font-size: inherit;
+    line-height: inherit;
+    word-break: inherit;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  .azzar-code-editor-borderless pre,
+  .azzar-code-editor-borderless textarea {
+    padding: 0;
+  }
+
+  .azzar-code-editor-highlight.azzar-code-editor-highlight pre code {
+    display: block;
+  }
+
+  .azzar-code-editor-highlight.azzar-code-editor-highlight pre code::after {
+    content: '\200b';
+  }
+
+  .azzar-code-editor-highlight.azzar-code-editor-highlight pre code .line {
+    display: inline;
+    margin: 0;
+    padding: 0;
+  }
+
+  .azzar-code-editor-highlight.azzar-code-editor-highlight pre code span {
+    font-weight: inherit !important;
+    font-style: inherit !important;
+  }
+}

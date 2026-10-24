@@ -1,0 +1,7 @@
+{
+  "name": "@azzar/agent-templates",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "description": "Templates for building AZZAR agents"
+}

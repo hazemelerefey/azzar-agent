@@ -1,0 +1,28 @@
+@layer azzar-ui {
+  .azzar-markdown-table-copy {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: calc(0.75em + (var(--azzar-markdown-line-height) * 0.5em));
+    inset-inline-end: 0.5em;
+    transform: translateY(-50%);
+
+    opacity: 0;
+    background: var(--azzar-color-bg-container);
+    box-shadow: 0 0 0 1px var(--azzar-color-border-secondary);
+
+    transition: opacity var(--azzar-motion-duration-mid) var(--azzar-motion-ease-in-out);
+  }
+
+  .azzar-markdown-table:hover .azzar-markdown-table-copy,
+  .azzar-markdown-table:focus-within .azzar-markdown-table-copy {
+    opacity: 1;
+  }
+
+  .azzar-markdown-table > table {
+    margin-block: 0;
+  }
+
+  .azzar-markdown-table > table thead th:last-child {
+    padding-inline-end: calc(1em + 32px);
+  }
+}

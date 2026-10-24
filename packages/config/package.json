@@ -1,0 +1,17 @@
+{
+  "name": "@azzar/config",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/business-config": "workspace:*",
+    "@azzar/const": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Shared configuration for AZZAR"
+}

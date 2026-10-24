@@ -1,0 +1,16 @@
+{
+  "name": "@azzar/conversation-flow",
+  "version": "0.0.1",
+  "description": "Conversation flow rendering engine for AZZAR",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage --silent='passed-only'"
+  },
+  "dependencies": {
+    "@azzar/const": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  }
+}

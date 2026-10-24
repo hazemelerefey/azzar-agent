@@ -1,0 +1,175 @@
+import type { MenuItemType } from '@azzar/ui';
+import Fuse, { type IFuseOptions } from 'fuse.js';
+import type { ReactNode } from 'react';
+
+import { genServiceId } from '../../../editor-kernel';
+import type { IEditor, IEditorKernel, IServiceID } from '../../../types';
+import { createDebugLogger } from '../../../utils/debug';
+
+import { getBasicTypeaheadTriggerMatch } from '../utils/utils';
+
+export type ISlashDividerOption = {
+  type: 'divider';
+};
+
+export interface ISlashMenuOption extends MenuItemType {
+  description?: ReactNode;
+  layout?: 'compact' | 'tile' | 'wide';
+  metadata?: Record<string, any>;
+  onSelect?: (editor: IEditor, matchingString: string) => void;
+  shortcut?: ReactNode;
+}
+
+export interface ISlashSectionOption {
+  items: ISlashMenuOption[];
+  key?: string;
+  label: ReactNode;
+  type: 'section';
+}
+
+export type ISlashOption = ISlashMenuOption | ISlashDividerOption | ISlashSectionOption;
+
+export const isSlashDividerOption = (option: ISlashOption): option is ISlashDividerOption =>
+  'type' in option && option.type === 'divider';
+
+export const isSlashSectionOption = (option: ISlashOption): option is ISlashSectionOption =>
+  'type' in option && option.type === 'section';
+
+export const isSlashMenuOption = (option: ISlashOption): option is ISlashMenuOption =>
+  !isSlashDividerOption(option) && !isSlashSectionOption(option);
+
+export const flattenSlashOptions = (options: ISlashOption[]): ISlashMenuOption[] =>
+  options.flatMap((option) => {
+    if (isSlashDividerOption(option)) return [];
+    if (isSlashSectionOption(option)) return option.items;
+    return [option];
+  });
+
+export interface SlashOptions {
+  allowWhitespace?: boolean;
+  /**
+   * Complete Fuse.js configuration options
+   * @example
+   * {
+   *   keys: ['key', 'label', 'description'],
+   *   threshold: 0.3,
+   *   includeScore: true,
+   *   includeMatches: true
+   * }
+   */
+  fuseOptions?: IFuseOptions<ISlashMenuOption>;
+  // Trigger symbol
+  items:
+    | Array<ISlashOption>
+    | ((
+        search: {
+          leadOffset: number;
+          matchingString: string;
+          replaceableString: string;
+        } | null,
+      ) => Promise<Array<ISlashOption>>);
+  maxLength?: number;
+  minLength?: number;
+  punctuation?: string;
+  /**
+   * Fuse.js search keys for fuzzy matching
+   * Default is ['key']
+   * @example ['key', 'label', 'description']
+   * @deprecated Use fuseOptions instead
+   */
+  searchKeys?: string[];
+  trigger: string;
+}
+
+export interface SlashTriggerResolution {
+  leadOffset: number;
+  trigger: string;
+}
+
+export interface ISlashService {
+  registerSlash(options: SlashOptions): void;
+  resolveTrigger(text: string): SlashTriggerResolution | null;
+  updateOptions(options: SlashOptions[]): void;
+}
+
+export const ISlashService: IServiceID<ISlashService> = genServiceId<ISlashService>('SlashService');
+
+export class SlashService implements ISlashService {
+  private triggerMap: Map<string, SlashOptions> = new Map();
+  private triggerFnMap: Map<string, ReturnType<typeof getBasicTypeaheadTriggerMatch>> = new Map();
+  private triggerFuseMap: Map<string, Fuse<ISlashMenuOption>> = new Map();
+  private logger = createDebugLogger('service', 'slash');
+
+  constructor(private kernel: IEditorKernel) {}
+  // Specific service methods can be added here
+
+  registerSlash(options: SlashOptions, update = false): void {
+    if (this.triggerMap.has(options.trigger) && !update) {
+      if (this.kernel.isHotReloadMode()) {
+        this.logger.warn(`🔄 Overriding slash trigger "${options.trigger}"`);
+      } else {
+        throw new Error(`Slash trigger "${options.trigger}" is already registered.`);
+      }
+    }
+    this.triggerMap.set(options.trigger, options);
+    this.triggerFnMap.set(
+      options.trigger,
+      getBasicTypeaheadTriggerMatch(options.trigger, {
+        allowWhitespace: options.allowWhitespace,
+        maxLength: options.maxLength,
+        minLength: options.minLength,
+        punctuation: options.punctuation,
+      }),
+    );
+    this.logger.debug(`⚡ Slash trigger: ${options.trigger}`);
+
+    if (Array.isArray(options.items)) {
+      const searchableItems = flattenSlashOptions(options.items);
+
+      // Use fuseOptions if provided, otherwise fallback to searchKeys or default
+      const fuseConfig: IFuseOptions<ISlashMenuOption> = options.fuseOptions || {
+        keys: options.searchKeys || ['key'],
+      };
+
+      this.triggerFuseMap.set(options.trigger, new Fuse(searchableItems, fuseConfig));
+    }
+  }
+
+  removeAllOptions(): void {
+    this.triggerMap.clear();
+    this.triggerFnMap.clear();
+    this.triggerFuseMap.clear();
+  }
+
+  resolveTrigger(text: string): SlashTriggerResolution | null {
+    let resolution: SlashTriggerResolution | null = null;
+
+    for (const [trigger, triggerFn] of this.triggerFnMap) {
+      const match = triggerFn(text);
+      if (!match || (resolution && match.leadOffset <= resolution.leadOffset)) continue;
+
+      resolution = { leadOffset: match.leadOffset, trigger };
+    }
+
+    return resolution;
+  }
+
+  updateOptions(options: SlashOptions[]): void {
+    this.removeAllOptions();
+    options.forEach((option) => {
+      this.registerSlash(option);
+    });
+  }
+
+  getSlashOptions(trigger: string): SlashOptions | undefined {
+    return this.triggerMap.get(trigger);
+  }
+
+  getSlashTriggerFn(trigger: string): ReturnType<typeof getBasicTypeaheadTriggerMatch> | undefined {
+    return this.triggerFnMap.get(trigger);
+  }
+
+  getSlashFuse(trigger: string): Fuse<ISlashMenuOption> | undefined {
+    return this.triggerFuseMap.get(trigger);
+  }
+}

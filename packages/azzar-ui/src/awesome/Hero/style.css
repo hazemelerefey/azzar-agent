@@ -1,0 +1,55 @@
+@layer azzar-ui {
+  @keyframes azzar-hero-gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .azzar-hero-actions button {
+    height: 45px;
+    padding-inline: 32px;
+    border-radius: var(--azzar-border-radius-lg);
+
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .azzar-hero-title b {
+    position: relative;
+    z-index: 5;
+
+    border-radius: inherit;
+
+    background-image: linear-gradient(
+      -45deg,
+      var(--azzar-gold),
+      var(--azzar-magenta),
+      var(--azzar-geekblue),
+      var(--azzar-cyan)
+    );
+    background-clip: text;
+    background-size: 400% 400%;
+
+    animation: 5s azzar-hero-gradient 5s ease infinite;
+
+    -webkit-text-fill-color: transparent;
+  }
+
+  .azzar-hero-title b::selection {
+    -webkit-text-fill-color: #000 !important;
+  }
+
+  @media (width <= 575.98px) {
+    .azzar-hero-actions button {
+      width: 100%;
+    }
+  }
+}

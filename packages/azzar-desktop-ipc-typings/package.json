@@ -1,0 +1,15 @@
+{
+  "name": "@azzar/desktop-ipc-typings",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./exports.d.ts",
+    "./package.json": "./package.json"
+  },
+  "main": "./exports.d.ts",
+  "types": "./exports.d.ts",
+  "dependencies": {
+    "@azzar/electron-client-ipc": "workspace:*"
+  },
+  "description": "TypeScript typings for AZZAR desktop IPC"
+}

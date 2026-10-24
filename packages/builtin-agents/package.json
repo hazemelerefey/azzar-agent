@@ -1,0 +1,35 @@
+{
+  "name": "@azzar/builtin-agents",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage --silent='passed-only'",
+    "test:update": "vitest -u"
+  },
+  "dependencies": {
+    "@azzar/builtin-tool-agent-builder": "workspace:*",
+    "@azzar/builtin-tool-agent-documents": "workspace:*",
+    "@azzar/builtin-tool-agent-management": "workspace:*",
+    "@azzar/builtin-tool-group-agent-builder": "workspace:*",
+    "@azzar/builtin-tool-group-management": "workspace:*",
+    "@azzar/builtin-tool-notebook": "workspace:*",
+    "@azzar/builtin-tool-task": "workspace:*",
+    "@azzar/builtin-tool-user-interaction": "workspace:*",
+    "@azzar/builtin-tool-verify": "workspace:*",
+    "@azzar/business-const": "workspace:*",
+    "@azzar/const": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Built-in department agents for AZZAR"
+}

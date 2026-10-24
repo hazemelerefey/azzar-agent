@@ -1,0 +1,33 @@
+---
+title: getEmojiByCharacter
+description: Extract the first emoji from a string, or look up an emoji's name from vendored emoji data.
+category: Utils
+---
+
+## getEmojiNameByCharacter
+
+Returns the name of the first emoji in the input (from `vendored emoji data`), or `undefined` if there is no emoji or no name for it.
+
+```tsx
+import { getEmojiNameByCharacter } from '@azzar/fluent-emoji';
+
+export default () => {
+  const name = getEmojiNameByCharacter('🤯');
+
+  return name;
+};
+```
+
+## getEmoji
+
+Returns the first emoji found in a string, or `undefined` if there is none.
+
+```tsx
+import { getEmoji } from '@azzar/fluent-emoji';
+
+export default () => {
+  const emoji = getEmoji('🤯 in string');
+
+  return emoji;
+};
+```

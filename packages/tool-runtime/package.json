@@ -1,0 +1,17 @@
+{
+  "name": "@azzar/tool-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/prompts": "workspace:*",
+    "path-browserify-esm": "*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Runtime for AZZAR agent tools"
+}

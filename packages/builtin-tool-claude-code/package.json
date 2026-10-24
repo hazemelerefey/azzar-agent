@@ -1,0 +1,25 @@
+{
+  "name": "@azzar/builtin-tool-claude-code",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./client/displayControls": "./src/client/Render/displayControls.ts",
+    "./client/labels": "./src/client/labels.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/shared-tool-ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@azzar/ui": "^6.0.4",
+    "lucide-react": "*",
+    "path-browserify-esm": "*",
+    "react": "*"
+  },
+  "description": "Claude Code harness adapter for AZZAR"
+}

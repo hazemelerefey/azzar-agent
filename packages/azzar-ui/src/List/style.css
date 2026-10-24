@@ -1,0 +1,5 @@
+@layer azzar-ui {
+  .azzar-list-label a {
+    color: inherit;
+  }
+}

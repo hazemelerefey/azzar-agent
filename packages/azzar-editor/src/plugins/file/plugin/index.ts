@@ -1,0 +1,160 @@
+import { $wrapNodeInElement } from '@lexical/utils';
+import type { DecoratorNode, LexicalEditor } from 'lexical';
+import {
+  $createParagraphNode,
+  $createRangeSelection,
+  $insertNodes,
+  $isRootOrShadowRoot,
+  $setSelection,
+} from 'lexical';
+
+import { INodeHelper } from '../../../editor-kernel/inode/helper';
+import { KernelPlugin } from '../../../editor-kernel/plugin';
+import { ILitexmlService } from '../../litexml';
+import { IMarkdownShortCutService } from '../../markdown/service/shortcut';
+import { IUploadService } from '../../upload';
+import type { IEditorKernel, IEditorPlugin, IEditorPluginConstructor } from '../../../types';
+import { createDebugLogger } from '../../../utils/debug';
+
+import { registerFileCommand } from '../command';
+import { $createFileNode, $isFileNode, FileNode } from '../node/FileNode';
+import { registerFileNodeSelectionObserver } from '../utils';
+
+export interface FilePluginOptions {
+  decorator?: (node: FileNode, editor: LexicalEditor) => any;
+  handleUpload?: (file: File) => Promise<{ url: string }>;
+  markdownWriter?: (file: FileNode) => string;
+  theme?: {
+    file?: string;
+  };
+}
+
+export const FilePlugin: IEditorPluginConstructor<FilePluginOptions> = class
+  extends KernelPlugin
+  implements IEditorPlugin<FilePluginOptions>
+{
+  static pluginName = 'FilePlugin';
+  private logger = createDebugLogger('plugin', 'file');
+
+  constructor(
+    protected kernel: IEditorKernel,
+    public config?: FilePluginOptions,
+  ) {
+    super();
+    // Register the file node
+    kernel.registerNodes([FileNode]);
+    if (config?.theme) {
+      kernel.registerThemes(config?.theme);
+    }
+    this.registerDecorator(
+      kernel,
+      FileNode.getType(),
+      (node: DecoratorNode<any>, editor: LexicalEditor) => {
+        return config?.decorator ? config.decorator(node as FileNode, editor) : null;
+      },
+    );
+  }
+
+  onInit(editor: LexicalEditor): void {
+    const handleUpload = this.config?.handleUpload;
+
+    if (handleUpload) {
+      this.kernel
+        .requireService(IUploadService)
+        ?.registerUpload(async (file: File, from: string, range: Range | null | undefined) => {
+          editor.update(() => {
+            if (range) {
+              const rangeSelection = $createRangeSelection();
+              if (range !== null && range !== undefined) {
+                rangeSelection.applyDOMRange(range);
+              }
+              $setSelection(rangeSelection);
+            }
+            const fileNode = $createFileNode(file.name);
+            $insertNodes([fileNode]); // Insert a zero-width space to ensure the image is not the last child
+            if ($isRootOrShadowRoot(fileNode.getParentOrThrow())) {
+              $wrapNodeInElement(fileNode, $createParagraphNode).selectEnd();
+            }
+            handleUpload(file)
+              .then((url) => {
+                editor.update(() => {
+                  fileNode.setUploaded(url.url);
+                });
+              })
+              .catch((error) => {
+                this.logger.error('File upload failed:', error);
+                editor.update(() => {
+                  fileNode.setError('File upload failed : ' + error.message);
+                });
+              });
+          });
+          return null;
+        });
+
+      this.register(registerFileCommand(editor, handleUpload));
+    }
+
+    if (this.config?.decorator) {
+      this.register(registerFileNodeSelectionObserver(editor));
+    }
+
+    this.registerLiteXml();
+    this.registerMarkdownWriter();
+  }
+
+  registerLiteXml() {
+    const litexmlService = this.kernel.requireService(ILitexmlService);
+    if (!litexmlService) {
+      return;
+    }
+
+    litexmlService.registerXMLWriter(FileNode.getType(), (node, ctx) => {
+      if ($isFileNode(node)) {
+        return ctx.createXmlNode('file', {
+          fileUrl: node.fileUrl || '',
+          message: node.message || '',
+          name: node.name,
+          size: node.size?.toString() || '0',
+          status: node.status,
+        });
+      }
+      return false;
+    });
+
+    litexmlService.registerXMLReader('file', (xmlElement: Element) => {
+      const name = xmlElement.getAttribute('name') || 'unknown';
+      const fileUrl = xmlElement.getAttribute('fileUrl') || '';
+      const status = xmlElement.getAttribute('status') as
+        'pending' | 'uploaded' | 'error' | undefined;
+      return INodeHelper.createTypeNode(FileNode.getType(), {
+        fileUrl,
+        message: xmlElement.getAttribute('message') || '',
+        name,
+        size: parseInt(xmlElement.getAttribute('size') || '0', 10),
+        status,
+      });
+    });
+  }
+
+  registerMarkdownWriter() {
+    const markdownService = this.kernel.requireService(IMarkdownShortCutService);
+    if (!markdownService) {
+      return;
+    }
+    markdownService.registerMarkdownWriter(FileNode.getType(), (ctx, node) => {
+      if ($isFileNode(node)) {
+        if (this.config?.markdownWriter) {
+          ctx.appendLine(this.config.markdownWriter(node));
+          return;
+        }
+        if (node.status === 'pending') {
+          ctx.appendLine(`Uploading ${node.name}...`);
+        } else if (node.status === 'error') {
+          ctx.appendLine(`Failed to upload ${node.name}: ${node.message}`);
+        } else {
+          ctx.appendLine(`[${node.name}](${node.fileUrl})`);
+        }
+      }
+    });
+  }
+};

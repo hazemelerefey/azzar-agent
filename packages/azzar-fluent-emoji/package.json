@@ -1,0 +1,39 @@
+{
+  "author": "AZZAR",
+  "bugs": {
+    "url": "https://github.com/hazemelerefey/azzar-agent/issues/new"
+  },
+  "dependencies": {
+    "emoji-regex": "^10.6.0",
+    "url-join": "^5.0.0"
+  },
+  "description": "Microsoft Fluent emoji for React in five styles, served from AZZAR's own CDN",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "homepage": "https://github.com/hazemelerefey/azzar-agent",
+  "keywords": [
+    "emoji",
+    "fluent-emoji",
+    "fluentui-emoji",
+    "react"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "name": "@azzar/fluent-emoji",
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hazemelerefey/azzar-agent.git"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "5.0.0"
+}

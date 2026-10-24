@@ -1,0 +1,76 @@
+{
+  "name": "@azzar/cli",
+  "version": "0.0.66",
+  "type": "module",
+  "bin": {
+    "azzar": "dist/index.js"
+  },
+  "man": [
+    "./man/man1/azzar.1",
+    "./man/man1/azzar.1",
+    "./man/man1/azzar.1"
+  ],
+  "files": [
+    "dist",
+    "man"
+  ],
+  "scripts": {
+    "build": "bun scripts/ensureWorkspaceLinks.ts && tsdown && tsdown src/daemon/maintenanceWorker.ts --no-config --no-clean --format esm --target node22",
+    "cli:link": "bun link",
+    "cli:unlink": "bun unlink",
+    "dev": "AZZAR_CLI_HOME=.azzar-dev bun src/index.ts",
+    "man:generate": "bun src/man/generate.ts",
+    "prepublishOnly": "npm run build && npm run man:generate",
+    "test": "bunx vitest run --config vitest.config.mts --silent='passed-only'",
+    "test:coverage": "bunx vitest run --config vitest.config.mts --coverage",
+    "test:e2e": "bunx vitest run --config vitest.e2e.config.mts --silent='passed-only'",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lydell/node-pty": "1.2.0-beta.15",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "@azzar/agent-gateway-client": "workspace:*",
+    "@azzar/agent-tracing": "workspace:*",
+    "@azzar/const": "workspace:*",
+    "@azzar/device-control": "workspace:*",
+    "@azzar/device-gateway-client": "workspace:*",
+    "@azzar/device-identity": "workspace:*",
+    "@azzar/eval-rubric": "workspace:*",
+    "@azzar/heterogeneous-agents": "workspace:*",
+    "@azzar/html-artifact": "workspace:*",
+    "@azzar/local-file-shell": "workspace:*",
+    "@azzar/tool-runtime": "workspace:*",
+    "@azzar/types": "workspace:*",
+    "@azzar/utils": "workspace:*",
+    "@trpc/client": "^11.18.0",
+    "@types/node": "^24.13.2",
+    "@types/semver": "^7.7.1",
+    "@types/ws": "^8.18.1",
+    "commander": "^13.1.0",
+    "dayjs": "^1.11.21",
+    "debug": "^4.4.3",
+    "diff": "^8.0.4",
+    "fast-glob": "^3.3.3",
+    "ignore": "^7.0.5",
+    "picocolors": "^1.1.1",
+    "semver": "^7.8.5",
+    "superjson": "^2.2.6",
+    "tinyexec": "^1.3.0",
+    "tree-kill": "^1.2.2",
+    "tsdown": "^0.21.10",
+    "typescript": "^6.0.3",
+    "url-join": "^5.0.0",
+    "vitest": "5.0.0",
+    "zod": "^4.4.3"
+  },
+  "engines": {
+    "node": ">=22.15"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "description": "Command-line interface for the AZZAR agent orchestrator"
+}

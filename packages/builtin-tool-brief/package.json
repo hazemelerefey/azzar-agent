@@ -1,0 +1,13 @@
+{
+  "name": "@azzar/builtin-tool-brief",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Briefing tool for AZZAR missions"
+}

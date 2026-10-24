@@ -1,0 +1,18 @@
+@layer azzar-ui {
+  .azzar-dashboard-auth-layout__title {
+    margin: 0;
+    font-size: var(--azzar-font-size-heading-3);
+    line-height: var(--azzar-line-height-heading-3);
+  }
+
+  .azzar-dashboard-auth-layout__description {
+    line-height: 1.6;
+    color: var(--azzar-color-text-secondary);
+  }
+
+  .azzar-auth-layout-footer a {
+    font-weight: 600;
+    color: var(--azzar-color-link);
+    text-decoration: none;
+  }
+}

@@ -1,0 +1,25 @@
+@layer azzar-ui {
+  .azzar-auth-locale-switch {
+    inline-size: fit-content;
+    min-inline-size: 120px;
+    block-size: 28px;
+    border-radius: 28px;
+    background: var(--azzar-color-bg-layout);
+  }
+
+  .azzar-auth-theme-switch {
+    block-size: 28px;
+    padding: 2px;
+    border-radius: 28px;
+  }
+
+  .azzar-auth-theme-switch .azzar-segmented-indicator {
+    border-radius: 22px;
+  }
+
+  .azzar-auth-theme-switch-item {
+    block-size: 22px;
+    padding-inline: 8px;
+    border-radius: 22px;
+  }
+}

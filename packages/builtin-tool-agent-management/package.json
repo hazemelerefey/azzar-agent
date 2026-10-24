@@ -1,0 +1,26 @@
+{
+  "name": "@azzar/builtin-tool-agent-management",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./executor": "./src/executor.ts"
+  },
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@azzar/agent-manager-runtime": "workspace:*",
+    "@azzar/builtin-tool-agent-builder": "workspace:*",
+    "@azzar/const": "workspace:*",
+    "@azzar/heterogeneous-agents": "workspace:*",
+    "lucide-react": "^1.22.0",
+    "react-router": "^8.1.0"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Agent management tool for AZZAR missions"
+}

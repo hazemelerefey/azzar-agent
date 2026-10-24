@@ -1,0 +1,24 @@
+{
+  "name": "@azzar/builtin-tool-goal",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./client/executor": "./src/client/executor/index.ts",
+    "./report": "./src/report.ts",
+    "./supervisor": "./src/supervisor.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/builtin-tool-task": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-i18next": "*"
+  },
+  "description": "Goal tracking tool for AZZAR missions"
+}

@@ -1,0 +1,33 @@
+---
+title: SendButton
+description: SendButton provides send and stop controls for chat input workflows.
+category: General
+---
+
+import DemoIndex from './demos/index.tsx?demo';
+
+## Introduction
+
+SendButton is a powerful button component designed specifically for message sending interfaces. It supports various states including loading, generating, and provides dropdown menu functionality for additional actions. The component automatically switches between send and stop icons based on the current state.
+
+## Basic Usage
+
+<Demo of={DemoIndex} layout="bare" />
+
+## APIs
+
+### SendButton
+
+| Property   | Description                          | Type                             | Default     |
+| ---------- | ------------------------------------ | -------------------------------- | ----------- |
+| generating | Show generating state with stop icon | `boolean`                        | `false`     |
+| shape      | Button shape style                   | `'default' \| 'round'`           | `'default'` |
+| size       | Button size                          | `number`                         | `32`        |
+| menu       | Dropdown menu configuration          | `DropdownButtonProps['menu']`    | -           |
+| loading    | Show loading state                   | `boolean`                        | `false`     |
+| type       | Button type                          | `DropdownButtonProps['type']`    | `'primary'` |
+| className  | Custom CSS class                     | `string`                         | -           |
+| style      | Custom inline styles                 | `CSSProperties`                  | -           |
+| onClick    | Click event handler                  | `DropdownButtonProps['onClick']` | -           |
+
+Note: This component extends Ant Design's DropdownButton component and inherits all its properties except `children`, `icon`, and `size`.

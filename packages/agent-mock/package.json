@@ -1,0 +1,21 @@
+{
+  "name": "@azzar/agent-mock",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run --silent='passed-only'"
+  },
+  "dependencies": {
+    "@azzar/agent-gateway-client": "workspace:*",
+    "@azzar/agent-tracing": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "5.0.0"
+  },
+  "description": "Mock agents for testing AZZAR missions"
+}

@@ -1,0 +1,5 @@
+@layer azzar-ui {
+  .azzar-draggable-side-nav-body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--azzar-color-border);
+  }
+}

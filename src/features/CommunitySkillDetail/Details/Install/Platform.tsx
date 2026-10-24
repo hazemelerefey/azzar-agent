@@ -1,0 +1,364 @@
+'use client';
+
+import { AGENT_CHAT_URL, DEFAULT_INBOX_AVATAR } from '@azzar/const';
+import { Claude, Cline, Cursor, OpenAI } from '@azzar/icons';
+import {
+  Avatar,
+  Block,
+  Button,
+  createStaticStyles,
+  cx,
+  Divider,
+  Flexbox,
+  Highlighter,
+  Icon,
+  Markdown,
+  Select,
+  Tabs,
+  Text,
+} from '@azzar/ui';
+import { BotIcon, UserRoundIcon } from 'lucide-react';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { useWorkspaceAwareNavigate } from '@/features/Workspace/useWorkspaceAwareNavigate';
+import { useAgentStore } from '@/store/agent';
+import { builtinAgentSelectors } from '@/store/agent/selectors';
+import { useChatStore } from '@/store/chat';
+
+import { useDetailActionContext } from '../../DetailProvider';
+import { getSkillInstructionsUrl } from './getSkillInstructionsUrl';
+import VsCodeIcon from './VsCodeIcon';
+
+const Title = ({ children }: { children?: React.ReactNode }) => (
+  <Text as={'h3'} fontSize={16} style={{ margin: 0, paddingInline: 8 }} weight={600}>
+    {children}
+  </Text>
+);
+
+type GuideMode = 'agent' | 'human';
+
+enum PlatformType {
+  Claude = 'claude',
+  Cline = 'cline',
+  Codex = 'codex',
+  Cursor = 'cursor',
+  AZZAR = 'azzar',
+  VsCode = 'vscode',
+}
+
+export const styles = createStaticStyles(({ css }) => ({
+  lite: css`
+    pre {
+      padding: 12px !important;
+    }
+  `,
+}));
+
+interface PlatformProps {
+  downloadUrl?: string;
+  expandCodeByDefault?: boolean;
+  identifier?: string;
+  lite?: boolean;
+  mobile?: boolean;
+}
+
+const genInstallCommand = (identifier?: string, platform?: PlatformType) => {
+  const id = identifier || '<skill-identifier>';
+
+  const agentMap: Record<PlatformType, string> = {
+    [PlatformType.Claude]: 'claude-code',
+    [PlatformType.Cline]: 'cline',
+    [PlatformType.Cursor]: 'cursor',
+    [PlatformType.AZZAR]: 'azzar',
+    [PlatformType.Codex]: 'codex',
+    [PlatformType.VsCode]: 'vscode',
+  };
+
+  switch (platform) {
+    case PlatformType.Cursor:
+    case PlatformType.Claude:
+    case PlatformType.Cline:
+    case PlatformType.VsCode: {
+      return `npx -y @azzar/market-cli skills install ${id} --agent ${agentMap[platform]}`;
+    }
+    case PlatformType.Codex: {
+      return `npx -y @azzar/market-cli skills install ${id} --agent ${agentMap[platform]}`;
+    }
+    default: {
+      return `# Recommended for AZZAR users:
+# Open the marketplace page and install with one click:
+# https://hazemelerefy.tech/community/skills/${id}`;
+    }
+  }
+};
+
+const genLayout = (
+  identifier: string | undefined,
+  platform: PlatformType,
+  i18nText: {
+    azzar: string;
+    resourcesHint: string;
+  },
+) => {
+  const id = identifier || '<skill-identifier>';
+  const basePathMap: Record<PlatformType, string> = {
+    [PlatformType.Claude]: `~/.claude/skills/${id}`,
+    [PlatformType.Cline]: `~/.cline/skills/${id}`,
+    [PlatformType.Cursor]: `~/.cursor/skills/${id}`,
+    [PlatformType.AZZAR]: `<managed-by-azzar>`,
+    [PlatformType.Codex]: `~/.agents/skills/${id}`,
+    [PlatformType.VsCode]: `./.vscode/skills/${id}`,
+  };
+  const basePath = basePathMap[platform];
+
+  if (platform === PlatformType.AZZAR) {
+    return i18nText.azzar;
+  }
+
+  return `${basePath}
+├── SKILL.md
+└── ... (${i18nText.resourcesHint})`;
+};
+
+const Platform = memo<PlatformProps>(
+  ({ lite, identifier, mobile, expandCodeByDefault, downloadUrl }) => {
+    const { t } = useTranslation('discover');
+    const navigate = useWorkspaceAwareNavigate();
+    const { close } = useDetailActionContext();
+    const inboxAgentId = useAgentStore(builtinAgentSelectors.inboxAgentId);
+    const sendMessage = useChatStore((s) => s.sendMessage);
+    const [active, setActive] = useState<PlatformType>(PlatformType.Claude);
+    const [mode, setMode] = useState<GuideMode>('agent');
+
+    const options = [
+      {
+        icon: <Claude.Color className={'anticon'} size={18} />,
+        label: 'Claude Code',
+        value: PlatformType.Claude,
+      },
+      {
+        icon: <OpenAI className={'anticon'} size={18} />,
+        label: 'Codex',
+        value: PlatformType.Codex,
+      },
+      {
+        icon: <Cursor className={'anticon'} size={18} />,
+        label: 'Cursor',
+        value: PlatformType.Cursor,
+      },
+      {
+        icon: <VsCodeIcon className={'anticon'} size={18} />,
+        label: 'VsCode',
+        value: PlatformType.VsCode,
+      },
+      {
+        icon: <Cline className={'anticon'} size={18} />,
+        label: 'Cline',
+        value: PlatformType.Cline,
+      },
+    ];
+
+    const { platform, steps } = useMemo(() => {
+      switch (active) {
+        case PlatformType.AZZAR: {
+          return {
+            platform: 'AZZAR',
+            steps: t('skills.details.sidebar.platform.steps.azzar'),
+          };
+        }
+        case PlatformType.Claude: {
+          return {
+            platform: 'Claude',
+            steps: t('skills.details.sidebar.platform.steps.claude'),
+          };
+        }
+        case PlatformType.Codex: {
+          return {
+            platform: 'Codex',
+            steps: t('skills.details.sidebar.platform.steps.codex'),
+          };
+        }
+        case PlatformType.Cursor: {
+          return {
+            platform: 'Cursor',
+            steps: t('skills.details.sidebar.platform.steps.cursor'),
+          };
+        }
+        case PlatformType.Cline: {
+          return {
+            platform: 'Cline',
+            steps: t('skills.details.sidebar.platform.steps.cline'),
+          };
+        }
+        case PlatformType.VsCode: {
+          return {
+            platform: 'VS Code',
+            steps: t('skills.details.sidebar.platform.steps.vscode'),
+          };
+        }
+      }
+    }, [active, t]);
+
+    const command = genInstallCommand(identifier, active);
+
+    const agentPrompt = `Curl ${getSkillInstructionsUrl(identifier || '<skill-identifier>')}, then follow the instructions to set up AZZAR Skills Marketplace and install the skill. Once installed, read the SKILL.md file in the installed directory and follow its instructions to complete the task.`;
+
+    const handleUseOnAzzarAI = useCallback(() => {
+      if (!inboxAgentId) return;
+
+      // Send message to AzzarAI
+      sendMessage({
+        context: { agentId: inboxAgentId },
+        message: agentPrompt,
+      });
+
+      // Navigate to AzzarAI chat session; in the modal the host outlives the
+      // router, so dismiss the detail alongside the navigation
+      navigate(AGENT_CHAT_URL(inboxAgentId, mobile));
+      close?.();
+    }, [agentPrompt, close, inboxAgentId, mobile, navigate, sendMessage]);
+
+    return (
+      <Block gap={lite ? 0 : 16} padding={4} variant={lite ? 'outlined' : 'borderless'}>
+        <Tabs
+          activeKey={mode}
+          style={{ marginBottom: 8 }}
+          items={[
+            {
+              icon: <Icon icon={BotIcon} />,
+              key: 'agent',
+              label: t('skills.hero.guide.agent'),
+            },
+            {
+              icon: <Icon icon={UserRoundIcon} />,
+              key: 'human',
+              label: t('skills.hero.guide.human'),
+            },
+          ]}
+          styles={{
+            list: { display: 'flex', width: '100%' },
+            tab: { flex: 1 },
+          }}
+          onChange={(key) => setMode(key as GuideMode)}
+        />
+
+        {mode === 'agent' ? (
+          <Flexbox gap={mobile || lite ? 0 : 16}>
+            {mobile || lite ? (
+              <Text align={'center'} as={'h3'} fontSize={14} style={{ padding: 8 }} weight={500}>
+                {t('skills.details.sidebar.agent.title')}
+              </Text>
+            ) : (
+              <Title>{t('skills.details.sidebar.agent.title')}</Title>
+            )}
+            <Highlighter
+              fullFeatured
+              wrap
+              className={cx(lite && styles.lite)}
+              defaultExpand={expandCodeByDefault ?? false}
+              fileName={'Agent prompt'}
+              language={'bash'}
+              style={{ fontSize: 12 }}
+              variant={lite ? 'borderless' : 'outlined'}
+            >
+              {agentPrompt}
+            </Highlighter>
+            <Flexbox padding={8}>
+              <Button
+                block
+                icon={<Avatar avatar={DEFAULT_INBOX_AVATAR} size={18} />}
+                size={'large'}
+                type={'primary'}
+                onClick={handleUseOnAzzarAI}
+              >
+                {t('skills.details.sidebar.agent.useOnAzzarAI')}
+              </Button>
+            </Flexbox>
+          </Flexbox>
+        ) : (
+          <>
+            {mobile || lite ? (
+              <Select
+                value={active}
+                variant={'filled'}
+                options={options.map((item) => ({
+                  ...item,
+                  label: (
+                    <Flexbox horizontal align={'center'} gap={8}>
+                      {item.icon} {item.label}
+                    </Flexbox>
+                  ),
+                }))}
+                onSelect={(v) => setActive(v as PlatformType)}
+              />
+            ) : (
+              <Tabs
+                activeKey={active}
+                items={options.map((opt) => ({
+                  icon: opt.icon,
+                  key: opt.value,
+                  label: opt.label,
+                }))}
+                styles={{
+                  list: { display: 'flex', width: '100%' },
+                  tab: { flex: 1 },
+                }}
+                onChange={(key) => setActive(key as PlatformType)}
+              />
+            )}
+            <Flexbox>
+              {!lite && <Title>{t('skills.details.sidebar.platform.title', { platform })}</Title>}
+              <Markdown variant={'chat'}>{steps}</Markdown>
+            </Flexbox>
+            {lite && <Divider dashed />}
+            <Highlighter
+              fullFeatured
+              className={cx(lite && styles.lite)}
+              defaultExpand={expandCodeByDefault ?? false}
+              fileName={t('skills.details.sidebar.installCommand')}
+              language={'bash'}
+              style={{ fontSize: 12 }}
+              variant={lite ? 'borderless' : 'outlined'}
+            >
+              {command}
+            </Highlighter>
+            {lite && <Divider dashed />}
+            <Highlighter
+              fullFeatured
+              className={cx(lite && styles.lite)}
+              defaultExpand={false}
+              fileName={t('skills.details.sidebar.directoryLayout')}
+              language={'text'}
+              style={{ fontSize: 12 }}
+              variant={lite ? 'borderless' : 'outlined'}
+            >
+              {genLayout(identifier, active, {
+                azzar: t('skills.details.sidebar.platform.layout.azzar'),
+                resourcesHint: t('skills.details.sidebar.platform.layout.resourcesHint'),
+              })}
+            </Highlighter>
+            {downloadUrl && (
+              <>
+                <Divider dashed />
+                <Flexbox padding={8}>
+                  <Button
+                    block
+                    href={downloadUrl}
+                    size={'large'}
+                    target={'_blank'}
+                    type={'primary'}
+                  >
+                    {t('skills.details.sidebar.downloadSkill')}
+                  </Button>
+                </Flexbox>
+              </>
+            )}
+          </>
+        )}
+      </Block>
+    );
+  },
+);
+
+export default Platform;

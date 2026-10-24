@@ -1,0 +1,26 @@
+{
+  "name": "@azzar/builtin-tool-skills",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./executor": "./src/executor/index.ts",
+    "./executionRuntime": "./src/ExecutionRuntime/index.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/const": "workspace:*",
+    "@azzar/prompts": "workspace:*",
+    "@azzar/shared-tool-ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@azzar/ui": "^6.0.4",
+    "react": "*",
+    "react-i18next": "*"
+  },
+  "description": "Skills management tool for AZZAR agents"
+}

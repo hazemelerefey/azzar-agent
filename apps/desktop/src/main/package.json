@@ -1,0 +1,11 @@
+{
+  "name": "@azzar/desktop-main",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./exports.d.ts"
+  },
+  "main": "./exports.d.ts",
+  "types": "./exports.d.ts",
+  "description": "Main process for the AZZAR desktop application"
+}

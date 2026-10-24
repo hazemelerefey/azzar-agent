@@ -1,0 +1,13 @@
+{
+  "name": "@azzar/business-model-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "description": "Model runtime for AZZAR business deployments"
+}

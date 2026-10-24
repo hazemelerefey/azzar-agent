@@ -1,0 +1,25 @@
+{
+  "name": "@azzar/builtin-tool-knowledge-base",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./client/executor": "./src/client/executor/index.ts",
+    "./executionRuntime": "./src/ExecutionRuntime/index.ts"
+  },
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@azzar/prompts": "workspace:*"
+  },
+  "devDependencies": {
+    "@azzar/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@azzar/ui": "^6.0.4",
+    "polished": "*",
+    "react": "*",
+    "react-i18next": "*"
+  },
+  "description": "Knowledge base tool for AZZAR agents"
+}

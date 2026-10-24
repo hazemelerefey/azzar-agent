@@ -1,0 +1,5 @@
+@layer azzar-ui {
+  .azzar-result-extra > :is(div, section, form) {
+    flex: 1 1 100%;
+  }
+}

@@ -1,0 +1,5 @@
+@layer azzar-ui {
+  [data-orientation='horizontal'] .azzar-segmented-indicator:dir(rtl) {
+    --azzar-segmented-indicator-start: var(--active-item-right);
+  }
+}

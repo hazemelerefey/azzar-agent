@@ -1,0 +1,24 @@
+---
+title: Section
+description: Section is a titled page block with a description, extra actions and a "more" link. `variant="card"` puts it in a Surface. Links go through renderLink / SurfaceLinkProvider.
+category: Layout
+order: 7
+---
+
+import DemoIndex from './demos/index.tsx?demo';
+import { StableClassTable } from '../../../docs/stable-classes/StableClassTable';
+import { dashboardSectionClasses } from './stable';
+
+## Default
+
+<Demo of={DemoIndex} />
+
+## APIs
+
+<Api name="Section" />
+
+## Class names
+
+These class names are public API for overrides, integrations and e2e selectors. See [Styling Overrides](/styling-overrides).
+
+<StableClassTable of={dashboardSectionClasses} />

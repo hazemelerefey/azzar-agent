@@ -1,0 +1,29 @@
+'use client';
+
+import { cx } from '@azzar/ui';
+import { type FC, useLayoutEffect } from 'react';
+
+import { useLexicalComposerContext } from '../../../editor-kernel/react/react-context';
+import { MarkdownPlugin } from '../../markdown/plugin';
+
+import { CodePlugin } from '../plugin';
+import { styles } from './style';
+import type { ReactCodePluginProps } from './type';
+
+const ReactCodePlugin: FC<ReactCodePluginProps> = ({ className, enableHotkey = true }) => {
+  const [editor] = useLexicalComposerContext();
+
+  useLayoutEffect(() => {
+    editor.registerPlugin(MarkdownPlugin);
+    editor.registerPlugin(CodePlugin, {
+      enableHotkey,
+      theme: cx(styles.codeInline, className),
+    });
+  }, [className, cx, enableHotkey, styles.codeInline]);
+
+  return null;
+};
+
+ReactCodePlugin.displayName = 'ReactCodePlugin';
+
+export default ReactCodePlugin;
