@@ -3,7 +3,6 @@ export * from './base64';
 export * from './chunkers';
 export * from './client/cookie';
 export * from './dedupeBy';
-export * from './detectChinese';
 export * from './detectTruncatedJSON';
 export * from './entityId';
 export * from './env';
