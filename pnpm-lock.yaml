@@ -166,12 +166,13 @@ overrides:
   '@azzar/ui': workspace:*
   '@azzar/icons': workspace:*
   '@azzar/editor': workspace:*
-  '@azzar/charts': workspace:*
+  '@azzar/charts': npm:@lobehub/charts@6.0.0
   '@azzar/lint': workspace:*
   '@azzar/seo-cli': workspace:*
   '@azzar/i18n-cli': workspace:*
-  '@azzar/market-sdk': workspace:*
-  '@azzar/market-types': workspace:*
+  '@azzar/market-sdk': npm:@lobehub/market-sdk@0.44.0
+  '@azzar/market-types': npm:@lobehub/market-types@1.20.0
+  '@azzar/analytics': npm:@lobehub/analytics@1.6.4
   '@azzar/tts': workspace:*
   '@azzar/desktop-ipc-typings': workspace:*
   '@azzar/fluent-emoji': workspace:*
@@ -252,8 +253,8 @@ importers:
         specifier: workspace:*
         version: link:packages/agent-templates
       '@azzar/analytics':
-        specifier: workspace:*
-        version: link:packages/azzar-analytics
+        specifier: npm:@lobehub/analytics@1.6.4
+        version: '@lobehub/analytics@1.6.4(@types/react@19.2.13)(debug@4.4.3(supports-color@10.2.2))(preact-render-to-string@6.6.5)(react@19.2.7)(supports-color@10.2.2)'
       '@azzar/artifact-template':
         specifier: workspace:*
         version: link:packages/artifact-template
@@ -396,8 +397,8 @@ importers:
         specifier: workspace:*
         version: link:packages/canvas
       '@azzar/charts':
-        specifier: workspace:*
-        version: link:packages/azzar-charts
+        specifier: npm:@lobehub/charts@6.0.0
+        version: '@lobehub/charts@6.0.0(@lobehub/ui@6.9.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)'
       '@azzar/chat-adapter-feishu':
         specifier: workspace:*
         version: link:packages/chat-adapter-feishu
@@ -492,8 +493,8 @@ importers:
         specifier: workspace:*
         version: link:packages/markdown-patch
       '@azzar/market-sdk':
-        specifier: workspace:*
-        version: link:packages/azzar-market-sdk
+        specifier: npm:@lobehub/market-sdk@0.44.0
+        version: '@lobehub/market-sdk@0.44.0(supports-color@10.2.2)(zod@4.6.5)'
       '@azzar/mecha':
         specifier: workspace:*
         version: link:packages/azzar-mecha
@@ -1132,8 +1133,8 @@ importers:
         specifier: workspace:*
         version: link:packages/azzar-lint
       '@azzar/market-types':
-        specifier: workspace:*
-        version: link:packages/azzar-market-types
+        specifier: npm:@lobehub/market-types@1.20.0
+        version: '@lobehub/market-types@1.20.0'
       '@azzar/seo-cli':
         specifier: workspace:*
         version: link:packages/azzar-seo-cli
@@ -1707,19 +1708,6 @@ importers:
 
   packages/artifact-template: {}
 
-  packages/azzar-analytics:
-    dependencies:
-      posthog-js:
-        specifier: ^1.103.0
-        version: 1.438.15(@types/react@19.2.13)(preact-render-to-string@6.6.5)(react@19.2.7)
-      react:
-        specifier: 19.2.7
-        version: 19.2.7
-    optionalDependencies:
-      posthog-node:
-        specifier: ^4.2.1
-        version: 4.18.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-
   packages/azzar-business-const: {}
 
   packages/azzar-business-model-bank:
@@ -1733,39 +1721,6 @@ importers:
       '@azzar/types':
         specifier: workspace:*
         version: link:../types
-
-  packages/azzar-charts:
-    dependencies:
-      '@azzar/ui':
-        specifier: workspace:*
-        version: link:../azzar-ui
-      ahooks:
-        specifier: ^3.10.0
-        version: 3.10.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      chroma-js:
-        specifier: ^3.2.0
-        version: 3.2.0
-      date-fns:
-        specifier: ^4.4.0
-        version: 4.4.0
-      dayjs:
-        specifier: ^1.11.23
-        version: 1.11.23
-      fast-deep-equal:
-        specifier: ^3.1.3
-        version: 3.1.3
-      lucide-react:
-        specifier: ^0.562.0
-        version: 0.562.0(react@19.2.7)
-      react:
-        specifier: 19.2.7
-        version: 19.2.7
-      react-dom:
-        specifier: 19.2.7
-        version: 19.2.7(react@19.2.7)
-      recharts:
-        specifier: ^2.15.4
-        version: 2.15.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
   packages/azzar-const:
     dependencies:
@@ -2317,33 +2272,6 @@ importers:
 
   packages/azzar-markdown-patch: {}
 
-  packages/azzar-market-sdk:
-    dependencies:
-      '@azzar/market-types':
-        specifier: workspace:*
-        version: link:../azzar-market-types
-      '@opentelemetry/api':
-        specifier: 1.9.1
-        version: 1.9.1
-      debug:
-        specifier: ^4.4.3
-        version: 4.4.3(supports-color@10.2.2)
-      jose:
-        specifier: ^6.1.3
-        version: 6.2.13
-      url-join:
-        specifier: 5.0.0
-        version: 5.0.0
-      zod:
-        specifier: ^3.24.4
-        version: 3.25.76
-
-  packages/azzar-market-types:
-    dependencies:
-      zod:
-        specifier: ^3.22.4
-        version: 3.25.76
-
   packages/azzar-mecha:
     dependencies:
       '@azzar/agent-runtime':
@@ -2834,7 +2762,7 @@ importers:
         version: 4.18.1
       lucide-react:
         specifier: '>=0.396.0'
-        version: 0.469.0(react@19.2.7)
+        version: 1.61.0(@types/react@19.2.13)(react@19.2.7)
       openai:
         specifier: '>=4'
         version: 6.49.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/hash-node@4.5.2)(@smithy/signature-v4@5.7.4)(ws@8.22.0)(zod@4.6.5)
@@ -5152,11 +5080,11 @@ importers:
   packages/types:
     dependencies:
       '@azzar/market-sdk':
-        specifier: workspace:*
-        version: link:../azzar-market-sdk
+        specifier: npm:@lobehub/market-sdk@0.44.0
+        version: '@lobehub/market-sdk@0.44.0(supports-color@10.2.2)(zod@4.6.5)'
       '@azzar/market-types':
-        specifier: workspace:*
-        version: link:../azzar-market-types
+        specifier: npm:@lobehub/market-types@1.20.0
+        version: '@lobehub/market-types@1.20.0'
       '@azzar/ui':
         specifier: workspace:*
         version: link:../azzar-ui
@@ -8874,6 +8802,66 @@ packages:
   '@lit/reactive-element@2.1.2':
     resolution: {integrity: sha512-pbCDiVMnne1lYUIaYNN5wrwQXDtHaYtg7YEFPeW+hws6U47WeFvISGUWekPGKWOP1ygrs0ef0o1VJMk1exos5A==}
 
+  '@lobehub/analytics@1.6.4':
+    resolution: {integrity: sha512-7pJlcaIt2wE8DCx0ZyRrX0D0gXJo4Z73nR3XPppWhUhl+D0Srv7UUypVHzz6Yg6WoQ2/FXAbdO9lTdey+9zHaQ==}
+    peerDependencies:
+      react: 19.2.7
+    peerDependenciesMeta:
+      react:
+        optional: true
+
+  '@lobehub/charts@6.0.0':
+    resolution: {integrity: sha512-tg3GmXeZ5VqLiZm9D0UK322FBpBtYgIkZbmq/cc5RycgI7QfQ7ITSGYxUp4nCoqGl1NbgIZ8RTtnW208QzO9tQ==}
+    peerDependencies:
+      '@lobehub/ui': ^6.0.0
+      react: 19.2.7
+      react-dom: 19.2.7
+
+  '@lobehub/emojilib@1.0.0':
+    resolution: {integrity: sha512-s9KnjaPjsEefaNv150G3aifvB+J3P4eEKG+epY9zDPS2BeB6+V2jELWqAZll+nkogMaVovjEE813z3V751QwGw==}
+
+  '@lobehub/fluent-emoji@5.0.0':
+    resolution: {integrity: sha512-8nltdQfdjjmUFb4QLDEB1OQCbgwAG79JHXf1VTeCKolf/H6bBjieAXt+wpTHEn9gp3BUrA4A42p1kqecYb5/Cw==}
+    peerDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7
+
+  '@lobehub/icons@6.9.0':
+    resolution: {integrity: sha512-Q3jP0FpcSwtINTqD2OkP/9bkaKgGAlCG2gRWVVs/GgwpC/G0otQDKHBQNoSdHM3lcZNSQ092SJiBhWiyeRZGRg==}
+    peerDependencies:
+      '@lobehub/ui': ^6.0.0
+      react: 19.2.7
+      react-dom: 19.2.7
+
+  '@lobehub/market-sdk@0.44.0':
+    resolution: {integrity: sha512-QmA4l/9VbHRiarPBtlWoUW1/EtkZGkkiIfIkJup3reDZrZGx/UPdSfu7Ro/JwMNERo3Nc+be1VRSHbHY+ZyRjw==}
+    peerDependencies:
+      zod: ^3.24.4
+
+  '@lobehub/market-types@1.20.0':
+    resolution: {integrity: sha512-pAtzN4BoG4LE0VjXUZ+tMrQk11tv1EgWvduy08mobuN+NWQRq9lKSU/nwXq8rj9rB5cRUz02+WMiuQ/6xApNsQ==}
+
+  '@lobehub/streamdown@1.4.4':
+    resolution: {integrity: sha512-k1vAHB+FzAMC674yB3npZr2EosRciJmT3jZQ/51ZI+d9O5rk+CoGI1RdOhz39A/oaaQFgSbEWwE2EwlrpR+Clw==}
+    engines: {node: '>=22.0.0'}
+    peerDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7
+
+  '@lobehub/ui@6.9.0':
+    resolution: {integrity: sha512-NIWRCrb1KEbj8suZPr91v+T/s/HJeZNvBbp1seC2E9G7PsgKGKRJ84wbwdNXnhgS1kMeAzOC7ElI0fMaxMcXnA==}
+    engines: {node: '>=22.22.0'}
+    peerDependencies:
+      '@lobehub/fluent-emoji': ^5.0.0-beta.1
+      '@lobehub/icons': ^6.0.0-beta.1
+      '@splinetool/runtime': ^1.12.0
+      motion: ^13.0.0 || ^14.0.0
+      react: 19.2.7
+      react-dom: 19.2.7
+    peerDependenciesMeta:
+      '@splinetool/runtime':
+        optional: true
+
   '@lukeed/ms@2.0.2':
     resolution: {integrity: sha512-9I2Zn6+NJLfaGoz9jN3lpwDgAYvfGeNYdbAIjJOqzs4Tpc+VU3Jqq4IofSUBKajiDS8k9fZIg18/z13mpk1bsA==}
     engines: {node: '>=8'}
@@ -10825,12 +10813,46 @@ packages:
       react-dom:
         optional: true
 
+  '@pierre/diffs@1.6.1':
+    resolution: {integrity: sha512-XTfLW4bFETyosZfFNUoyRh1zPE4tmAijOoxdHx4X805tlaq/7/fuQXIiJSm21+jLkDo8vn5elQ+2O4YtMTKM0Q==}
+    peerDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
+  '@pierre/highlights@0.2.0':
+    resolution: {integrity: sha512-hTpcOU1EzDAP4bYtEhxmMu2jwMvtkUydRUBUpWMSHTs3dw0IaC3Ld5ansMy18L0GE3b6Vfl2OGkLK+pWWpnBmw==}
+
   '@pierre/theme@2.0.0':
     resolution: {integrity: sha512-yNDd9GYLQl1mEUJR8AneJ5e4ohLIHQd/wZLWr4fagt78vS2RwwZNW530vVgHqXFAyFVcFlRmGUD5ramXH46OXw==}
     engines: {vscode: ^1.0.0}
 
   '@pierre/theming@1.0.1':
     resolution: {integrity: sha512-WCI5Qd7iprDpISL9fBYOLe8RV53+b7mFNA3bPzl60/2CKCSrsKN8zEcep6Y3BAzvARlmca50zGjDodqPGiTUKA==}
+    peerDependencies:
+      '@pierre/theme': ^1.1.0 || ^2.0.0
+      '@shikijs/themes': ^3.0.0 || ^4.0.0
+      react: 19.2.7
+      react-dom: 19.2.7
+      shiki: ^3.0.0 || ^4.0.0
+    peerDependenciesMeta:
+      '@pierre/theme':
+        optional: true
+      '@shikijs/themes':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      shiki:
+        optional: true
+
+  '@pierre/theming@1.0.2':
+    resolution: {integrity: sha512-RmXLLqtx31UGcR8kZyO5hGAQ1EXz6loT1Cu0BFAGsbnBboIxp2BlomkLfWyvdT4WZXnBGyu25onL1gKpFQuSUw==}
     peerDependencies:
       '@pierre/theme': ^1.1.0 || ^2.0.0
       '@shikijs/themes': ^3.0.0 || ^4.0.0
@@ -14492,6 +14514,12 @@ packages:
   boolbase@2.0.0:
     resolution: {integrity: sha512-DkVaaQHymRhpYEYo9x1oo7Q7B0Y6KJUsjm3c9eTyFDby4MHLBTwZ6ZDWBel5zrYxj1WsZgC5oLpiz+93MluXeA==}
     engines: {node: '>=20.19.0'}
+
+  boring-avatars@2.0.4:
+    resolution: {integrity: sha512-xhZO/w/6aFmRfkaWohcl2NfyIy87gK5SBbys8kctZeTGF1Apjpv/10pfUuv+YEfVPkESU/h2Y6tt/Dwp+bIZPw==}
+    peerDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7
 
   bottleneck@2.19.5:
     resolution: {integrity: sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==}
@@ -29042,6 +29070,160 @@ snapshots:
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.6.0
 
+  '@lobehub/analytics@1.6.4(@types/react@19.2.13)(debug@4.4.3(supports-color@10.2.2))(preact-render-to-string@6.6.5)(react@19.2.7)(supports-color@10.2.2)':
+    dependencies:
+      posthog-js: 1.438.15(@types/react@19.2.13)(preact-render-to-string@6.6.5)(react@19.2.7)
+    optionalDependencies:
+      posthog-node: 4.18.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+      react: 19.2.7
+    transitivePeerDependencies:
+      - '@types/react'
+      - debug
+      - preact-render-to-string
+      - supports-color
+
+  '@lobehub/charts@6.0.0(@lobehub/ui@6.9.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@lobehub/ui': 6.9.0(@lobehub/fluent-emoji@5.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@lobehub/icons@6.9.0)(@shikijs/themes@4.5.0)(@splinetool/runtime@1.12.98)(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(date-fns@4.4.0)(micromark-util-types@2.0.3)(micromark@4.0.3(patch_hash=c60385b8a8a0e37b5b4fe922f5b3548144cebbfb662875a6d28ab87dd6810f29)(supports-color@10.2.2))(motion@14.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)(vue@3.5.44(typescript@6.0.3))
+      ahooks: 3.10.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      chroma-js: 3.2.0
+      date-fns: 4.4.0
+      dayjs: 1.11.23
+      fast-deep-equal: 3.1.3
+      lucide-react: 0.562.0(react@19.2.7)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+      recharts: 2.15.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+
+  '@lobehub/emojilib@1.0.0': {}
+
+  '@lobehub/fluent-emoji@5.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@lobehub/emojilib': 1.0.0
+      emoji-regex: 10.6.0
+      es-toolkit: 1.52.0
+      lucide-react: 0.562.0(react@19.2.7)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+      url-join: 5.0.0
+
+  '@lobehub/icons@6.9.0(@lobehub/ui@6.9.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@lobehub/ui': 6.9.0(@lobehub/fluent-emoji@5.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@lobehub/icons@6.9.0)(@shikijs/themes@4.5.0)(@splinetool/runtime@1.12.98)(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(date-fns@4.4.0)(micromark-util-types@2.0.3)(micromark@4.0.3(patch_hash=c60385b8a8a0e37b5b4fe922f5b3548144cebbfb662875a6d28ab87dd6810f29)(supports-color@10.2.2))(motion@14.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)(vue@3.5.44(typescript@6.0.3))
+      es-toolkit: 1.52.0
+      lucide-react: 0.469.0(react@19.2.7)
+      polished: 4.3.1
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+
+  '@lobehub/market-sdk@0.44.0(supports-color@10.2.2)(zod@4.6.5)':
+    dependencies:
+      '@lobehub/market-types': 1.20.0
+      '@opentelemetry/api': 1.9.1
+      debug: 4.4.3(supports-color@10.2.2)
+      jose: 6.2.13
+      url-join: 5.0.0
+      zod: 4.6.5
+    transitivePeerDependencies:
+      - supports-color
+
+  '@lobehub/market-types@1.20.0':
+    dependencies:
+      zod: 3.25.76
+
+  '@lobehub/streamdown@1.4.4(@types/react@19.2.13)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)':
+    dependencies:
+      '@types/hast': 3.0.5
+      hast-util-to-jsx-runtime: 2.3.6(supports-color@10.2.2)
+      html-url-attributes: 3.0.1
+      katex: 0.18.11
+      marked: 18.1.1
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+      react-markdown: 10.1.0(@types/react@19.2.13)(react@19.2.7)(supports-color@10.2.2)
+      remark-parse: 11.0.0(supports-color@10.2.2)
+      remark-rehype: 11.1.2
+      remend: 1.4.0
+      unified: 11.0.5
+      unist-util-visit: 5.1.0
+      vfile: 6.0.3
+    transitivePeerDependencies:
+      - '@types/react'
+      - supports-color
+
+  '@lobehub/ui@6.9.0(@lobehub/fluent-emoji@5.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@lobehub/icons@6.9.0)(@shikijs/themes@4.5.0)(@splinetool/runtime@1.12.98)(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(date-fns@4.4.0)(micromark-util-types@2.0.3)(micromark@4.0.3(patch_hash=c60385b8a8a0e37b5b4fe922f5b3548144cebbfb662875a6d28ab87dd6810f29)(supports-color@10.2.2))(motion@14.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)(vue@3.5.44(typescript@6.0.3))':
+    dependencies:
+      '@base-ui/react': 1.9.0(@types/react@19.2.13)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@dnd-kit/core': 6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@dnd-kit/modifiers': 9.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
+      '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
+      '@dnd-kit/utilities': 3.2.2(react@19.2.7)
+      '@emoji-mart/data': 1.2.1
+      '@emoji-mart/react': 1.1.1(emoji-mart@5.6.0)(react@19.2.7)
+      '@emotion/css': 11.13.5(supports-color@10.2.2)
+      '@emotion/serialize': 1.3.3
+      '@giscus/react': 3.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@lobehub/fluent-emoji': 5.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@lobehub/icons': 6.9.0(@lobehub/ui@6.9.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@lobehub/streamdown': 1.4.4(@types/react@19.2.13)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)
+      '@mdx-js/mdx': 3.1.1(supports-color@10.2.2)
+      '@pierre/diffs': 1.6.1(@shikijs/themes@4.5.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@pierre/highlights': 0.2.0
+      '@stylexjs/stylex': 0.19.1
+      '@tanstack/form-core': 1.33.5
+      '@tanstack/react-table': 9.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@tanstack/react-virtual': 3.14.22(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      boring-avatars: 2.0.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      chroma-js: 3.2.0
+      clsx: 2.1.1
+      dayjs: 1.11.23
+      emoji-mart: 5.6.0
+      es-toolkit: 1.52.0
+      hast-util-from-html-isomorphic: 2.0.0
+      hast-util-to-text: 4.0.2
+      katex: 0.18.11
+      leva: 0.10.1(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      lucide-react: 1.61.0(@types/react@19.2.13)(react@19.2.7)
+      mdast-util-gfm-autolink-literal: 2.0.1
+      motion: 14.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      pele: 1.8.0
+      re-resizable: 6.11.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react: 19.2.7
+      react-avatar-editor: 16.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react-dom: 19.2.7(react@19.2.7)
+      react-error-boundary: 6.1.6(@types/react@19.2.13)(react@19.2.7)
+      react-hotkeys-hook: 5.3.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react-markdown: 10.1.0(@types/react@19.2.13)(react@19.2.7)(supports-color@10.2.2)
+      rehype-github-alerts: 4.2.0
+      rehype-raw: 7.0.0
+      rehype-sanitize: 6.0.0
+      remark-breaks: 4.0.0
+      remark-cjk-friendly: 2.3.3(@types/mdast@4.0.4)(micromark-util-types@2.0.3)(micromark@4.0.3(patch_hash=c60385b8a8a0e37b5b4fe922f5b3548144cebbfb662875a6d28ab87dd6810f29)(supports-color@10.2.2))(unified@11.0.5)
+      remark-gfm: 4.0.1(supports-color@10.2.2)
+      remark-math: 6.0.0(supports-color@10.2.2)
+      unified: 11.0.5
+      unist-util-visit-parents: 6.0.2
+      uqr: 0.1.3
+      vfile: 6.0.3
+      virtua: 0.53.6(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vue@3.5.44(typescript@6.0.3))
+    optionalDependencies:
+      '@splinetool/runtime': 1.12.98
+    transitivePeerDependencies:
+      - '@angular/common'
+      - '@angular/core'
+      - '@date-fns/tz'
+      - '@shikijs/themes'
+      - '@types/mdast'
+      - '@types/react'
+      - '@types/react-dom'
+      - date-fns
+      - micromark
+      - micromark-util-types
+      - solid-js
+      - supports-color
+      - svelte
+      - vue
+
   '@lukeed/ms@2.0.2': {}
 
   '@marijn/find-cluster-break@1.0.4': {}
@@ -31234,9 +31416,34 @@ snapshots:
     transitivePeerDependencies:
       - '@shikijs/themes'
 
+  '@pierre/diffs@1.6.1(@shikijs/themes@4.5.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@pierre/highlights': 0.2.0
+      '@pierre/theme': 2.0.0
+      '@pierre/theming': 1.0.2(@pierre/theme@2.0.0)(@shikijs/themes@4.5.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(shiki@4.5.0)
+      diff: 9.0.0
+      hast-util-to-html: 9.0.5
+      lru_map: 0.4.1
+      shiki: 4.5.0
+    optionalDependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+    transitivePeerDependencies:
+      - '@shikijs/themes'
+
+  '@pierre/highlights@0.2.0': {}
+
   '@pierre/theme@2.0.0': {}
 
   '@pierre/theming@1.0.1(@pierre/theme@2.0.0)(@shikijs/themes@4.5.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(shiki@4.5.0)':
+    optionalDependencies:
+      '@pierre/theme': 2.0.0
+      '@shikijs/themes': 4.5.0
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+      shiki: 4.5.0
+
+  '@pierre/theming@1.0.2(@pierre/theme@2.0.0)(@shikijs/themes@4.5.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(shiki@4.5.0)':
     optionalDependencies:
       '@pierre/theme': 2.0.0
       '@shikijs/themes': 4.5.0
@@ -33047,6 +33254,7 @@ snapshots:
     dependencies:
       on-change: 4.0.0
       semver-compare: 1.0.0
+    optional: true
 
   '@stablelib/base64@1.0.1': {}
 
@@ -35362,6 +35570,11 @@ snapshots:
   boolbase@1.0.0: {}
 
   boolbase@2.0.0: {}
+
+  boring-avatars@2.0.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+    dependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   bottleneck@2.19.5: {}
 
@@ -41871,7 +42084,8 @@ snapshots:
 
   omggif@1.0.10: {}
 
-  on-change@4.0.0: {}
+  on-change@4.0.0:
+    optional: true
 
   on-finished@2.4.2:
     dependencies:
@@ -44728,7 +44942,8 @@ snapshots:
       - supports-color
       - typescript
 
-  semver-compare@1.0.0: {}
+  semver-compare@1.0.0:
+    optional: true
 
   semver-diff@4.0.0:
     dependencies:
