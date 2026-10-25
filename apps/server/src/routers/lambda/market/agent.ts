@@ -542,17 +542,13 @@ export const agentRouter = router({
             response.statusText,
             errorText,
           );
-          throw new Error(`Failed to get onboarding full: ${response.statusText}`);
+          return {};
         }
 
         return (await response.json()) as Record<string, unknown[]>;
       } catch (error) {
         log('Error getting onboarding full: %O', error);
-        throw new TRPCError({
-          cause: error,
-          code: 'INTERNAL_SERVER_ERROR',
-          message: error instanceof Error ? error.message : 'Failed to get onboarding full',
-        });
+        return {};
       }
     }),
 
