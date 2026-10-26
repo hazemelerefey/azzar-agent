@@ -167,7 +167,7 @@ overrides:
   '@azzar/icons': workspace:*
   '@azzar/editor': workspace:*
   '@azzar/charts': npm:@lobehub/charts@6.0.0
-  '@azzar/lint': workspace:*
+  '@azzar/lint': npm:@lobehub/lint@^2.1.7
   '@azzar/seo-cli': workspace:*
   '@azzar/i18n-cli': workspace:*
   '@azzar/market-sdk': npm:@lobehub/market-sdk@0.44.0
@@ -1130,8 +1130,8 @@ importers:
         specifier: workspace:*
         version: link:packages/azzar-i18n-cli
       '@azzar/lint':
-        specifier: workspace:*
-        version: link:packages/azzar-lint
+        specifier: npm:@lobehub/lint@^2.1.7
+        version: '@lobehub/lint@2.1.7(@commitlint/cli@19.8.1(@types/node@24.19.2)(typescript@6.0.3))(@octokit/core@3.6.0)(@typescript-eslint/eslint-plugin@8.72.0(@typescript-eslint/parser@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(@typescript-eslint/utils@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(bluebird@3.7.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(postcss@8.5.31)(prettier@3.9.10)(remark-cli@12.0.1(bluebird@3.7.2)(supports-color@10.2.2))(remark-lint-file-extension@3.0.1)(remark@15.0.1(supports-color@10.2.2))(semantic-release@21.1.2(supports-color@10.2.2)(typescript@6.0.3))(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)(typescript@6.0.3)(zod@4.6.5)'
       '@azzar/market-types':
         specifier: npm:@lobehub/market-types@1.20.0
         version: '@lobehub/market-types@1.20.0'
@@ -2000,213 +2000,6 @@ importers:
       react-dom:
         specifier: 19.2.7
         version: 19.2.7(react@19.2.7)
-
-  packages/azzar-lint:
-    dependencies:
-      '@eslint-community/eslint-plugin-eslint-comments':
-        specifier: ^4.7.1
-        version: 4.8.1(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      '@eslint-react/eslint-plugin':
-        specifier: ^5.8.1
-        version: 5.28.6(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
-      '@eslint/js':
-        specifier: ^10.0.1
-        version: 10.0.1(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      '@next/eslint-plugin-next':
-        specifier: ^16.2.6
-        version: 16.4.2(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      commitlint-config-gitmoji:
-        specifier: ^2.3.1
-        version: 2.3.1
-      eslint-config-prettier:
-        specifier: ^10.1.8
-        version: 10.1.8(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-import-resolver-typescript:
-        specifier: ^4.4.4
-        version: 4.4.5(eslint-plugin-import-x@4.17.1(@typescript-eslint/utils@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
-      eslint-mdx:
-        specifier: ^3.7.0
-        version: 3.8.2(bluebird@3.7.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(remark-lint-file-extension@3.0.1)(supports-color@10.2.2)
-      eslint-plugin-import-x:
-        specifier: ^4.16.2
-        version: 4.17.1(@typescript-eslint/utils@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
-      eslint-plugin-jsx-a11y:
-        specifier: ^6.10.2
-        version: 6.10.2(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-plugin-mdx:
-        specifier: ^3.7.0
-        version: 3.8.2(bluebird@3.7.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(remark-lint-file-extension@3.0.1)(supports-color@10.2.2)
-      eslint-plugin-perfectionist:
-        specifier: ^5.9.0
-        version: 5.13.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
-      eslint-plugin-react:
-        specifier: ^7.37.5
-        version: 7.37.5(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-plugin-react-hooks:
-        specifier: 7.1.1
-        version: 7.1.1(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
-      eslint-plugin-react-native:
-        specifier: ^5.0.0
-        version: 5.0.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-plugin-react-refresh:
-        specifier: ^0.5.2
-        version: 0.5.7(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-plugin-regexp:
-        specifier: ^3.1.0
-        version: 3.3.1(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-plugin-simple-import-sort:
-        specifier: ^13.0.0
-        version: 13.0.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-plugin-unicorn:
-        specifier: ^64.0.0
-        version: 64.0.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-plugin-unused-imports:
-        specifier: ^4.4.1
-        version: 4.4.1(@typescript-eslint/eslint-plugin@8.72.0(@typescript-eslint/parser@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      eslint-plugin-yml:
-        specifier: ^3.3.2
-        version: 3.9.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
-      globals:
-        specifier: ^17.6.0
-        version: 17.13.0
-      postcss-less:
-        specifier: ^6.0.0
-        version: 6.0.0(postcss@8.5.31)
-      postcss-styled-syntax:
-        specifier: ^0.7.1
-        version: 0.7.4(postcss@8.5.31)
-      prettier-plugin-packagejson:
-        specifier: ^3.0.2
-        version: 3.0.2(prettier@3.9.10)
-      prettier-plugin-sh:
-        specifier: ^0.18.1
-        version: 0.18.1(prettier@3.9.10)
-      prettier-plugin-sort-json:
-        specifier: ^4.2.0
-        version: 4.2.0(prettier@3.9.10)
-      remark-frontmatter:
-        specifier: ^5.0.0
-        version: 5.0.0(supports-color@10.2.2)
-      remark-gfm:
-        specifier: ^4.0.1
-        version: 4.0.1(supports-color@10.2.2)
-      remark-lint:
-        specifier: ^10.0.1
-        version: 10.0.1(supports-color@10.2.2)
-      remark-lint-checkbox-content-indent:
-        specifier: ^5.0.1
-        version: 5.0.1
-      remark-lint-frontmatter-schema:
-        specifier: ^3.15.4
-        version: 3.15.4
-      remark-lint-heading-whitespace:
-        specifier: ^1.0.0
-        version: 1.0.0
-      remark-lint-linebreak-style:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-list-item-indent:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-list-item-spacing:
-        specifier: ^5.0.1
-        version: 5.0.1
-      remark-lint-no-duplicate-headings-in-section:
-        specifier: ^4.0.1
-        version: 4.0.1(supports-color@10.2.2)
-      remark-lint-no-empty-sections:
-        specifier: ^4.0.0
-        version: 4.0.0
-      remark-lint-no-empty-url:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-no-file-name-irregular-characters:
-        specifier: ^3.0.1
-        version: 3.0.1
-      remark-lint-no-heading-indent:
-        specifier: ^5.0.1
-        version: 5.0.1
-      remark-lint-no-heading-like-paragraph:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-no-paragraph-content-indent:
-        specifier: ^5.0.1
-        version: 5.0.1
-      remark-lint-no-reference-like-url:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-no-shell-dollars:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-no-tabs:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-no-unneeded-full-reference-image:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-no-unneeded-full-reference-link:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-ordered-list-marker-value:
-        specifier: ^4.0.1
-        version: 4.0.1
-      remark-lint-write-good:
-        specifier: ^1.2.0
-        version: 1.2.0
-      remark-pangu:
-        specifier: ^2.2.0
-        version: 2.2.0
-      remark-preset-lint-consistent:
-        specifier: ^6.0.1
-        version: 6.0.1(supports-color@10.2.2)
-      remark-preset-lint-markdown-style-guide:
-        specifier: ^6.0.1
-        version: 6.0.1(supports-color@10.2.2)
-      remark-preset-lint-recommended:
-        specifier: ^7.0.1
-        version: 7.0.1(supports-color@10.2.2)
-      remark-remove-unused-definitions:
-        specifier: ^3.0.0
-        version: 3.0.0
-      remark-sort-definitions:
-        specifier: ^3.0.0
-        version: 3.0.0
-      remark-textr:
-        specifier: ^6.1.0
-        version: 6.1.0
-      remark-toc:
-        specifier: ^9.0.0
-        version: 9.0.0
-      semantic-release-config-gitmoji:
-        specifier: ^1.5.3
-        version: 1.5.3(@octokit/core@3.6.0)(semantic-release@21.1.2(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)
-      stylelint-config-clean-order:
-        specifier: 7.0.0
-        version: 7.0.0(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
-      stylelint-config-recommended:
-        specifier: ^14.0.1
-        version: 14.0.1(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
-      stylelint-config-standard:
-        specifier: ^37.0.0
-        version: 37.0.0(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
-      stylelint-less:
-        specifier: ^3.0.1
-        version: 3.0.1(postcss@8.5.31)(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
-      stylelint-order:
-        specifier: ^6.0.4
-        version: 6.0.4(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
-      stylelint-use-logical-spec:
-        specifier: ^5.0.1
-        version: 5.0.1(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
-      typescript-eslint:
-        specifier: ^8.59.3
-        version: 8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.1.0
-      zod-validation-error:
-        specifier: ^4.0.2
-        version: 4.0.2(zod@4.6.5)
 
   packages/azzar-local-file-shell:
     dependencies:
@@ -8817,8 +8610,21 @@ packages:
       react: 19.2.7
       react-dom: 19.2.7
 
+  '@lobehub/commitlint-config@2.1.7':
+    resolution: {integrity: sha512-0N5xGb01z0foEuRkikwRngmQg4vy/zLXd+zQK2nBZtoz1wfx9b2QcWA8Bqs961rV1ONmo/si3pAV2STQoEpuuQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@commitlint/cli': '>=19.0.0'
+
   '@lobehub/emojilib@1.0.0':
     resolution: {integrity: sha512-s9KnjaPjsEefaNv150G3aifvB+J3P4eEKG+epY9zDPS2BeB6+V2jELWqAZll+nkogMaVovjEE813z3V751QwGw==}
+
+  '@lobehub/eslint-config@2.1.7':
+    resolution: {integrity: sha512-oDNph5VLs1QYdFk5uDc1fbFO+6D4eNQor/xpsy59+sqbiLlCSdb8+k1JZm+2hAirl8iWj0RuGNDWnYx2JGmc5Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      eslint: ^10.0.0
+      typescript: 6.0.3
 
   '@lobehub/fluent-emoji@5.0.0':
     resolution: {integrity: sha512-8nltdQfdjjmUFb4QLDEB1OQCbgwAG79JHXf1VTeCKolf/H6bBjieAXt+wpTHEn9gp3BUrA4A42p1kqecYb5/Cw==}
@@ -8833,6 +8639,12 @@ packages:
       react: 19.2.7
       react-dom: 19.2.7
 
+  '@lobehub/lint@2.1.7':
+    resolution: {integrity: sha512-GV8sXvMlURLqIp4PgvRUwBY/f80nIqzbS7Ui3Fly51UuEouKiIBYhzN4IFQgP2DfQI548P0yKwDImd6ObHqDiQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      typescript: 6.0.3
+
   '@lobehub/market-sdk@0.44.0':
     resolution: {integrity: sha512-QmA4l/9VbHRiarPBtlWoUW1/EtkZGkkiIfIkJup3reDZrZGx/UPdSfu7Ro/JwMNERo3Nc+be1VRSHbHY+ZyRjw==}
     peerDependencies:
@@ -8841,12 +8653,37 @@ packages:
   '@lobehub/market-types@1.20.0':
     resolution: {integrity: sha512-pAtzN4BoG4LE0VjXUZ+tMrQk11tv1EgWvduy08mobuN+NWQRq9lKSU/nwXq8rj9rB5cRUz02+WMiuQ/6xApNsQ==}
 
+  '@lobehub/prettier-config@2.1.7':
+    resolution: {integrity: sha512-OeFRFyXbV6uC1Km+r8x8coDW++2Gv9r3v0RGLRAMEdFI/aFejyxTiTOmlrqnZo5t4j0GVkzoSNyDXdv9hCJSZw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      prettier: '>=3.0.0'
+
+  '@lobehub/remarklint-config@2.1.7':
+    resolution: {integrity: sha512-Jx6io4RpTsBS8IRno3QfcvMNf6LlfOk/qBGIKiFdNTXx8ruRToLL2HYrD2GS2a9YVsu8Hkxps6Vr05gGi4CZUg==}
+    engines: {node: '>=20.18'}
+    peerDependencies:
+      remark: '>=15.0.0'
+      remark-cli: '>=12.0.0'
+
+  '@lobehub/semantic-release-config@2.1.7':
+    resolution: {integrity: sha512-DY5v+3z0bEa+KMmACclY3QA0/yWyT60UseLhNToEMV2fqbB9Qvhrcrr1UMbZQPTiA0GUY224v9xrkxsXbN/TjQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      semantic-release: '>=21.0.0'
+
   '@lobehub/streamdown@1.4.4':
     resolution: {integrity: sha512-k1vAHB+FzAMC674yB3npZr2EosRciJmT3jZQ/51ZI+d9O5rk+CoGI1RdOhz39A/oaaQFgSbEWwE2EwlrpR+Clw==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
       react: 19.2.7
       react-dom: 19.2.7
+
+  '@lobehub/stylelint-config@2.1.7':
+    resolution: {integrity: sha512-+jO2q0mSRrq8HEaqUW4ka+c1NrfJQVsh3sHfW6mQKWkrOI2pdgRR0fFb/ngb1rQlP2qr+CZs4jTOF+p1NwnXCA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      stylelint: '>=16.0.0'
 
   '@lobehub/ui@6.9.0':
     resolution: {integrity: sha512-NIWRCrb1KEbj8suZPr91v+T/s/HJeZNvBbp1seC2E9G7PsgKGKRJ84wbwdNXnhgS1kMeAzOC7ElI0fMaxMcXnA==}
@@ -29095,7 +28932,49 @@ snapshots:
       react-dom: 19.2.7(react@19.2.7)
       recharts: 2.15.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
+  '@lobehub/commitlint-config@2.1.7(@commitlint/cli@19.8.1(@types/node@24.19.2)(typescript@6.0.3))':
+    dependencies:
+      '@commitlint/cli': 19.8.1(@types/node@24.19.2)(typescript@6.0.3)
+      commitlint-config-gitmoji: 2.3.1
+
   '@lobehub/emojilib@1.0.0': {}
+
+  '@lobehub/eslint-config@2.1.7(@typescript-eslint/eslint-plugin@8.72.0(@typescript-eslint/parser@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(@typescript-eslint/utils@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(bluebird@3.7.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(remark-lint-file-extension@3.0.1)(supports-color@10.2.2)(typescript@6.0.3)(zod@4.6.5)':
+    dependencies:
+      '@eslint-community/eslint-plugin-eslint-comments': 4.8.1(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      '@eslint-react/eslint-plugin': 5.28.6(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
+      '@eslint/js': 10.0.1(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      '@next/eslint-plugin-next': 16.4.2(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint: 10.0.2(jiti@2.7.0)(supports-color@10.2.2)
+      eslint-config-prettier: 10.1.8(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-import-resolver-typescript: 4.4.5(eslint-plugin-import-x@4.17.1(@typescript-eslint/utils@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
+      eslint-mdx: 3.8.2(bluebird@3.7.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(remark-lint-file-extension@3.0.1)(supports-color@10.2.2)
+      eslint-plugin-import-x: 4.17.1(@typescript-eslint/utils@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
+      eslint-plugin-jsx-a11y: 6.10.2(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-mdx: 3.8.2(bluebird@3.7.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(remark-lint-file-extension@3.0.1)(supports-color@10.2.2)
+      eslint-plugin-perfectionist: 5.13.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
+      eslint-plugin-react: 7.37.5(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-react-hooks: 7.1.1(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
+      eslint-plugin-react-native: 5.0.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-react-refresh: 0.5.7(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-regexp: 3.3.1(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-simple-import-sort: 13.0.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-unicorn: 64.0.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-unused-imports: 4.4.1(@typescript-eslint/eslint-plugin@8.72.0(@typescript-eslint/parser@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-yml: 3.9.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))
+      globals: 17.13.0
+      typescript: 6.0.3
+      typescript-eslint: 8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
+      zod-validation-error: 4.0.2(zod@4.6.5)
+    transitivePeerDependencies:
+      - '@typescript-eslint/eslint-plugin'
+      - '@typescript-eslint/utils'
+      - bluebird
+      - eslint-import-resolver-node
+      - eslint-plugin-import
+      - remark-lint-file-extension
+      - supports-color
+      - zod
 
   '@lobehub/fluent-emoji@5.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
@@ -29116,6 +28995,35 @@ snapshots:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
+  '@lobehub/lint@2.1.7(@commitlint/cli@19.8.1(@types/node@24.19.2)(typescript@6.0.3))(@octokit/core@3.6.0)(@typescript-eslint/eslint-plugin@8.72.0(@typescript-eslint/parser@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(@typescript-eslint/utils@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(bluebird@3.7.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(postcss@8.5.31)(prettier@3.9.10)(remark-cli@12.0.1(bluebird@3.7.2)(supports-color@10.2.2))(remark-lint-file-extension@3.0.1)(remark@15.0.1(supports-color@10.2.2))(semantic-release@21.1.2(supports-color@10.2.2)(typescript@6.0.3))(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)(typescript@6.0.3)(zod@4.6.5)':
+    dependencies:
+      '@lobehub/commitlint-config': 2.1.7(@commitlint/cli@19.8.1(@types/node@24.19.2)(typescript@6.0.3))
+      '@lobehub/eslint-config': 2.1.7(@typescript-eslint/eslint-plugin@8.72.0(@typescript-eslint/parser@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(@typescript-eslint/utils@8.72.0(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(bluebird@3.7.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@10.2.2))(remark-lint-file-extension@3.0.1)(supports-color@10.2.2)(typescript@6.0.3)(zod@4.6.5)
+      '@lobehub/prettier-config': 2.1.7(prettier@3.9.10)
+      '@lobehub/remarklint-config': 2.1.7(remark-cli@12.0.1(bluebird@3.7.2)(supports-color@10.2.2))(remark@15.0.1(supports-color@10.2.2))(supports-color@10.2.2)
+      '@lobehub/semantic-release-config': 2.1.7(@octokit/core@3.6.0)(semantic-release@21.1.2(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)
+      '@lobehub/stylelint-config': 2.1.7(postcss@8.5.31)(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
+      typescript: 6.0.3
+    transitivePeerDependencies:
+      - '@commitlint/cli'
+      - '@octokit/core'
+      - '@typescript-eslint/eslint-plugin'
+      - '@typescript-eslint/utils'
+      - bluebird
+      - encoding
+      - eslint
+      - eslint-import-resolver-node
+      - eslint-plugin-import
+      - postcss
+      - prettier
+      - remark
+      - remark-cli
+      - remark-lint-file-extension
+      - semantic-release
+      - stylelint
+      - supports-color
+      - zod
+
   '@lobehub/market-sdk@0.44.0(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
       '@lobehub/market-types': 1.20.0
@@ -29130,6 +29038,61 @@ snapshots:
   '@lobehub/market-types@1.20.0':
     dependencies:
       zod: 3.25.76
+
+  '@lobehub/prettier-config@2.1.7(prettier@3.9.10)':
+    dependencies:
+      prettier: 3.9.10
+      prettier-plugin-packagejson: 3.0.2(prettier@3.9.10)
+      prettier-plugin-sh: 0.18.1(prettier@3.9.10)
+      prettier-plugin-sort-json: 4.2.0(prettier@3.9.10)
+
+  '@lobehub/remarklint-config@2.1.7(remark-cli@12.0.1(bluebird@3.7.2)(supports-color@10.2.2))(remark@15.0.1(supports-color@10.2.2))(supports-color@10.2.2)':
+    dependencies:
+      remark: 15.0.1(supports-color@10.2.2)
+      remark-cli: 12.0.1(bluebird@3.7.2)(supports-color@10.2.2)
+      remark-frontmatter: 5.0.0(supports-color@10.2.2)
+      remark-gfm: 4.0.1(supports-color@10.2.2)
+      remark-lint: 10.0.1(supports-color@10.2.2)
+      remark-lint-checkbox-content-indent: 5.0.1
+      remark-lint-frontmatter-schema: 3.15.4
+      remark-lint-heading-whitespace: 1.0.0
+      remark-lint-linebreak-style: 4.0.1
+      remark-lint-list-item-indent: 4.0.1
+      remark-lint-list-item-spacing: 5.0.1
+      remark-lint-no-duplicate-headings-in-section: 4.0.1(supports-color@10.2.2)
+      remark-lint-no-empty-sections: 4.0.0
+      remark-lint-no-empty-url: 4.0.1
+      remark-lint-no-file-name-irregular-characters: 3.0.1
+      remark-lint-no-heading-indent: 5.0.1
+      remark-lint-no-heading-like-paragraph: 4.0.1
+      remark-lint-no-paragraph-content-indent: 5.0.1
+      remark-lint-no-reference-like-url: 4.0.1
+      remark-lint-no-shell-dollars: 4.0.1
+      remark-lint-no-tabs: 4.0.1
+      remark-lint-no-unneeded-full-reference-image: 4.0.1
+      remark-lint-no-unneeded-full-reference-link: 4.0.1
+      remark-lint-ordered-list-marker-value: 4.0.1
+      remark-lint-write-good: 1.2.0
+      remark-pangu: 2.2.0
+      remark-preset-lint-consistent: 6.0.1(supports-color@10.2.2)
+      remark-preset-lint-markdown-style-guide: 6.0.1(supports-color@10.2.2)
+      remark-preset-lint-recommended: 7.0.1(supports-color@10.2.2)
+      remark-remove-unused-definitions: 3.0.0
+      remark-sort-definitions: 3.0.0
+      remark-textr: 6.1.0
+      remark-toc: 9.0.0
+      unist-util-visit: 5.1.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@lobehub/semantic-release-config@2.1.7(@octokit/core@3.6.0)(semantic-release@21.1.2(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)':
+    dependencies:
+      semantic-release: 21.1.2(supports-color@10.2.2)(typescript@6.0.3)
+      semantic-release-config-gitmoji: 1.5.3(@octokit/core@3.6.0)(semantic-release@21.1.2(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)
+    transitivePeerDependencies:
+      - '@octokit/core'
+      - encoding
+      - supports-color
 
   '@lobehub/streamdown@1.4.4(@types/react@19.2.13)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)':
     dependencies:
@@ -29150,6 +29113,20 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
+
+  '@lobehub/stylelint-config@2.1.7(postcss@8.5.31)(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))':
+    dependencies:
+      postcss-less: 6.0.0(postcss@8.5.31)
+      postcss-styled-syntax: 0.7.4(postcss@8.5.31)
+      stylelint: 16.26.1(supports-color@10.2.2)(typescript@6.0.3)
+      stylelint-config-clean-order: 7.0.0(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
+      stylelint-config-recommended: 14.0.1(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
+      stylelint-config-standard: 37.0.0(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
+      stylelint-less: 3.0.1(postcss@8.5.31)(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
+      stylelint-order: 6.0.4(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
+      stylelint-use-logical-spec: 5.0.1(stylelint@16.26.1(supports-color@10.2.2)(typescript@6.0.3))
+    transitivePeerDependencies:
+      - postcss
 
   '@lobehub/ui@6.9.0(@lobehub/fluent-emoji@5.0.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@lobehub/icons@6.9.0)(@shikijs/themes@4.5.0)(@splinetool/runtime@1.12.98)(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(date-fns@4.4.0)(micromark-util-types@2.0.3)(micromark@4.0.3(patch_hash=c60385b8a8a0e37b5b4fe922f5b3548144cebbfb662875a6d28ab87dd6810f29)(supports-color@10.2.2))(motion@14.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)(vue@3.5.44(typescript@6.0.3))':
     dependencies:
