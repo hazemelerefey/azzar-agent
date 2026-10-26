@@ -226,6 +226,12 @@ const essentialCss = `@layer azzar-ui {
     display: none;
   }
 
+  /*
+   * Upstream compatibility shim for @lobehub/charts (aliased as @azzar/charts).
+   * @lobehub/charts wraps charts in Flexbox from @lobehub/ui, which renders .lobe-flex
+   * with --lobe-flex-* CSS variables. This shim maps those properties without needing
+   * to install @lobehub/ui as a second UI library in the repository.
+   */
   :where(.lobe-flex) {
     --lobe-flex: 0 1 auto;
     --lobe-flex-direction: column;

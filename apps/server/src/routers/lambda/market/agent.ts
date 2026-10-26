@@ -542,12 +542,28 @@ export const agentRouter = router({
             response.statusText,
             errorText,
           );
+          // PREVIEW FALLBACK NOTE:
+          // The remote marketplace backend (market.azzar.com) is not deployed in this preview environment.
+          // An empty catalog is an intentional preview fallback so the local client can fall back to local agents.
+          // In production, when the market service is deployed, real market auth or permission errors
+          // must not be silenced into empty catalogs.
+          console.warn(
+            `[Marketplace Preview Fallback] Market backend at ${MARKET_BASE_URL} returned status ${response.status}. ` +
+              `Returning empty catalog as preview fallback because the marketplace service is not deployed in this preview.`,
+          );
           return {};
         }
 
         return (await response.json()) as Record<string, unknown[]>;
       } catch (error) {
         log('Error getting onboarding full: %O', error);
+        // PREVIEW FALLBACK NOTE:
+        // Network failure reaching market backend in preview environment.
+        // Returning {} so local onboarding flow continues cleanly without crashing.
+        console.warn(
+          `[Marketplace Preview Fallback] Failed to fetch onboarding catalog from ${MARKET_BASE_URL} (${(error as Error)?.message}). ` +
+            `Returning empty catalog as preview fallback because the marketplace service is not deployed in this preview.`,
+        );
         return {};
       }
     }),
