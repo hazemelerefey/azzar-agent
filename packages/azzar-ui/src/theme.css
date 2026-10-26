@@ -2411,9 +2411,12 @@
 
   /*
    * Upstream compatibility shim for @lobehub/charts (aliased as @azzar/charts).
-   * @lobehub/charts wraps charts in Flexbox from @lobehub/ui, which renders .lobe-flex
-   * with --lobe-flex-* CSS variables. This shim maps those properties without needing
-   * to install @lobehub/ui as a second UI library in the repository.
+   * @lobehub/ui is present inside the pnpm virtual store as a peer dependency of charts
+   * and traversed by Vite, but is not a top-level dependency in the repository (app code
+   * imports @azzar/ui only). While @lobehub/ui component JS executes, the application
+   * global stylesheet only defines .azzar-flex, whereas charts renders .lobe-flex classes.
+   * This shim ensures .lobe-flex and --lobe-flex-* layout rules are present in the global
+   * stylesheet without requiring a top-level @lobehub/ui stylesheet import.
    */
   :where(.lobe-flex) {
     --lobe-flex: 0 1 auto;
