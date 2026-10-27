@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><g transform="translate(212.0 212.0) scale(1.171875)">
+<circle cx="256" cy="256" r="256" fill="#000000"/>
+<circle cx="256" cy="256" r="254" fill="none" stroke="#F2F4F8" stroke-opacity="0.30" stroke-width="3"/>
+<circle cx="256" cy="256" r="224" fill="none" stroke="#F2F4F8" stroke-opacity="0.18" stroke-width="2"/>
+<g id="departments"><circle cx="256.0" cy="32.0" r="12" fill="#E5535D" stroke="rgba(248,249,251,0.55)" stroke-width="2"/><circle cx="414.4" cy="97.6" r="12" fill="#D9A400" stroke="rgba(248,249,251,0.55)" stroke-width="2"/><circle cx="480.0" cy="256.0" r="12" fill="#8C77DF" stroke="rgba(248,249,251,0.55)" stroke-width="2"/><circle cx="414.4" cy="414.4" r="12" fill="#F2711C" stroke="rgba(248,249,251,0.55)" stroke-width="2"/><circle cx="256.0" cy="480.0" r="12" fill="#2E94DD" stroke="rgba(248,249,251,0.55)" stroke-width="2"/><circle cx="97.6" cy="414.4" r="12" fill="#12A394" stroke="rgba(248,249,251,0.55)" stroke-width="2"/><circle cx="32.0" cy="256.0" r="12" fill="#2B2E34" stroke="rgba(248,249,251,0.55)" stroke-width="2"/><circle cx="97.6" cy="97.6" r="12" fill="#6B7A8F" stroke="rgba(248,249,251,0.55)" stroke-width="2"/></g>
+<g id="azzar-mark" transform="translate(121.0,121.0) scale(2.934783)"><polygon points="0.00,0.00 92.00,0.00 92.00,20.00 0.00,20.00" fill="#F2F4F8"/>
+<polygon points="53.50,24.00 87.50,24.00 71.90,38.00 37.90,38.00" fill="#F2F4F8"/>
+<polygon points="33.50,42.00 67.50,42.00 54.10,54.00 20.10,54.00" fill="#F2F4F8"/>
+<polygon points="15.70,58.00 49.70,58.00 38.50,68.00 4.50,68.00" fill="#F2F4F8"/>
+<polygon points="0.00,72.00 68.00,72.00 68.00,92.00 0.00,92.00" fill="#F2F4F8"/>
+<circle cx="82.00" cy="82.00" r="10.00" fill="#00F0A0"/></g></g></svg>

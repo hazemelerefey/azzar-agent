@@ -1,0 +1,30 @@
+:root{
+  --azzar-oled-black: #000000;
+  --azzar-command-white: #F2F4F8;
+  --azzar-signal-mint: #00F0A0;
+  --azzar-ink: #0A0B0E;
+  --azzar-signal-mint-deep: #00B97E;
+  --azzar-surface-1: #0E1014;
+  --azzar-surface-2: #14171D;
+  --azzar-border: #23262D;
+  --azzar-text-secondary: #8A93A3;
+  --azzar-paper: #F6F7F9;
+  --dept-human-resources: #E5535D;
+  --dept-accounting-finance: #D9A400;
+  --dept-marketing: #8C77DF;
+  --dept-sales: #F2711C;
+  --dept-operations: #2E94DD;
+  --dept-customer-support: #12A394;
+  --dept-legal-compliance: #2B2E34;
+  --dept-information-technology: #6B7A8F;
+}
+@media (prefers-color-scheme: dark){:root{
+  --dept-human-resources: #E8646D;
+  --dept-accounting-finance: #DDAD1A;
+  --dept-marketing: #9885E2;
+  --dept-sales: #F37F33;
+  --dept-operations: #439FE0;
+  --dept-customer-support: #2AAC9F;
+  --dept-legal-compliance: #3C414A;
+  --dept-information-technology: #7A879A;
+}}

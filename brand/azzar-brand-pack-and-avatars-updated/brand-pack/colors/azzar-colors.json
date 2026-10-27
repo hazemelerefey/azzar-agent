@@ -1,0 +1,34 @@
+{
+  "core": {
+    "oled-black": "#000000",
+    "command-white": "#F2F4F8",
+    "signal-mint": "#00F0A0",
+    "ink": "#0A0B0E",
+    "signal-mint-deep (light mode)": "#00B97E",
+    "surface-1 (dark)": "#0E1014",
+    "surface-2 (dark)": "#14171D",
+    "border (dark)": "#23262D",
+    "text-secondary": "#8A93A3",
+    "paper (light)": "#F6F7F9"
+  },
+  "departments_light_mode": {
+    "Human Resources": "#E5535D",
+    "Accounting & Finance": "#D9A400",
+    "Marketing": "#8C77DF",
+    "Sales": "#F2711C",
+    "Operations": "#2E94DD",
+    "Customer Support": "#12A394",
+    "Legal & Compliance": "#2B2E34",
+    "Information Technology": "#6B7A8F"
+  },
+  "departments_dark_mode": {
+    "Human Resources": "#E8646D",
+    "Accounting & Finance": "#DDAD1A",
+    "Marketing": "#9885E2",
+    "Sales": "#F37F33",
+    "Operations": "#439FE0",
+    "Customer Support": "#2AAC9F",
+    "Legal & Compliance": "#3C414A",
+    "Information Technology": "#7A879A"
+  }
+}
