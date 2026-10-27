@@ -10,7 +10,8 @@ const FONT_EMOJI = [
 ];
 
 const FONT_EN = [
-  'HarmonyOS Sans',
+  'Inter',
+  'Cairo',
   '-apple-system',
   'BlinkMacSystemFont',
   'Segoe UI Variable Display',
@@ -20,18 +21,8 @@ const FONT_EN = [
   'Arial',
 ];
 
-const FONT_CN = [
-  '/* SC */',
-  'HarmonyOS Sans SC',
-  'PingFang SC',
-  'Hiragino Sans GB',
-  'Microsoft YaHei UI',
-  'Microsoft YaHei',
-  'Source Han Sans SC',
-  'Noto Sans CJK SC',
-];
-
 const FONT_CODE = [
+  'JetBrains Mono',
   'Hack',
   'ui-monospace',
   'SFMono-Regular',
@@ -41,6 +32,8 @@ const FONT_CODE = [
   'Consolas',
   'Liberation Mono',
 ];
+
+const FONT_BRAND = ['AzzarWordmark', 'Inter', 'sans-serif'];
 
 const FALLBACK = ['/* FALLBACK */', 'ui-sans-serif', 'system-ui', 'sans-serif'];
 
@@ -52,6 +45,7 @@ export const baseToken = {
   borderRadiusSM: 6,
   borderRadiusXS: 4,
   controlHeight: 36,
-  fontFamily: joinFontFamily([FONT_EN, FONT_CN, FALLBACK, FONT_EMOJI].flat()),
-  fontFamilyCode: joinFontFamily([FONT_CODE, FONT_CN, FALLBACK_CODE, FONT_EMOJI].flat()),
+  fontFamily: joinFontFamily([FONT_EN, FALLBACK, FONT_EMOJI].flat()),
+  fontFamilyBrand: joinFontFamily(FONT_BRAND),
+  fontFamilyCode: joinFontFamily([FONT_CODE, FALLBACK_CODE, FONT_EMOJI].flat()),
 };

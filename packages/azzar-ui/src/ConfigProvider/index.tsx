@@ -23,7 +23,6 @@ import {
 } from '../i18n/types';
 import { MotionComponent, type MotionComponentType } from '../MotionProvider';
 import { type CDN, type CdnApi, genCdnUrl } from '../utils/genCdnUrl';
-
 import AppElementContext from './AppElementContext';
 import { KATEX_CSS_VERSION } from './cdnAssets';
 
@@ -171,16 +170,6 @@ const WebFonts = ({ customFonts }: { customFonts?: string[] }) => {
     () =>
       customFonts || [
         genCdnUrl({ path: 'css/index.css', pkg: '@azzar/webfont-mono', version: '1.0.0' }),
-        genCdnUrl({
-          path: 'css/index-full.css',
-          pkg: '@azzar/webfont-harmony-sans',
-          version: '1.0.0',
-        }),
-        genCdnUrl({
-          path: 'css/index.css',
-          pkg: '@azzar/webfont-harmony-sans-sc',
-          version: '1.0.0',
-        }),
         genCdnUrl({ path: 'dist/katex.min.css', pkg: 'katex', version: KATEX_CSS_VERSION }),
       ],
     [customFonts, genCdnUrl],

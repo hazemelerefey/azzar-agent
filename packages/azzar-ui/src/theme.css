@@ -1,5 +1,41 @@
 @layer azzar-base, azzar-popup, azzar-ui;
 
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/inter-latin-variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo/cairo-arabic-variable.woff2') format('woff2');
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'AzzarWordmark';
+  src: url('/fonts/AzzarWordmark-Regular.woff2') format('woff2'),
+       url('/fonts/AzzarWordmark-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Azzar Wordmark';
+  src: url('/fonts/AzzarWordmark-Regular.woff2') format('woff2'),
+       url('/fonts/AzzarWordmark-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root, [data-theme='light'] {
   --azzar-border-radius-outer: 6px;
   --azzar-color-text-light-solid: #fff;
@@ -117,8 +153,9 @@
   --azzar-border-radius-sm: 6px;
   --azzar-border-radius-xs: 4px;
   --azzar-control-height: 36px;
-  --azzar-font-family: "HarmonyOS Sans",-apple-system,BlinkMacSystemFont,"Segoe UI Variable Display","Segoe UI",Roboto,"Helvetica Neue",Arial,"/* SC */","HarmonyOS Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","/* FALLBACK */",ui-sans-serif,system-ui,sans-serif,"/* EMOJI */","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-  --azzar-font-family-code: Hack,ui-monospace,SFMono-Regular,"SF Mono",Menlo,"Cascadia Code",Consolas,"Liberation Mono","/* SC */","HarmonyOS Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","/* FALLBACK */",monospace,"/* EMOJI */","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  --azzar-font-family: "Inter","Cairo",-apple-system,BlinkMacSystemFont,"Segoe UI Variable Display","Segoe UI",Roboto,"Helvetica Neue",Arial,"/* FALLBACK */",ui-sans-serif,system-ui,sans-serif,"/* EMOJI */","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  --azzar-font-family-code: "JetBrains Mono",Hack,ui-monospace,SFMono-Regular,"SF Mono",Menlo,"Cascadia Code",Consolas,"Liberation Mono","/* FALLBACK */",monospace,"/* EMOJI */","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  --azzar-font-family-brand: "AzzarWordmark","Inter",sans-serif;
   --azzar-box-shadow-card: 0 1px 2px -2px rgba(0,0,0,0.16), 0 3px 6px 0 rgba(0,0,0,0.12), 0 5px 12px 4px rgba(0,0,0,0.09);
   --azzar-box-shadow-drawer-down: 0 -6px 16px 0 rgba(0,0,0,0.08), 0 -3px 6px -4px rgba(0,0,0,0.12), 0 -9px 28px 8px rgba(0,0,0,0.05);
   --azzar-box-shadow-drawer-left: 6px 0 16px 0 rgba(0,0,0,0.08), 3px 0 6px -4px rgba(0,0,0,0.12), 9px 0 28px 8px rgba(0,0,0,0.05);
