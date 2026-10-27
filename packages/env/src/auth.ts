@@ -7,74 +7,75 @@ declare global {
     interface ProcessEnv {
       /** Comma-separated origins merged into Better Auth's resolved trusted origins. */
       AUTH_ADDITIONAL_TRUSTED_ORIGINS?: string;
+      AUTH_ADDITIONAL_TRUSTED_ORIGINS?: string;
       AUTH_ALLOWED_EMAILS?: string;
       AUTH_APPLE_APP_BUNDLE_IDENTIFIER?: string;
       AUTH_APPLE_CLIENT_ID?: string;
       AUTH_APPLE_CLIENT_SECRET?: string;
       AUTH_AUTH0_ID?: string;
       AUTH_AUTH0_ISSUER?: string;
+
       AUTH_AUTH0_SECRET?: string;
-
       AUTH_AUTHELIA_ID?: string;
-      AUTH_AUTHELIA_ISSUER?: string;
 
+      AUTH_AUTHELIA_ISSUER?: string;
       AUTH_AUTHELIA_SECRET?: string;
       AUTH_AUTHENTIK_ID?: string;
+
       AUTH_AUTHENTIK_ISSUER?: string;
-
       AUTH_AUTHENTIK_SECRET?: string;
-      AUTH_CASDOOR_ID?: string;
 
+      AUTH_CASDOOR_ID?: string;
       AUTH_CASDOOR_ISSUER?: string;
       AUTH_CASDOOR_SECRET?: string;
       AUTH_CLOUDFLARE_ZERO_TRUST_ID?: string;
       AUTH_CLOUDFLARE_ZERO_TRUST_ISSUER?: string;
       AUTH_CLOUDFLARE_ZERO_TRUST_SECRET?: string;
-      AUTH_COGNITO_DOMAIN?: string;
 
+      AUTH_COGNITO_DOMAIN?: string;
       AUTH_COGNITO_ID?: string;
       AUTH_COGNITO_ISSUER?: string;
       AUTH_COGNITO_REGION?: string;
-      AUTH_COGNITO_SECRET?: string;
 
+      AUTH_COGNITO_SECRET?: string;
       AUTH_COGNITO_USERPOOL_ID?: string;
       // ===== Better Auth ===== //
       /** Namespace every Better Auth cookie. Defaults to `better-auth`. */
       AUTH_COOKIE_PREFIX?: string;
-      AUTH_DISABLE_EMAIL_PASSWORD?: string;
 
+      AUTH_DISABLE_EMAIL_PASSWORD?: string;
       AUTH_EMAIL_VERIFICATION?: string;
       AUTH_ENABLE_MAGIC_LINK?: string;
-      AUTH_FEISHU_APP_ID?: string;
 
+      AUTH_FEISHU_APP_ID?: string;
       AUTH_FEISHU_APP_SECRET?: string;
       AUTH_GENERIC_OIDC_ID?: string;
-      AUTH_GENERIC_OIDC_ISSUER?: string;
 
+      AUTH_GENERIC_OIDC_ISSUER?: string;
       AUTH_GENERIC_OIDC_SECRET?: string;
       AUTH_GITHUB_ID?: string;
-      AUTH_GITHUB_SECRET?: string;
 
+      AUTH_GITHUB_SECRET?: string;
       // ===== Auth Provider Credentials ===== //
       AUTH_GOOGLE_ID?: string;
       AUTH_GOOGLE_SECRET?: string;
+
       AUTH_KEYCLOAK_ID?: string;
-
       AUTH_KEYCLOAK_ISSUER?: string;
-      AUTH_KEYCLOAK_SECRET?: string;
 
+      AUTH_KEYCLOAK_SECRET?: string;
       AUTH_LOGTO_ID?: string;
       AUTH_LOGTO_ISSUER?: string;
-      AUTH_LOGTO_SECRET?: string;
 
+      AUTH_LOGTO_SECRET?: string;
       AUTH_MICROSOFT_AUTHORITY_URL?: string;
       AUTH_MICROSOFT_ID?: string;
-      AUTH_MICROSOFT_SECRET?: string;
 
+      AUTH_MICROSOFT_SECRET?: string;
       AUTH_MICROSOFT_TENANT_ID?: string;
       AUTH_OKTA_ID?: string;
-      AUTH_OKTA_ISSUER?: string;
 
+      AUTH_OKTA_ISSUER?: string;
       AUTH_OKTA_SECRET?: string;
       AUTH_SECRET?: string;
       AUTH_SSO_PROVIDERS?: string;
@@ -211,6 +212,7 @@ export const getAuthConfig = () => {
       AUTH_ENABLE_MAGIC_LINK: process.env.AUTH_ENABLE_MAGIC_LINK === '1',
       AUTH_SECRET: process.env.AUTH_SECRET,
       AUTH_SSO_PROVIDERS: process.env.AUTH_SSO_PROVIDERS,
+      AUTH_ADDITIONAL_TRUSTED_ORIGINS: process.env.AUTH_ADDITIONAL_TRUSTED_ORIGINS,
       AUTH_TRUSTED_ORIGINS: process.env.AUTH_TRUSTED_ORIGINS,
       AUTH_ALLOWED_EMAILS: process.env.AUTH_ALLOWED_EMAILS,
       AUTH_DISABLE_EMAIL_PASSWORD: process.env.AUTH_DISABLE_EMAIL_PASSWORD === '1',
