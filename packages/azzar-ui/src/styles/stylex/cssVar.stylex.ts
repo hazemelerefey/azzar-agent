@@ -118,6 +118,7 @@ export const cssVar = stylex.defineConsts({
   borderRadiusXS: 'var(--azzar-border-radius-xs)',
   controlHeight: 'var(--azzar-control-height)',
   fontFamily: 'var(--azzar-font-family)',
+  fontFamilyBrand: 'var(--azzar-font-family-brand)',
   fontFamilyCode: 'var(--azzar-font-family-code)',
   boxShadowCard: 'var(--azzar-box-shadow-card)',
   boxShadowDrawerDown: 'var(--azzar-box-shadow-drawer-down)',

@@ -1,5 +1,6 @@
 const FONT_EN = [
-  'Geist',
+  'Inter',
+  'Cairo',
   '-apple-system',
   'BlinkMacSystemFont',
   'Segoe UI Variable Display',
@@ -7,25 +8,6 @@ const FONT_EN = [
   'Roboto',
   'Helvetica Neue',
   'Arial',
-];
-
-const FONT_SC = [
-  'HarmonyOS Sans SC',
-  'PingFang SC',
-  'Hiragino Sans GB',
-  'Microsoft YaHei UI',
-  'Microsoft YaHei',
-  'Source Han Sans SC',
-  'Noto Sans CJK SC',
-];
-
-const FONT_TC = [
-  'PingFang TC',
-  'Hiragino Sans CNS',
-  'Microsoft JhengHei UI',
-  'Microsoft JhengHei',
-  'Source Han Sans TC',
-  'Noto Sans CJK TC',
 ];
 
 const FONT_JP = [
@@ -41,7 +23,8 @@ const FONT_JP = [
 const FONT_KR = ['Apple SD Gothic Neo', 'Malgun Gothic', 'Source Han Sans KR', 'Noto Sans CJK KR'];
 
 const FONT_CODE = [
-  'Geist Mono',
+  'JetBrains Mono',
+  'Hack',
   'ui-monospace',
   'SFMono-Regular',
   'SF Mono',
@@ -57,12 +40,11 @@ const FALLBACK_CODE = ['monospace'];
 
 const FONT_EMOJI = ['Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'];
 
-// Han glyphs differ per region, so the locale's own CJK family must win over the
-// SC families that stay in the stack as the last-resort CJK fallback.
+export const FONT_BRAND = ['AzzarWordmark', 'Inter', 'sans-serif'];
+
 const LOCALE_CJK_FONTS: Record<string, string[]> = {
   'ja-JP': FONT_JP,
   'ko-KR': FONT_KR,
-  'zh-TW': FONT_TC,
 };
 
 // user / env values may already be a full CSS font-family list, so leave those alone
@@ -85,7 +67,6 @@ export const genFontFamily = ({
     customFontFamily?.trim(),
     ...FONT_EN,
     ...(locale ? (LOCALE_CJK_FONTS[locale] ?? []) : []),
-    ...FONT_SC,
     ...FALLBACK,
     ...FONT_EMOJI,
   ]
@@ -98,10 +79,11 @@ export const genFontFamilyCode = ({ locale, userFontFamily }: GenFontFamilyParam
     userFontFamily?.trim(),
     ...FONT_CODE,
     ...(locale ? (LOCALE_CJK_FONTS[locale] ?? []) : []),
-    ...FONT_SC,
     ...FALLBACK_CODE,
     ...FONT_EMOJI,
   ]
     .filter(Boolean)
     .map((font) => quote(font as string))
     .join(',');
+
+export const genFontFamilyBrand = () => FONT_BRAND.map((font) => quote(font)).join(',');

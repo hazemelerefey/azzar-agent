@@ -1,5 +1,5 @@
-import { noBaseUiSubpath } from './noBaseUiSubpath';
-import { noInlineFormSchema } from './noInlineFormSchema';
+import { noBaseUiSubpath } from './noBaseUiSubpath.ts';
+import { noInlineFormSchema } from './noInlineFormSchema.ts';
 
 export const restrictedImports = {
   rules: {

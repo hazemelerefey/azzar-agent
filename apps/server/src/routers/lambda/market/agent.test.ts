@@ -104,3 +104,35 @@ describe('agentRouter.publishOrCreate', () => {
     expect(mockMarketSDK.headers['x-azzar-owner-account-id']).toBeUndefined();
   });
 });
+
+describe('agentRouter.getOnboardingFull', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    fetchSpy = vi.spyOn(globalThis, 'fetch' as never);
+  });
+
+  it('returns parsed catalog when market request succeeds', async () => {
+    const mockCatalog = { writing: [{ identifier: 'copywriter', title: 'Copywriter' }] };
+    fetchSpy.mockResolvedValue(
+      new Response(JSON.stringify(mockCatalog), {
+        status: 200,
+      }),
+    );
+
+    const caller = agentRouter.createCaller({ serverDB: {}, userId: 'user-1' } as any);
+    const result = await caller.getOnboardingFull({ locale: 'en-US' });
+
+    expect(result).toEqual(mockCatalog);
+  });
+
+  it('returns empty object when market fetch fails or returns non-ok', async () => {
+    fetchSpy.mockRejectedValue(new Error('fetch failed'));
+
+    const caller = agentRouter.createCaller({ serverDB: {}, userId: 'user-1' } as any);
+    const result = await caller.getOnboardingFull({ locale: 'en-US' });
+
+    expect(result).toEqual({});
+  });
+});

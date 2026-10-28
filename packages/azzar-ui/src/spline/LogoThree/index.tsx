@@ -2,16 +2,9 @@
 
 import { type CSSProperties, memo, useState } from 'react';
 
-import { useCdnFn } from '../../ConfigProvider';
 import { Flexbox } from '../../Flex';
 import Img from '../../Img';
 import Spline, { type SplineProps } from '../../spline/Spline';
-
-const LOGO_3D = {
-  path: 'assets/logo-3d.webp',
-  pkg: '@azzar/assets-logo',
-  version: '1.2.0',
-};
 
 export interface LogoThreeProps extends Partial<SplineProps> {
   className?: string;
@@ -20,7 +13,6 @@ export interface LogoThreeProps extends Partial<SplineProps> {
 }
 
 const LogoThree = memo<LogoThreeProps>(({ className, style, size = 128, onLoad, ...rest }) => {
-  const genCdnUrl = useCdnFn();
   const [loading, setLoading] = useState(true);
   return (
     <Flexbox
@@ -34,7 +26,7 @@ const LogoThree = memo<LogoThreeProps>(({ className, style, size = 128, onLoad, 
         <Img
           alt={'logo'}
           height={size * 0.75}
-          src={genCdnUrl(LOGO_3D)}
+          src={'/icons/logo-3d.webp'}
           style={{ position: 'absolute' }}
           width={size * 0.75}
         />

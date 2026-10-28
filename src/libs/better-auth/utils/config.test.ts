@@ -58,6 +58,18 @@ describe('getTrustedOrigins', () => {
       'https://gateway.example.com',
     ]);
   });
+
+  it('should preserve wildcard origin patterns in additional trusted origins', async () => {
+    mocks.authEnv.AUTH_ADDITIONAL_TRUSTED_ORIGINS = 'https://*.loca.lt,*.loca.lt';
+    const { getTrustedOrigins } = await import('./config');
+
+    expect(getTrustedOrigins([])).toEqual([
+      'https://app.example.com',
+      'com.azzar.app://',
+      'https://*.loca.lt',
+      '*.loca.lt',
+    ]);
+  });
 });
 
 describe('getPasskeyOrigins', () => {

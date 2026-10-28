@@ -23,6 +23,11 @@ export const normalizeOrigin = (url?: string) => {
     return url;
   }
 
+  // Handle wildcard origin patterns (e.g. *.loca.lt, https://*.loca.lt)
+  if (url.includes('*')) {
+    return url;
+  }
+
   try {
     const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
 
@@ -93,6 +98,18 @@ export const getTrustedOrigins = (enabledSSOProviders: string[]) => {
     return mergeOrigins(originsFromEnv, additionalOrigins);
   }
 
+  const devOrigins = isDev
+    ? [
+        'http://localhost:3010',
+        'http://localhost:3210',
+        'http://localhost:9876',
+        'https://*.loca.lt',
+        '*.loca.lt',
+        'https://*.ngrok-free.app',
+        'https://*.trycloudflare.com',
+      ]
+    : [];
+
   const defaults = [
     normalizeOrigin(appEnv.APP_URL),
     normalizeOrigin(process.env.VERCEL_URL),
@@ -100,6 +117,7 @@ export const getTrustedOrigins = (enabledSSOProviders: string[]) => {
     MOBILE_APP_SCHEME,
     // Add expo URL in development
     ...(isDev ? [EXPO_DEV_SCHEME] : []),
+    ...devOrigins,
   ].filter(Boolean) as string[];
 
   const providerOrigins = enabledSSOProviders.includes('apple')

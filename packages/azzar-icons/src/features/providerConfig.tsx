@@ -1,5 +1,6 @@
-import { DivProps } from '@azzar/ui';
-import { FC, memo } from 'react';
+import type { DivProps } from '@azzar/ui';
+import type { FC } from 'react';
+import { memo } from 'react';
 
 import Ai21 from '../Ai21';
 import Ai302 from '../Ai302';
@@ -19,6 +20,7 @@ import AtlasCloud from '../AtlasCloud';
 import Aws from '../Aws';
 import Azure from '../Azure';
 import AzureAI from '../AzureAI';
+import AZZAR from '../AZZAR';
 import Baichuan from '../Baichuan';
 import Baidu from '../Baidu';
 import BaiduCloud from '../BaiduCloud';
@@ -70,12 +72,11 @@ import Infinigence from '../Infinigence';
 import InternLM from '../InternLM';
 import Jina from '../Jina';
 import Kluster from '../Kluster';
-import LG from '../LG';
 import Lambda from '../Lambda';
 import LeptonAI from '../LeptonAI';
+import LG from '../LG';
 import LlmApi from '../LlmApi';
 import LmStudio from '../LmStudio';
-import AZZAR from '../AZZAR';
 import LongCat from '../LongCat';
 import Menlo from '../Menlo';
 import MetaAI from '../MetaAI';
@@ -84,20 +85,20 @@ import Minimax from '../Minimax';
 import Mistral from '../Mistral';
 import ModelScope from '../ModelScope';
 import Moonshot from '../Moonshot';
-import NPLCloud from '../NPLCloud';
 import Nebius from '../Nebius';
 import NewAPI from '../NewAPI';
 import NousResearch from '../NousResearch';
 import Novita from '../Novita';
+import NPLCloud from '../NPLCloud';
 import Nvidia from '../Nvidia';
 import Ollama from '../Ollama';
 import OpenAI from '../OpenAI';
 import OpenCode from '../OpenCode';
 import OpenRouter from '../OpenRouter';
-import PPIO from '../PPIO';
 import Parasail from '../Parasail';
 import Perplexity from '../Perplexity';
 import Player2 from '../Player2';
+import PPIO from '../PPIO';
 import Qiniu from '../Qiniu';
 import Qwen from '../Qwen';
 import Replicate from '../Replicate';
@@ -115,11 +116,12 @@ import Stepfun from '../Stepfun';
 import Straico from '../Straico';
 import StreamLake from '../StreamLake';
 import SubModel from '../SubModel';
-import TII from '../TII';
 import Targon from '../Targon';
 import Tencent from '../Tencent';
 import TencentCloud from '../TencentCloud';
+import TII from '../TII';
 import Together from '../Together';
+import type { IconType } from '../types';
 import Upstage from '../Upstage';
 import V0 from '../V0';
 import Vercel from '../Vercel';
@@ -137,8 +139,6 @@ import Yandex from '../Yandex';
 import ZenMux from '../ZenMux';
 import ZeroOne from '../ZeroOne';
 import Zhipu from '../Zhipu';
-import type { IconType } from '../types';
-
 import type { IconAvatarProps } from './IconAvatar';
 import type { IconCombineProps } from './IconCombine';
 import Combine from './ProviderCombine/Combine';
@@ -155,8 +155,8 @@ type ProviderIconType = FC<IconType & any> & {
 
 export interface ProviderMapping {
   Combine?: FC<DivProps & { size: number; type: 'color' | 'mono' }>;
-  Icon: ProviderIconType;
   combineMultiple?: number;
+  Icon: ProviderIconType;
   keywords: string[];
   props?: any;
 }
@@ -212,7 +212,11 @@ export const providerMappings: ProviderMapping[] = [
 
   { Icon: AiMass, keywords: [ModelProvider.AiMass] },
   { Icon: AiStudio, keywords: [ModelProvider.AiStudio] },
-  { Icon: AZZAR, combineMultiple: 1.1, keywords: [ModelProvider.AZZAR] },
+  {
+    Icon: AZZAR,
+    combineMultiple: 1.1,
+    keywords: [ModelProvider.AZZAR, 'lobe', 'lobehub', 'lobe-chat'],
+  },
   {
     Icon: Zhipu,
     combineMultiple: 1.25,
@@ -235,6 +239,8 @@ export const providerMappings: ProviderMapping[] = [
   {
     Combine: memo(({ size = 24, type = 'color', ...props }) => (
       <Combine
+        right={<Gemini.Combine size={size} type={type} />}
+        size={size}
         left={
           type === 'color' ? (
             <Google.BrandColor size={size * 0.95} />
@@ -242,8 +248,6 @@ export const providerMappings: ProviderMapping[] = [
             <Google.Brand size={size * 0.95} />
           )
         }
-        right={<Gemini.Combine size={size} type={type} />}
-        size={size}
         {...props}
       />
     )),

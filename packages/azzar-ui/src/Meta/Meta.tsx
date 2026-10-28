@@ -1,8 +1,6 @@
 'use client';
 
-import { type FC, useCallback } from 'react';
-
-import { useCdnFn } from '../ConfigProvider';
+import { type FC } from 'react';
 
 export interface MetaProps {
   description?: string;
@@ -15,36 +13,12 @@ const Meta: FC<MetaProps> = ({
   description = 'Empowering your AI dreams with AZZAR',
   withManifest,
 }) => {
-  const genCdnUrl = useCdnFn();
-  const genAssets = useCallback(
-    (path: string) =>
-      genCdnUrl({
-        path,
-        pkg: '@azzar/assets-favicons',
-        version: 'latest',
-      }),
-    [],
-  );
   return (
     <>
-      <link href={genAssets('assets/favicon.ico')} rel="shortcut icon" />
-      <link
-        href={genAssets('assets/apple-touch-icon.png')}
-        rel="apple-touch-icon"
-        sizes="180x180"
-      />
-      <link
-        href={genAssets('assets/favicon-32x32.png')}
-        rel="icon"
-        sizes="32x32"
-        type="image/png"
-      />
-      <link
-        href={genAssets('assets/favicon-16x16.png')}
-        rel="icon"
-        sizes="16x16"
-        type="image/png"
-      />
+      <link href="/favicon.ico" rel="shortcut icon" />
+      <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180" />
+      <link href="/favicon.ico" rel="icon" sizes="32x32" type="image/x-icon" />
+      <link href="/favicon.ico" rel="icon" sizes="16x16" type="image/x-icon" />
       <meta
         content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no"
         name="viewport"
@@ -58,7 +32,7 @@ const Meta: FC<MetaProps> = ({
       <meta content="yes" name="apple-mobile-web-app-capable" />
       <meta content={title} name="apple-mobile-web-app-title" />
       <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style" />
-      {withManifest && <link href={genAssets('assets/site.webmanifest')} rel="manifest" />}
+      {withManifest && <link href="/site.webmanifest" rel="manifest" />}
     </>
   );
 };

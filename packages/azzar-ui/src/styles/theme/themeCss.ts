@@ -225,6 +225,46 @@ const essentialCss = `@layer azzar-ui {
   .azzar-flex-hidden {
     display: none;
   }
+
+  /*
+   * Upstream compatibility shim for @lobehub/charts (aliased as @azzar/charts).
+   * @lobehub/ui is present inside the pnpm virtual store as a peer dependency of charts
+   * and traversed by Vite, but is not a top-level dependency in the repository (app code
+   * imports @azzar/ui only). While @lobehub/ui component JS executes, the application
+   * global stylesheet only defines .azzar-flex, whereas charts renders .lobe-flex classes.
+   * This shim ensures .lobe-flex and --lobe-flex-* layout rules are present in the global
+   * stylesheet without requiring a top-level @lobehub/ui stylesheet import.
+   */
+  :where(.lobe-flex) {
+    --lobe-flex: 0 1 auto;
+    --lobe-flex-direction: column;
+    --lobe-flex-wrap: nowrap;
+    --lobe-flex-justify: flex-start;
+    --lobe-flex-align: stretch;
+    --lobe-flex-width: auto;
+    --lobe-flex-height: auto;
+    --lobe-flex-padding: 0;
+    --lobe-flex-padding-inline: var(--lobe-flex-padding);
+    --lobe-flex-padding-block: var(--lobe-flex-padding);
+    --lobe-flex-gap: 0;
+
+    display: flex;
+    flex: var(--lobe-flex);
+    flex-flow: var(--lobe-flex-direction) var(--lobe-flex-wrap);
+    gap: var(--lobe-flex-gap);
+    align-items: var(--lobe-flex-align);
+    justify-content: var(--lobe-flex-justify);
+
+    width: var(--lobe-flex-width);
+    height: var(--lobe-flex-height);
+    padding: var(--lobe-flex-padding);
+    padding-block: var(--lobe-flex-padding-block);
+    padding-inline: var(--lobe-flex-padding-inline);
+  }
+
+  .lobe-flex-hidden {
+    display: none;
+  }
 }
 
 @keyframes draw {

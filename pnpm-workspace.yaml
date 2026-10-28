@@ -19,6 +19,7 @@ publicHoistPattern:
 
 packages:
   - packages/**
+  - '!packages/azzar-lint'
   - .
   - e2e
   - apps/desktop/src/main
@@ -65,12 +66,13 @@ overrides:
   '@azzar/ui': workspace:*
   '@azzar/icons': workspace:*
   '@azzar/editor': workspace:*
-  '@azzar/charts': workspace:*
-  '@azzar/lint': workspace:*
+  '@azzar/charts': npm:@lobehub/charts@6.0.0
+  '@azzar/lint': npm:@lobehub/lint@^2.1.7
   '@azzar/seo-cli': workspace:*
   '@azzar/i18n-cli': workspace:*
-  '@azzar/market-sdk': workspace:*
-  '@azzar/market-types': workspace:*
+  '@azzar/market-sdk': npm:@lobehub/market-sdk@0.44.0
+  '@azzar/market-types': npm:@lobehub/market-types@1.20.0
+  '@azzar/analytics': npm:@lobehub/analytics@1.6.4
   '@azzar/tts': workspace:*
   '@azzar/desktop-ipc-typings': workspace:*
   '@azzar/fluent-emoji': workspace:*
