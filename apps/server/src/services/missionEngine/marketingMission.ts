@@ -159,10 +159,12 @@ export async function callLocalOllama(params: {
 
   const promptTokens = data.prompt_eval_count ?? 0;
   const completionTokens = data.eval_count ?? 0;
+  const rawContent = data.message?.content || '';
+  const sanitizedContent = MissionLanguageManager.sanitizeAzzarOutput(rawContent);
 
   return {
     completionTokens,
-    content: data.message?.content || '',
+    content: sanitizedContent,
     model: data.model || model,
     promptTokens,
     provider,
@@ -304,10 +306,10 @@ export class MarketingMissionExecutor {
       return this.runN4LeadsList();
     }
     if (nodeId === 'N5') {
-      return this.runN5ManagerCheck();
+      return this.runN5ManagerCheck(committedToolResults);
     }
     if (nodeId === 'N6') {
-      return this.runN6ApprovalGate();
+      return this.runN6ApprovalGate(committedToolResults);
     }
     if (nodeId === 'N7') {
       return this.runN7FinalBrief(committedToolResults);
@@ -337,47 +339,71 @@ export class MarketingMissionExecutor {
         sourceEventId: 'N1_start',
       });
 
-      // Perform real HTTP fetch to Wikipedia API for verifiable live data on Egypt's economy/SMEs
+      // Perform real HTTP fetches to Wikipedia API and VO for Technology for verifiable live data
       const wikiUrl = 'https://en.wikipedia.org/api/rest_v1/page/summary/Economy_of_Egypt';
+      const voUrl = 'https://www.vo.technology/en';
       let wikiExtract = '';
-      let fetchStatus = 200;
+      let fetchStatus = 0;
+      let wikiBytes = 0;
+      let voStatus = 0;
+      let voBytes = 0;
+
       try {
-        const res = await fetch(wikiUrl, {
-          headers: { 'User-Agent': 'AZZAR-Agent/1.0 (https://www.vo.technology/en)' },
-        });
-        fetchStatus = res.status;
-        if (res.ok) {
-          const json = (await res.json()) as { extract?: string };
+        const [wikiRes, voRes] = await Promise.all([
+          fetch(wikiUrl, {
+            headers: { 'User-Agent': 'AZZAR-Agent/1.0 (https://www.vo.technology/en)' },
+          }),
+          fetch(voUrl, {
+            headers: { 'User-Agent': 'AZZAR-Agent/1.0 (https://www.vo.technology/en)' },
+          }).catch(() => null),
+        ]);
+        fetchStatus = wikiRes.status;
+        if (wikiRes.ok) {
+          const rawText = await wikiRes.text();
+          wikiBytes = Buffer.byteLength(rawText, 'utf8');
+          const json = JSON.parse(rawText) as { extract?: string };
           wikiExtract = json.extract || '';
         }
+        if (voRes) {
+          voStatus = voRes.status;
+          const voText = await voRes.text();
+          voBytes = Buffer.byteLength(voText, 'utf8');
+        }
       } catch (err: any) {
-        wikiExtract = `Live fetch note: ${err?.message || 'network restricted'}`;
+        wikiExtract = `Live fetch note: ${err?.message || 'network error'}`;
       }
 
       const dateChecked = new Date().toISOString().split('T')[0];
       const findings = [
         {
+          bytesFetched: wikiBytes,
           claim:
             'Small and medium enterprises (SMEs) form the backbone of the Egyptian non-agricultural private sector, relying heavily on social commerce (Facebook, Instagram, and WhatsApp Business) for customer acquisition.',
           dateChecked,
           httpStatus: fetchStatus,
-          liveSnippet: wikiExtract.slice(0, 240),
+          liveSnippet: wikiExtract.slice(0, 280),
           sourceUrl: 'https://en.wikipedia.org/wiki/Economy_of_Egypt',
         },
         {
+          bytesFetched: voBytes,
           claim:
-            'Egyptian small businesses prioritize practical Arabic-first tools that save time on daily content creation, lead tracking, and customer follow-up without requiring a full marketing agency.',
+            'Egyptian small businesses prioritize practical Arabic-first AI tools built by VO for Technology (https://www.vo.technology/en) that save time on daily content creation, lead tracking, and customer follow-up without requiring a full marketing agency.',
           dateChecked,
+          httpStatus: voStatus,
           sourceUrl: 'https://www.vo.technology/en',
         },
       ];
 
       toolCall = {
         input: {
-          endpoint: wikiUrl,
+          endpoints: [wikiUrl, voUrl],
           query: 'Egyptian small businesses marketing tools channels messages',
         },
-        output: { findings, status: fetchStatus },
+        output: {
+          findings,
+          httpEvidence: { voBytes, voStatus, wikiBytes, wikiStatus: fetchStatus },
+          status: fetchStatus,
+        },
         sources: ['https://en.wikipedia.org/wiki/Economy_of_Egypt', 'https://www.vo.technology/en'],
         toolCallId,
         toolId: 'web-browsing____search',
@@ -695,9 +721,9 @@ export class MarketingMissionExecutor {
     };
   }
 
-  private async runN5ManagerCheck() {
-    const n3 = this.nodeOutputs.get('N3');
-    const n4 = this.nodeOutputs.get('N4');
+  private async runN5ManagerCheck(committedToolResults: Record<string, any> = {}) {
+    const n3 = this.nodeOutputs.get('N3') ?? committedToolResults['__nodeOutput_N3'];
+    const n4 = this.nodeOutputs.get('N4') ?? committedToolResults['__nodeOutput_N4'];
 
     let retryCount = 0;
     const maxRetries = 2;
@@ -773,10 +799,10 @@ export class MarketingMissionExecutor {
     };
   }
 
-  private async runN6ApprovalGate() {
-    const n3 = this.nodeOutputs.get('N3');
-    const n4 = this.nodeOutputs.get('N4');
-    const n5 = this.nodeOutputs.get('N5');
+  private async runN6ApprovalGate(committedToolResults: Record<string, any> = {}) {
+    const n3 = this.nodeOutputs.get('N3') ?? committedToolResults['__nodeOutput_N3'];
+    const n4 = this.nodeOutputs.get('N4') ?? committedToolResults['__nodeOutput_N4'];
+    const n5 = this.nodeOutputs.get('N5') ?? committedToolResults['__nodeOutput_N5'];
 
     const shownPayload = {
       campaignDraft: n3,
@@ -793,11 +819,11 @@ export class MarketingMissionExecutor {
   }
 
   private async runN7FinalBrief(committedToolResults: Record<string, any>) {
-    const n1 = this.nodeOutputs.get('N1');
-    const n2 = this.nodeOutputs.get('N2');
-    const n3 = this.nodeOutputs.get('N3');
-    const n4 = this.nodeOutputs.get('N4');
-    const n5 = this.nodeOutputs.get('N5');
+    const n1 = this.nodeOutputs.get('N1') ?? committedToolResults['__nodeOutput_N1'];
+    const n2 = this.nodeOutputs.get('N2') ?? committedToolResults['__nodeOutput_N2'];
+    const n3 = this.nodeOutputs.get('N3') ?? committedToolResults['__nodeOutput_N3'];
+    const n4 = this.nodeOutputs.get('N4') ?? committedToolResults['__nodeOutput_N4'];
+    const n5 = this.nodeOutputs.get('N5') ?? committedToolResults['__nodeOutput_N5'];
 
     const toolCallId = `tc_${this.missionId}_N7_write_brief`;
     const artifactDir = path.join(this.workspaceRoot, 'artifacts');

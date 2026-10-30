@@ -23,6 +23,12 @@ export function defineConfig(config: CustomNextConfig) {
   const isTest =
     process.env.NODE_ENV === 'test' || process.env.TEST === '1' || process.env.E2E === '1';
 
+  const disableCodeInspector =
+    isTest ||
+    isProd ||
+    process.env.DISABLE_CODE_INSPECTOR === '1' ||
+    process.env.CODE_INSPECTOR === '0';
+
   const isStandaloneMode = buildWithDocker || process.env.NEXT_BUILD_STANDALONE === '1';
 
   const standaloneConfig: NextConfig = {
@@ -79,7 +85,7 @@ export function defineConfig(config: CustomNextConfig) {
       // oidc provider depend on constructor.name
       // but swc minification will remove the name
       // so we need to disable it
-      // refs: 
+      // refs:
       serverMinification: false,
       webVitalsAttribution: ['CLS', 'LCP'],
       ...config.experimental,
@@ -378,23 +384,21 @@ export function defineConfig(config: CustomNextConfig) {
     transpilePackages: ['mermaid'],
     turbopack: {
       rules: {
-        ...(isTest
+        ...(disableCodeInspector
           ? void 0
-          : // Narrow the plugin's `**/*.{jsx,tsx,js,ts,mjs,mts}` rule to JSX
-            // files only. The broad glob also matches Turbopack-internal
-            // virtual assets like `[turbopack-ecmascript]/worker/browser/createWorker.ts`
-            // (injected for `new Worker(new URL(...))`), which the webpack
-            // loader shim then tries to read from disk — any page whose module
-            // graph pulls in a web worker dies with "Reading source code for
-            // parsing failed". The inspector only instruments JSX elements, so
-            // jsx/tsx keeps click-to-source fully functional.
+          : // Narrow the plugin's rule to JSX files under src/ only.
+            // External packages like azzar-editor and Turbopack-internal virtual
+            // assets must not be processed by webpack loader shims in Turbopack.
             Object.fromEntries(
               Object.entries(
                 codeInspectorPlugin({
                   bundler: 'turbopack',
                   hotKeys: ['altKey', 'ctrlKey'],
                 }) as Record<string, unknown>,
-              ).map(([glob, rule]) => [glob.replace('{jsx,tsx,js,ts,mjs,mts}', '{jsx,tsx}'), rule]),
+              ).map(([glob, rule]) => [
+                glob.replace('{jsx,tsx,js,ts,mjs,mts}', 'src/**/*.{jsx,tsx}'),
+                rule,
+              ]),
             )),
         '*.md': {
           as: '*.js',

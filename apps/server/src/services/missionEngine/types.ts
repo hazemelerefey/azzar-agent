@@ -91,6 +91,7 @@ export interface MissionReceipt {
   approvalStep?: ReceiptApprovalStep;
   assignees: Record<string, string>;
   costRollup: {
+    costMethod?: string;
     currency: string;
     totalCost: number;
   };

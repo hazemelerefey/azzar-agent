@@ -74,7 +74,14 @@ export class MissionReceiptManager {
           }
         : undefined,
       assignees,
-      costRollup: params.costRollup || { currency: 'USD', totalCost: 0 },
+      costRollup: {
+        costMethod:
+          params.modelDisclosure.provider === 'ollama'
+            ? `ollama_local_zero_cost:${params.modelDisclosure.provider}/${params.modelDisclosure.model}`
+            : `provider_usage:${params.modelDisclosure.provider}/${params.modelDisclosure.model}`,
+        currency: params.costRollup?.currency || 'USD',
+        totalCost: params.costRollup?.totalCost ?? 0,
+      },
       dagTopology: {
         edges: params.dag.getEdges(),
         nodes: params.dag.nodes.map((n) => n.id),

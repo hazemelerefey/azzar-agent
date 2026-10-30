@@ -11,12 +11,8 @@ describe('getServerConfig', () => {
     it('should return default URLs when no environment variables are set', async () => {
       const { getAppConfig } = await import('../app');
       const config = getAppConfig();
-      expect(config.AGENTS_INDEX_URL).toBe(
-        'https://registry.npmmirror.com/@azzar/agents-index/v1/files/public',
-      );
-      expect(config.PLUGINS_INDEX_URL).toBe(
-        'https://registry.npmmirror.com/@azzar/plugins-index/v1/files/public',
-      );
+      expect(config.AGENTS_INDEX_URL).toBe('https://chat-agents.lobehub.com');
+      expect(config.PLUGINS_INDEX_URL).toBe('https://chat-plugins.lobehub.com');
     });
 
     it('should return custom URLs when environment variables are set', async () => {
@@ -34,12 +30,8 @@ describe('getServerConfig', () => {
 
       const { getAppConfig } = await import('../app');
       const config = getAppConfig();
-      expect(config.AGENTS_INDEX_URL).toBe(
-        'https://registry.npmmirror.com/@azzar/agents-index/v1/files/public',
-      );
-      expect(config.PLUGINS_INDEX_URL).toBe(
-        'https://registry.npmmirror.com/@azzar/plugins-index/v1/files/public',
-      );
+      expect(config.AGENTS_INDEX_URL).toBe('https://chat-agents.lobehub.com');
+      expect(config.PLUGINS_INDEX_URL).toBe('https://chat-plugins.lobehub.com');
     });
   });
 

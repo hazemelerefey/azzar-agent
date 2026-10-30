@@ -7,6 +7,7 @@ import Appearance from '../common/features/Appearance';
 import Common from '../common/features/Common/Common';
 import Desktop from './features/Desktop';
 import Font from './features/Font';
+import WorkbenchMode from './features/WorkbenchMode';
 
 interface PageProps {
   showSettingHeader?: boolean;
@@ -17,6 +18,7 @@ const Page = ({ showSettingHeader = true }: PageProps) => {
   return (
     <>
       {showSettingHeader && <SettingHeader title={t('tab.appearance')} />}
+      <WorkbenchMode />
       <Common />
       <Appearance />
       <Desktop />

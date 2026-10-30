@@ -78,6 +78,7 @@ import { marketRouter } from './market';
 import { messageRouter } from './message';
 import { messengerRouter } from './messenger';
 import { metricRouter } from './metric';
+import { missionRouter } from './mission';
 import { notebookRouter } from './notebook';
 import { notificationRouter } from './notification';
 import { oauthAppRouter } from './oauthApp';
@@ -178,6 +179,7 @@ export const lambdaRouter = router({
   message: messageRouter,
   messenger: messengerRouter,
   metric: metricRouter,
+  mission: missionRouter,
   notebook: notebookRouter,
   notification: notificationRouter,
   oauthApp: oauthAppRouter,

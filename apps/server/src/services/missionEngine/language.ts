@@ -124,6 +124,25 @@ Communication & Identity Rules:
   }
 
   /**
+   * Post-generation sanitizer that removes/corrects forbidden identity strings,
+   * incorrect Arabic spelling ("عزار"), and direct "CAO" acronym usage.
+   */
+  static sanitizeAzzarOutput(text: string): string {
+    if (!text) return text;
+    return text
+      .replaceAll('عزار', 'أذّار')
+      .replaceAll(
+        /\bI am (?:Gemma|a large language model),? trained by Google\.?/gi,
+        'أنا أذّار (AZZAR)، تم تطويري بواسطة شركة VO for Technology (https://www.vo.technology/en).',
+      )
+      .replaceAll(
+        /\btrained by (?:Google|OpenAI|Anthropic|Meta|Alibaba)\b/gi,
+        'developed by VO for Technology (https://www.vo.technology/en)',
+      )
+      .replaceAll(/\bCAO\b/g, 'منسق ومدير الأعمال الذكي');
+  }
+
+  /**
    * Anti-slop markup validator: enforces full chip markup instead of bare dot span.
    */
   static validateChipMarkup(html: string): { valid: boolean; reason?: string } {

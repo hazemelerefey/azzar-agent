@@ -1,4 +1,5 @@
 import { DEFAULT_DISCOVER_ASSISTANT_ITEM } from '@azzar/const';
+import { type CategoryItem, type CategoryListQuery } from '@azzar/market-sdk';
 import {
   type AssistantListResponse,
   type AssistantMarketSource,
@@ -8,7 +9,6 @@ import {
   type IdentifiersResponse,
 } from '@azzar/types';
 import { AssistantSorts } from '@azzar/types';
-import { type CategoryItem, type CategoryListQuery } from '@azzar/market-sdk';
 import dayjs from 'dayjs';
 import { cloneDeep, countBy, merge } from 'es-toolkit/compat';
 
@@ -16,6 +16,7 @@ import { normalizeLocale } from '@/locales/resources';
 
 import type { DiscoverService } from './index';
 import { log } from './utils';
+import { getWorkbenchAssistantDetail, getWorkbenchAssistantItems } from './workbenchAssistants';
 
 export const isLegacySource = (source?: AssistantMarketSource) => source === 'legacy';
 
@@ -25,14 +26,24 @@ export const legacyGetAssistantListRaw = async (
 ): Promise<DiscoverAssistantItem[]> => {
   log('legacyGetAssistantListRaw: locale=%s', locale);
   const normalizedLocale = normalizeLocale(locale);
+  const workbenchAgents = getWorkbenchAssistantItems(normalizedLocale);
   const list = await service.assistantStore.getAgentIndex(normalizedLocale);
   if (!list || !Array.isArray(list)) {
-    log('legacyGetAssistantListRaw: no valid list found, returning empty array');
-    return [];
+    log(
+      'legacyGetAssistantListRaw: no remote list found, returning %d workbench agents',
+      workbenchAgents.length,
+    );
+    return workbenchAgents;
   }
   const result = list.map(({ meta, ...item }) => ({ ...item, ...meta }));
-  log('legacyGetAssistantListRaw: returning %d items', result.length);
-  return result;
+  // Prepend our official Azzar Workbench managers at the top of the community catalog!
+  const combined = [...workbenchAgents, ...result];
+  log(
+    'legacyGetAssistantListRaw: returning %d items (%d workbench)',
+    combined.length,
+    workbenchAgents.length,
+  );
+  return combined;
 };
 
 export const legacyGetAssistantCategories = async (
@@ -80,6 +91,11 @@ export const legacyGetAssistantDetail = async (
 ): Promise<DiscoverAssistantDetail | undefined> => {
   log('legacyGetAssistantDetail: params=%O', params);
   const { locale, identifier } = params;
+  const workbenchDetail = getWorkbenchAssistantDetail(identifier, locale);
+  if (workbenchDetail) {
+    log('legacyGetAssistantDetail: returning workbench agent detail for %s', identifier);
+    return workbenchDetail;
+  }
   const normalizedLocale = normalizeLocale(locale);
   const data = await service.assistantStore.getAgent(identifier, normalizedLocale);
   if (!data) {

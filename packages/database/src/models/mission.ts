@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import { and, desc, eq, isNull } from 'drizzle-orm';
 
 import type {
@@ -51,6 +53,10 @@ export class MissionModel {
 
   async getMission(id: string): Promise<MissionItem | null> {
     return this.findById(id);
+  }
+
+  async listMissions(limit = 50): Promise<MissionItem[]> {
+    return this.db.select().from(missions).orderBy(desc(missions.createdAt)).limit(limit);
   }
 
   async updateStatus(id: string, status: string): Promise<MissionItem | null> {
@@ -155,6 +161,19 @@ export class MissionModel {
     decision: 'approved' | 'rejected',
     decidedBy?: string,
   ): Promise<MissionApprovalItem | null> {
+    const existing = await this.findApprovalById(id);
+    if (!existing) {
+      throw new Error(`Approval ${id} not found.`);
+    }
+    const recomputedHash = createHash('sha256')
+      .update(JSON.stringify(existing.shownPayload))
+      .digest('hex');
+    if (recomputedHash !== existing.shownPayloadHash) {
+      throw new Error(
+        `Approval ${id} payload hash integrity check failed: stored ${existing.shownPayloadHash} != recomputed ${recomputedHash}`,
+      );
+    }
+
     const result = await this.db
       .update(missionApprovals)
       .set({
@@ -170,12 +189,20 @@ export class MissionModel {
 
   /**
    * Consume an approval transactionally.
-   * Throws if approval is not found, not approved, or already consumed.
+   * Throws if approval is not found, not approved, payload hash tampered, or already consumed.
    */
   async consumeApproval(id: string): Promise<MissionApprovalItem> {
     const existing = await this.findApprovalById(id);
     if (!existing) {
       throw new Error(`Approval ${id} not found.`);
+    }
+    const recomputedHash = createHash('sha256')
+      .update(JSON.stringify(existing.shownPayload))
+      .digest('hex');
+    if (recomputedHash !== existing.shownPayloadHash) {
+      throw new Error(
+        `Approval ${id} payload hash integrity check failed: stored ${existing.shownPayloadHash} != recomputed ${recomputedHash}`,
+      );
     }
     if (existing.consumedAt) {
       throw new Error(

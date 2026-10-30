@@ -1,6 +1,6 @@
 import { type AzzarToolManifest } from '@azzar/context-engine';
-import { CacheRevalidate, CacheTag } from '@azzar/types';
 import { MarketSDK, type OrgRef, orgRefToPathSegment } from '@azzar/market-sdk';
+import { CacheRevalidate, CacheTag } from '@azzar/types';
 import debug from 'debug';
 import { type NextRequest } from 'next/server';
 import pMap from 'p-map';
@@ -21,7 +21,7 @@ import {
 
 const log = debug('azzar-server:market-service');
 
-const MARKET_BASE_URL = process.env.MARKET_BASE_URL || 'https://market.hazemelerefy.tech';
+const MARKET_BASE_URL = process.env.MARKET_BASE_URL || 'https://market.lobehub.com';
 /** Applies to `listConnections` and to each provider's tool-list request. */
 export const AZZAR_SKILL_DISCOVERY_TIMEOUT_MS = 3_000;
 /** Max providers whose tool lists are fetched at once during discovery. */

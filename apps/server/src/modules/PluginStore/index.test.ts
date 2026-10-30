@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { PluginStore } from './index';
 
-const baseURL = 'https://registry.npmmirror.com/@azzar/plugins-index/v1/files/public';
+const baseURL = 'https://chat-plugins.lobehub.com';
 
 describe('PluginStore', () => {
   it('should return the default index URL when no language is provided', () => {

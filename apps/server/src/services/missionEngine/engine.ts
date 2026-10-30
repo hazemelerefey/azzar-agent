@@ -123,9 +123,9 @@ export class MissionEngine {
     };
     let totalCost = checkpoint?.cost || 0;
     let rounds = checkpoint?.rounds || 0;
-    const accumulatedToolCalls: ReceiptToolCall[] = Object.values(
-      committedToolResults,
-    ) as ReceiptToolCall[];
+    const accumulatedToolCalls: ReceiptToolCall[] = Object.entries(committedToolResults)
+      .filter(([key, val]) => !key.startsWith('__nodeOutput_') && Boolean((val as any)?.toolCallId))
+      .map(([, val]) => val as ReceiptToolCall);
     const tokenRollup = {
       completionTokens: checkpoint?.tokenRollup?.completionTokens || 0,
       promptTokens: checkpoint?.tokenRollup?.promptTokens || 0,
@@ -199,6 +199,10 @@ export class MissionEngine {
             accumulatedToolCalls.push(tc);
             committedToolResults[tc.toolCallId] = tc;
           }
+        }
+
+        if (execRes.output !== undefined) {
+          committedToolResults[`__nodeOutput_${nodeId}`] = execRes.output;
         }
 
         // If node pauses for human approval (e.g. N6 approval step)
@@ -358,7 +362,9 @@ export class MissionEngine {
       }
 
       const checkpoint = await this.checkpointManager.getLatestCheckpoint(params.missionId);
-      const toolCalls = Object.values(checkpoint?.committedToolResults || {}) as ReceiptToolCall[];
+      const toolCalls = Object.entries(checkpoint?.committedToolResults || {})
+        .filter(([key, val]) => !key.startsWith('__nodeOutput_') && Boolean((val as any)?.toolCallId))
+        .map(([, val]) => val as ReceiptToolCall);
 
       const receipt = this.receiptManager.buildReceipt({
         approvalStep: {

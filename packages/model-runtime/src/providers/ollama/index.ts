@@ -166,7 +166,7 @@ export class AzzarOllamaAI implements AzzarRuntimeAI {
     const fetchErrorMessage = e.message?.toLowerCase();
     if (fetchErrorMessage === 'fetch failed' || fetchErrorMessage === 'failed to fetch') {
       // A long-running chat request can fail even while the local Ollama service remains healthy.
-      // See 
+      // See
       try {
         await this.client.list();
       } catch {
@@ -218,13 +218,24 @@ export class AzzarOllamaAI implements AzzarRuntimeAI {
           (m) => model.name.toLowerCase() === m.id.toLowerCase(),
         );
 
+        const isKnownOrLocal = knownModel ? (knownModel.enabled ?? true) : true;
+        const hasTools =
+          knownModel?.abilities?.functionCall ??
+          (model.name.includes('qwen') ||
+            model.name.includes('llama3') ||
+            model.name.includes('mistral') ||
+            model.name.includes('gemma'));
+
         return {
-          contextWindowTokens: knownModel?.contextWindowTokens ?? undefined,
-          displayName: knownModel?.displayName ?? undefined,
-          enabled: knownModel?.enabled || false,
-          functionCall: knownModel?.abilities?.functionCall || false,
+          contextWindowTokens: knownModel?.contextWindowTokens ?? 32_768,
+          displayName: knownModel?.displayName || model.name,
+          enabled: isKnownOrLocal,
+          functionCall: hasTools,
           id: model.name,
-          reasoning: knownModel?.abilities?.reasoning || false,
+          reasoning:
+            knownModel?.abilities?.reasoning ||
+            model.name.includes('r1') ||
+            model.name.includes('thinking'),
           vision: knownModel?.abilities?.vision || false,
         };
       })

@@ -362,7 +362,8 @@ const Home = memo(() => {
   if (acceptancePortalOpen && !acceptanceDrawerMounted) setAcceptanceDrawerMounted(true);
   const railVisible = resolveRailVisibility({ hiddenWidgets, isLogin, showHomeRail, usageActive });
   const railCollapsed = !railVisible;
-  const portraitVisible = Boolean(isLogin && showHomePortrait);
+  // Avatar portrait and speech bubble removed per user request
+  const portraitVisible = false;
 
   useEffect(() => {
     clearOnboardingHomeModeParam();
