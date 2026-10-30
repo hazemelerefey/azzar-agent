@@ -27,7 +27,14 @@ export const recommendForDepartment = (
   agents: AgentTemplate[],
   installs: Record<string, InstalledAgent>,
 ): Recommendation[] => {
-  const candidates = agents.filter((a) => a.departmentId === department.id);
+  const deptTags = new Set(department.does.map((d) => d.tag));
+  const directCandidates = agents.filter((a) => a.departmentId === department.id);
+  const candidates =
+    directCandidates.length > 0
+      ? directCandidates
+      : agents.filter(
+          (a) => a.kind !== 'individual' && a.fits.some((tag) => deptTags.has(tag)),
+        );
 
   const toRecommendation = (agent: AgentTemplate): Recommendation => {
     const matched = department.does.filter((item) => agent.fits.includes(item.tag));

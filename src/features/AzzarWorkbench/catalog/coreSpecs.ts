@@ -410,8 +410,11 @@ export const CORE_DEPARTMENT_SPECS: CoreDepartmentSpec[] = [
   },
 ];
 
-/** Departments 9 to 15 plus Custom. Templates only: no approved avatar and no agents yet. */
+/** Departments 9 to 15 plus Custom. Templates with scope, boundaries, and example missions. */
 export interface ExtraDepartmentSpec {
+  does?: Array<{ ar: string; en: string; tag: string }>;
+  doesNot?: Bi[];
+  examples?: Bi[];
   id: string;
   mission: Bi;
   name: Bi;
@@ -420,12 +423,33 @@ export interface ExtraDepartmentSpec {
 
 export const EXTRA_DEPARTMENT_SPECS: ExtraDepartmentSpec[] = [
   {
+    does: [
+      d('roadmap', 'Product roadmaps, specs, and release planning', 'خرائط طريق المنتج والمواصفات وتخطيط الإصدارات'),
+      d('architecture', 'Engineering architecture and code quality reviews', 'مراجعات البنية الهندسية وجودة الكود'),
+      d('qa', 'Automated testing, QA checklists, and bug triage', 'الاختبار الآلي وقوائم فحص الجودة وفرز الأخطاء'),
+    ],
+    doesNot: [
+      n('Does not deploy to production without human release approval.', 'لا ينشر في بيئة الإنتاج دون موافقة بشرية على الإصدار.'),
+    ],
+    examples: [
+      n('Draft Q3 product PRD and engineering milestone breakdown', 'صياغة وثيقة متطلبات المنتج للربع الثالث وتقسيم المراحل الهندسية'),
+    ],
     id: 'product-engineering',
     mission: n('Build and improve what the company sells.', 'بناء وتحسين ما تبيعه الشركة.'),
     name: n('Product and Engineering', 'المنتج والهندسة'),
     tier: 'enterprise',
   },
   {
+    does: [
+      d('research', 'KPI definitions, cohort analysis, and executive dashboards', 'تعريفات مؤشرات الأداء وتحليل الأفواج ولوحات القيادة التنفيذية'),
+      d('reporting', 'Automated weekly and monthly business intelligence briefs', 'موجزات ذكاء الأعمال الأسبوعية والشهرية الآلية'),
+    ],
+    doesNot: [
+      n('Does not alter raw production database records.', 'لا يعدّل سجلات قاعدة البيانات الإنتاجية الخام.'),
+    ],
+    examples: [
+      n('Analyze monthly retention cohorts and revenue attribution', 'تحليل أفواج الاحتفاظ الشهرية وإسناد الإيرادات'),
+    ],
     id: 'data-analytics',
     mission: n(
       'Turn company data into numbers people can trust and use.',
@@ -435,6 +459,16 @@ export const EXTRA_DEPARTMENT_SPECS: ExtraDepartmentSpec[] = [
     tier: 'enterprise',
   },
   {
+    does: [
+      d('vendors', 'Vendor comparisons, RFP scoring, and supply chain tracking', 'مقارنات الموردين وتقييم طلبات العروض وتتبع سلاسل الإمداد'),
+      d('inventory', 'Reorder alerts, lead-time monitoring, and purchase drafts', 'تنبيهات إعادة الطلب ومراقبة مدد التوريد ومسودات الشراء'),
+    ],
+    doesNot: [
+      n('Does not sign vendor contracts or wire funds.', 'لا يوقّع عقود الموردين أو يحوّل الأموال.'),
+    ],
+    examples: [
+      n('Compare 3 packaging suppliers on cost, SLA, and delivery lead time', 'مقارنة ٣ موردين للتغليف من حيث التكلفة ومستوى الخدمة ومدة التوريد'),
+    ],
     id: 'procurement-supply-chain',
     mission: n(
       'Buy well, from the right vendors, at the right time.',
@@ -444,18 +478,48 @@ export const EXTRA_DEPARTMENT_SPECS: ExtraDepartmentSpec[] = [
     tier: 'enterprise',
   },
   {
+    does: [
+      d('onboarding', 'Customer onboarding playbooks and adoption health checks', 'أدلة تهيئة العملاء وفحوصات صحة التبني'),
+      d('renewals', 'Renewal preparation, QBR decks, and expansion opportunity briefs', 'تحضير التجديدات وعروض المراجعة الفصلية وموجزات فرص التوسع'),
+    ],
+    doesNot: [
+      n('Does not issue refunds or modify billing terms without approval.', 'لا يصدر استردادات أو يعدّل شروط الفوترة دون موافقة.'),
+    ],
+    examples: [
+      n('Prepare 90-day enterprise onboarding and QBR brief', 'إعداد خطة تهيئة المؤسسات لـ ٩٠ يوماً وموجز المراجعة الفصلية'),
+    ],
     id: 'customer-success',
     mission: n('Help customers get value and renew.', 'مساعدة العملاء على تحقيق القيمة والتجديد.'),
     name: n('Customer Success', 'نجاح العملاء'),
     tier: 'enterprise',
   },
   {
+    does: [
+      d('security', 'Security policy audits, access reviews, and incident checklists', 'تدقيقات سياسات الأمن ومراجعات الصلاحيات وقوائم الاستجابة للحوادث'),
+      d('compliance', 'Vendor security questionnaires and SOC2/ISO readiness tracking', 'استبيانات أمن الموردين وتتبع جاهزية الامتثال'),
+    ],
+    doesNot: [
+      n('Does not revoke production keys or block traffic autonomously.', 'لا يلغي مفاتيح الإنتاج أو يحجب حركة المرور تلقائياً.'),
+    ],
+    examples: [
+      n('Run quarterly access control review and security posture brief', 'إجراء مراجعة ربع سنوية لصلاحيات الوصول وموجز الوضع الأمني'),
+    ],
     id: 'security',
     mission: n('Protect systems and data from threats.', 'حماية الأنظمة والبيانات من التهديدات.'),
     name: n('Security', 'الأمن'),
     tier: 'enterprise',
   },
   {
+    does: [
+      d('brand', 'Press releases, executive statements, and internal announcements', 'البيانات الصحفية والتصريحات التنفيذية والإعلانات الداخلية'),
+      d('campaigns', 'Crisis communication playbooks and media briefing kits', 'أدلة تواصل الأزمات وحقائب الإحاطة الإعلامية'),
+    ],
+    doesNot: [
+      n('Does not publish public statements without executive sign-off.', 'لا ينشر بيانات عامة دون اعتماد تنفيذي.'),
+    ],
+    examples: [
+      n('Draft bilingual product launch press release and internal town-hall brief', 'صياغة بيان صحفي ثنائي اللغة لإطلاق المنتج وموجز اللقاء الداخلي'),
+    ],
     id: 'corporate-communications',
     mission: n(
       'Speak for the company clearly, inside and outside.',
@@ -465,12 +529,32 @@ export const EXTRA_DEPARTMENT_SPECS: ExtraDepartmentSpec[] = [
     tier: 'enterprise',
   },
   {
+    does: [
+      d('scheduling', 'Office operations, asset tracking, and travel logistics', 'عمليات المكاتب وتتبع الأصول ولوجستيات السفر'),
+      d('vendors', 'Facility maintenance schedules and workspace checklists', 'جداول صيانة المرافق وقوائم فحص مساحات العمل'),
+    ],
+    doesNot: [
+      n('Does not commit lease agreements or capital expenditures.', 'لا يبرم عقود إيجار أو نفقات رأسمالية.'),
+    ],
+    examples: [
+      n('Organize Cairo HQ quarterly facility audit and equipment inventory', 'تنظيم التدقيق الفصلي لمرافق مقر القاهرة وجرد المعدات'),
+    ],
     id: 'admin-facilities',
     mission: n('Keep offices, assets and travel running.', 'إبقاء المكاتب والأصول والسفر تعمل.'),
     name: n('Administration and Facilities', 'الإدارة والمرافق'),
     tier: 'optional',
   },
   {
+    does: [
+      d('research', 'Custom domain research, source synthesis, and structured briefs', 'أبحاث المجال المخصص وتلخيص المصادر والموجزات المنظمة'),
+      d('campaigns', 'Custom workflows, bilingual drafting, and cross-project coordination', 'سير العمل المخصص والصياغة ثنائية اللغة والتنسيق عبر المشاريع'),
+    ],
+    doesNot: [
+      n('Does not execute external side-effects without explicit approval.', 'لا ينفّذ إجراءات خارجية دون موافقة صريحة.'),
+    ],
+    examples: [
+      n('Run a tailored mission using custom department context, sources, and projects', 'تشغيل مهمة مخصصة باستخدام سياق القسم المخصص ومصادره ومشاريعه'),
+    ],
     id: 'custom',
     mission: n(
       'A department you define: name, mission and rules.',
@@ -495,8 +579,8 @@ export const INDIVIDUAL_SPECS: IndividualSpec[] = [
     major: 'organisation',
     name: n('Chief of staff', 'رئيس الأركان الشخصي'),
     summary: n(
-      'Your CAO: turns your goals into missions and runs them.',
-      'الـ CAO الخاص بك: يحوّل أهدافك إلى مهام ويديرها.',
+      'Your personal orchestrator: turns your goals into missions and runs them.',
+      'منسقك الشخصي: يحوّل أهدافك إلى مهام ويديرها.',
     ),
   },
   {

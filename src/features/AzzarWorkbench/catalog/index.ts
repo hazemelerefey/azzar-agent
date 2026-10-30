@@ -185,9 +185,9 @@ const buildDepartments = (): DepartmentTemplate[] => {
   const extra: DepartmentTemplate[] = EXTRA_DEPARTMENT_SPECS.map((spec) => ({
     availability: 'coming-soon',
     avatarKey: null,
-    does: [],
-    doesNot: [],
-    exampleMissions: [],
+    does: (spec.does ?? []).map(({ tag, ar, en }) => ({ tag, text: { ar, en } })),
+    doesNot: spec.doesNot ?? [],
+    exampleMissions: spec.examples ?? [],
     id: spec.id,
     managerId: null,
     mission: spec.mission,
