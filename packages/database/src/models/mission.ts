@@ -367,7 +367,13 @@ export class MissionModel {
     patch: Partial<
       Pick<
         NewAzzarProject,
-        'context' | 'departmentId' | 'description' | 'inheritJson' | 'name' | 'sourcesJson' | 'visibility'
+        | 'context'
+        | 'departmentId'
+        | 'description'
+        | 'inheritJson'
+        | 'name'
+        | 'sourcesJson'
+        | 'visibility'
       >
     >,
   ): Promise<AzzarProjectItem | null> {

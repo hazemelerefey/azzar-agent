@@ -424,9 +424,9 @@ export interface ExtraDepartmentSpec {
 export const EXTRA_DEPARTMENT_SPECS: ExtraDepartmentSpec[] = [
   {
     does: [
-      d('roadmap', 'Product roadmaps, specs, and release planning', 'خرائط طريق المنتج والمواصفات وتخطيط الإصدارات'),
-      d('architecture', 'Engineering architecture and code quality reviews', 'مراجعات البنية الهندسية وجودة الكود'),
-      d('qa', 'Automated testing, QA checklists, and bug triage', 'الاختبار الآلي وقوائم فحص الجودة وفرز الأخطاء'),
+      d('software', 'Product roadmaps, specs, and software release planning', 'خرائط طريق المنتج والمواصفات وتخطيط إصدارات البرمجيات'),
+      d('process', 'Engineering workflow, architecture, and QA checklists', 'سير العمل الهندسي والبنية وقوائم فحص الجودة'),
+      d('research', 'Technical discovery, user feedback synthesis, and bug triage', 'الاكتشاف التقني وتلخيص ملاحظات المستخدمين وفرز الأخطاء'),
     ],
     doesNot: [
       n('Does not deploy to production without human release approval.', 'لا ينشر في بيئة الإنتاج دون موافقة بشرية على الإصدار.'),
@@ -460,8 +460,8 @@ export const EXTRA_DEPARTMENT_SPECS: ExtraDepartmentSpec[] = [
   },
   {
     does: [
-      d('vendors', 'Vendor comparisons, RFP scoring, and supply chain tracking', 'مقارنات الموردين وتقييم طلبات العروض وتتبع سلاسل الإمداد'),
-      d('inventory', 'Reorder alerts, lead-time monitoring, and purchase drafts', 'تنبيهات إعادة الطلب ومراقبة مدد التوريد ومسودات الشراء'),
+      d('supply-chain', 'Vendor comparisons, RFP scoring, and supply chain tracking', 'مقارنات الموردين وتقييم طلبات العروض وتتبع سلاسل الإمداد'),
+      d('logistics', 'Reorder alerts, lead-time monitoring, and purchase drafts', 'تنبيهات إعادة الطلب ومراقبة مدد التوريد ومسودات الشراء'),
     ],
     doesNot: [
       n('Does not sign vendor contracts or wire funds.', 'لا يوقّع عقود الموردين أو يحوّل الأموال.'),
@@ -479,8 +479,8 @@ export const EXTRA_DEPARTMENT_SPECS: ExtraDepartmentSpec[] = [
   },
   {
     does: [
-      d('onboarding', 'Customer onboarding playbooks and adoption health checks', 'أدلة تهيئة العملاء وفحوصات صحة التبني'),
-      d('renewals', 'Renewal preparation, QBR decks, and expansion opportunity briefs', 'تحضير التجديدات وعروض المراجعة الفصلية وموجزات فرص التوسع'),
+      d('retention', 'Customer onboarding playbooks and retention health checks', 'أدلة تهيئة العملاء وفحوصات صحة الاحتفاظ بالعملاء'),
+      d('faq', 'Renewal preparation, QBR decks, and customer knowledge briefs', 'تحضير التجديدات وعروض المراجعة الفصلية وموجزات معرفة العملاء'),
     ],
     doesNot: [
       n('Does not issue refunds or modify billing terms without approval.', 'لا يصدر استردادات أو يعدّل شروط الفوترة دون موافقة.'),
@@ -530,8 +530,8 @@ export const EXTRA_DEPARTMENT_SPECS: ExtraDepartmentSpec[] = [
   },
   {
     does: [
-      d('scheduling', 'Office operations, asset tracking, and travel logistics', 'عمليات المكاتب وتتبع الأصول ولوجستيات السفر'),
-      d('vendors', 'Facility maintenance schedules and workspace checklists', 'جداول صيانة المرافق وقوائم فحص مساحات العمل'),
+      d('allocation', 'Office operations, asset tracking, and travel logistics', 'عمليات المكاتب وتتبع الأصول ولوجستيات السفر'),
+      d('processes', 'Facility maintenance schedules and workspace checklists', 'جداول صيانة المرافق وقوائم فحص مساحات العمل'),
     ],
     doesNot: [
       n('Does not commit lease agreements or capital expenditures.', 'لا يبرم عقود إيجار أو نفقات رأسمالية.'),

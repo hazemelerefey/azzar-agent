@@ -2,6 +2,8 @@ import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
+import { MissionModel } from '@/database/models/mission';
+import { users } from '@/database/schemas/user';
 import {
   AGENT_TEMPLATES,
   getAgentTemplate,
@@ -17,8 +19,6 @@ import type {
   Project,
   WorkbenchData,
 } from '@/features/AzzarWorkbench/domain/types';
-import { MissionModel } from '@/database/models/mission';
-import { users } from '@/database/schemas/user';
 import { publicProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { MissionEngine } from '@/server/services/missionEngine/engine';
@@ -452,7 +452,9 @@ function mapDbDepartment(row: any): ActiveDepartment {
       ? row.rulesJson
       : defaultRuleSet();
   return {
-    activatedAt: row.activatedAt ? new Date(row.activatedAt).toISOString() : new Date().toISOString(),
+    activatedAt: row.activatedAt
+      ? new Date(row.activatedAt).toISOString()
+      : new Date().toISOString(),
     active: Boolean(row.active),
     context: row.context || '',
     customName: row.customNameJson || undefined,
@@ -484,7 +486,9 @@ function mapDbProject(row: any): Project {
 function mapDbInstall(row: any): InstalledAgent {
   return {
     departmentIds: Array.isArray(row.departmentIdsJson) ? row.departmentIdsJson : [],
-    installedAt: row.installedAt ? new Date(row.installedAt).toISOString() : new Date().toISOString(),
+    installedAt: row.installedAt
+      ? new Date(row.installedAt).toISOString()
+      : new Date().toISOString(),
     projectIds: Array.isArray(row.projectIdsJson) ? row.projectIdsJson : [],
     status: row.status === 'paused' ? 'paused' : 'active',
     templateId: row.templateId,
@@ -502,7 +506,11 @@ async function resolveOrgContext(
 
   const deptTpl = departmentId ? getDepartmentTemplate(departmentId) : undefined;
   const customName = (deptRow?.customNameJson as { ar?: string; en?: string } | undefined)?.en;
-  const inherit = (projRow?.inheritJson as { policies?: boolean; sources?: boolean; tone?: boolean }) || {
+  const inherit = (projRow?.inheritJson as {
+    policies?: boolean;
+    sources?: boolean;
+    tone?: boolean;
+  }) || {
     policies: true,
     sources: false,
     tone: true,
@@ -525,7 +533,9 @@ async function resolveOrgContext(
     projectDescription: projRow?.description || undefined,
     projectId: projRow?.id ?? projectId ?? null,
     projectName: projRow?.name || undefined,
-    projectSources: Array.isArray(projRow?.sourcesJson) ? (projRow.sourcesJson as any[]) : undefined,
+    projectSources: Array.isArray(projRow?.sourcesJson)
+      ? (projRow.sourcesJson as any[])
+      : undefined,
   };
 }
 
@@ -842,7 +852,8 @@ export const missionRouter = router({
         inherit = rules.inherit || { policies: true, sources: false, tone: true };
       }
 
-      const id = input.id || `prj_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+      const id =
+        input.id || `prj_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
       const row = await missionModel.createProject({
         context: input.context ?? '',
         departmentId: deptId,

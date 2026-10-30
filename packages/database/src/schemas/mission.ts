@@ -259,4 +259,3 @@ export type NewAzzarProject = typeof azzarProjects.$inferInsert;
 
 export type AzzarAgentInstallItem = typeof azzarAgentInstalls.$inferSelect;
 export type NewAzzarAgentInstall = typeof azzarAgentInstalls.$inferInsert;
-

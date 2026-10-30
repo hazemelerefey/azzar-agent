@@ -1,0 +1,262 @@
+{
+  "executedAt": "2026-10-30T23:11:44.948Z",
+  "departmentInPostgres": {
+    "activatedAt": "2026-10-30T23:09:06.141Z",
+    "active": true,
+    "context": "Egyptian B2B & Retail Growth Department (Cairo HQ)",
+    "instructions": "Always lead with natural Egyptian Arabic (ar-EG), back every claim with verified sources, and include an English executive summary.",
+    "rules": {
+      "model": {
+        "lock": false,
+        "modelId": null
+      },
+      "memory": {
+        "digestToGlobal": false,
+        "digestToDepartment": true
+      },
+      "inherit": {
+        "tone": true,
+        "sources": false,
+        "policies": true
+      },
+      "roleAccess": {
+        "manager": {
+          "read": true,
+          "send": true,
+          "write": true
+        },
+        "specialist": {
+          "read": true,
+          "send": false,
+          "write": true
+        }
+      },
+      "toolLevels": {},
+      "runLocation": "company-server"
+    },
+    "sources": [
+      {
+        "id": "src_phase2_1",
+        "kind": "file",
+        "name": "egypt-q4-growth-playbook.md",
+        "content": "Focus on Cairo and Alexandria SMEs using WhatsApp Business, Instagram Reels, and LinkedIn Egypt.",
+        "shareable": true
+      }
+    ],
+    "templateId": "marketing",
+    "tone": "Warm, practical Egyptian Arabic"
+  },
+  "activationRecommendationsCount": 5,
+  "activationRecommendationReasons": [
+    {
+      "agentId": "marketing-manager",
+      "matchedTags": [
+        "research",
+        "brand",
+        "campaigns",
+        "ads",
+        "leads",
+        "reporting"
+      ],
+      "reasons": [
+        {
+          "does": {
+            "ar": "أبحاث السوق والمنافسين",
+            "en": "Market and competitor research"
+          },
+          "tag": "research"
+        },
+        {
+          "does": {
+            "ar": "العلامة التجارية والرسائل",
+            "en": "Brand and messaging"
+          },
+          "tag": "brand"
+        },
+        {
+          "does": {
+            "ar": "الحملات والمحتوى",
+            "en": "Campaigns and content"
+          },
+          "tag": "campaigns"
+        },
+        {
+          "does": {
+            "ar": "إدارة الشبكات الاجتماعية والإعلانات، كمسودات",
+            "en": "Social and ads management, as drafts"
+          },
+          "tag": "ads"
+        },
+        {
+          "does": {
+            "ar": "توليد العملاء المحتملين وتقييمهم",
+            "en": "Lead generation and lead scoring"
+          },
+          "tag": "leads"
+        },
+        {
+          "does": {
+            "ar": "تقارير SEO والتحليلات",
+            "en": "SEO and analytics reporting"
+          },
+          "tag": "reporting"
+        }
+      ]
+    },
+    {
+      "agentId": "marketing-campaigns",
+      "matchedTags": [
+        "campaigns",
+        "ads"
+      ],
+      "reasons": [
+        {
+          "does": {
+            "ar": "الحملات والمحتوى",
+            "en": "Campaigns and content"
+          },
+          "tag": "campaigns"
+        },
+        {
+          "does": {
+            "ar": "إدارة الشبكات الاجتماعية والإعلانات، كمسودات",
+            "en": "Social and ads management, as drafts"
+          },
+          "tag": "ads"
+        }
+      ]
+    },
+    {
+      "agentId": "marketing-leads",
+      "matchedTags": [
+        "leads",
+        "reporting"
+      ],
+      "reasons": [
+        {
+          "does": {
+            "ar": "توليد العملاء المحتملين وتقييمهم",
+            "en": "Lead generation and lead scoring"
+          },
+          "tag": "leads"
+        },
+        {
+          "does": {
+            "ar": "تقارير SEO والتحليلات",
+            "en": "SEO and analytics reporting"
+          },
+          "tag": "reporting"
+        }
+      ]
+    },
+    {
+      "agentId": "marketing-research",
+      "matchedTags": [
+        "research"
+      ],
+      "reasons": [
+        {
+          "does": {
+            "ar": "أبحاث السوق والمنافسين",
+            "en": "Market and competitor research"
+          },
+          "tag": "research"
+        }
+      ]
+    },
+    {
+      "agentId": "marketing-brand",
+      "matchedTags": [
+        "brand"
+      ],
+      "reasons": [
+        {
+          "does": {
+            "ar": "العلامة التجارية والرسائل",
+            "en": "Brand and messaging"
+          },
+          "tag": "brand"
+        }
+      ]
+    }
+  ],
+  "projectInPostgres": {
+    "context": "Target 500 Egyptian retail & F&B SMEs in Cairo and Giza with zero ad spend organic validation first.",
+    "createdAt": "2026-10-30T23:09:06.820Z",
+    "departmentId": "marketing",
+    "description": "Phase 2 live department project for Egyptian SME campaign launch",
+    "id": "prj_phase2_live_1793401746803",
+    "inherit": {
+      "tone": true,
+      "sources": false,
+      "policies": true
+    },
+    "name": "Cairo SME Q4 Launch Project",
+    "sources": [],
+    "visibility": "private"
+  },
+  "myAgentsInstallInPostgres": {
+    "departmentIds": [
+      "marketing"
+    ],
+    "installedAt": "2026-10-30T23:09:06.860Z",
+    "projectIds": [
+      "prj_phase2_live_1793401746803"
+    ],
+    "status": "active",
+    "templateId": "marketing-manager"
+  },
+  "serverSideRefusals": {
+    "installSalesManager": {
+      "code": "PRECONDITION_FAILED",
+      "message": "Refused by server: Agent \"sales-manager\" (Sales Manager) is Coming soon and cannot be installed. Only Marketing Manager (marketing-manager) is Available."
+    },
+    "createMissionSalesManager": {
+      "code": "PRECONDITION_FAILED",
+      "message": "Refused by server: Agent \"sales-manager\" (Sales Manager) is Coming soon and cannot create or run missions. Only Marketing Manager (marketing-manager) is Available."
+    },
+    "createMissionIndAgent": {
+      "code": "PRECONDITION_FAILED",
+      "message": "Refused by server: Agent \"ind-chief-of-staff\" (Chief of staff) is Coming soon and cannot create or run missions. Only Marketing Manager (marketing-manager) is Available."
+    },
+    "nonAdminCaoTree": {
+      "code": "FORBIDDEN",
+      "message": "FORBIDDEN: Server-side admin authentication and role required to access /azzar/cao tree and telemetry."
+    }
+  },
+  "liveMission": {
+    "missionId": "mission_1793401747064",
+    "departmentId": "marketing",
+    "projectId": "prj_phase2_live_1793401746803",
+    "status": "completed",
+    "orgContextUsed": {
+      "departmentContext": "Egyptian B2B & Retail Growth Department (Cairo HQ)",
+      "departmentId": "marketing",
+      "departmentInstructions": "Always lead with natural Egyptian Arabic (ar-EG), back every claim with verified sources, and include an English executive summary.",
+      "departmentName": "Marketing",
+      "departmentTone": "Warm, practical Egyptian Arabic",
+      "projectContext": "Target 500 Egyptian retail & F&B SMEs in Cairo and Giza with zero ad spend organic validation first.",
+      "projectDescription": "Phase 2 live department project for Egyptian SME campaign launch",
+      "projectId": "prj_phase2_live_1793401746803",
+      "projectName": "Cairo SME Q4 Launch Project",
+      "projectSources": []
+    },
+    "approvalId": "approval_mission_1793401747064_N6",
+    "approvalPayloadHash": "adaeade1d82b252f71e8f23cb3f83da750e5b35f6ab8cd34dcc369ae8512b207",
+    "approvalConsumedAt": "2026-10-30T23:11:43.746Z",
+    "tokenRollup": {
+      "totalTokens": 9390,
+      "promptTokens": 3521,
+      "completionTokens": 5869
+    },
+    "briefPath": "./artifacts/azzar-marketing-brief-mission_1793401747064.md",
+    "briefBytes": 13661,
+    "briefSha256": "fa20986512b2523f1261bba3d69ab96403c2073f8722ab274bfb37b13d05c714",
+    "receiptSha256": "b890c6c49e9fa3689ca710e91fbd414f1163539268c88c9cdbec1ed62875f8e5"
+  },
+  "adminCaoTreeRoot": {
+    "id": "root",
+    "tokens": 45715,
+    "childrenCount": 1
+  }
+}
