@@ -1,5 +1,3 @@
-import { type DiscoverMcpDetail, type McpListResponse, type McpQueryParams } from '@azzar/types';
-import { CacheRevalidate, CacheTag, McpCategory, McpSorts } from '@azzar/types';
 import { type CategoryItem, type CategoryListQuery } from '@azzar/market-sdk';
 import {
   type AgentEventRequest,
@@ -7,6 +5,8 @@ import {
   type InstallReportRequest,
   type PluginEventRequest,
 } from '@azzar/market-types';
+import { type DiscoverMcpDetail, type McpListResponse, type McpQueryParams } from '@azzar/types';
+import { CacheRevalidate, CacheTag, McpCategory, McpSorts } from '@azzar/types';
 
 import { normalizeLocale } from '@/locales/resources';
 
@@ -22,19 +22,24 @@ export const getMcpCategories = async (
   log('getMcpCategories: params=%O', params);
   const { locale } = params;
   const normalizedLocale = normalizeLocale(locale);
-  const result = await service.market.plugins.getCategories(
-    {
-      ...params,
-      locale: normalizedLocale,
-    },
-    {
-      next: {
-        revalidate: 3600,
+  try {
+    const result = await service.market.plugins.getCategories(
+      {
+        ...params,
+        locale: normalizedLocale,
       },
-    },
-  );
-  log('getMcpCategories: returning %d categories', result.length);
-  return result;
+      {
+        next: {
+          revalidate: 3600,
+        },
+      },
+    );
+    log('getMcpCategories: returning %d categories', result.length);
+    return result;
+  } catch (error) {
+    log('getMcpCategories error: %O', error);
+    return [];
+  }
 };
 
 export const getMcpDetail = async (
@@ -78,28 +83,39 @@ export const getMcpList = async (
   params: McpQueryParams = {},
 ): Promise<McpListResponse> => {
   log('getMcpList: params=%O', params);
-  const { category, locale, sort } = params;
+  const { category, locale, sort, page = 1, pageSize = 20 } = params;
   const normalizedLocale = normalizeLocale(locale);
   const shouldOmitCategory = [McpCategory.All, McpCategory.Discover].includes(
     category as McpCategory,
   );
 
-  const result = await service.market.plugins.getPluginList(
-    {
-      ...params,
-      category: shouldOmitCategory ? undefined : category,
-      locale: normalizedLocale,
-      sort: shouldOmitCategory ? McpSorts.Recommended : sort,
-    },
-    {
-      next: {
-        revalidate: CacheRevalidate.List,
-        tags: [CacheTag.Discover, CacheTag.MCP],
+  try {
+    const result = await service.market.plugins.getPluginList(
+      {
+        ...params,
+        category: shouldOmitCategory ? undefined : category,
+        locale: normalizedLocale,
+        sort: shouldOmitCategory ? McpSorts.Recommended : sort,
       },
-    },
-  );
-  log('getMcpList: returning %d items on page %d', result.items.length, result.currentPage);
-  return result;
+      {
+        next: {
+          revalidate: CacheRevalidate.List,
+          tags: [CacheTag.Discover, CacheTag.MCP],
+        },
+      },
+    );
+    log('getMcpList: returning %d items on page %d', result.items.length, result.currentPage);
+    return result;
+  } catch (error) {
+    log('getMcpList error: %O', error);
+    return {
+      currentPage: page,
+      items: [],
+      pageSize,
+      totalCount: 0,
+      totalPages: 0,
+    };
+  }
 };
 
 export const getMcpManifest = async (

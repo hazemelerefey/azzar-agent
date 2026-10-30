@@ -1,4 +1,5 @@
 import { discoverUrl } from '@azzar/const';
+import { type CategoryItem, type CategoryListQuery } from '@azzar/market-sdk';
 import {
   type AgentStatus,
   type AssistantListResponse,
@@ -9,7 +10,6 @@ import {
   type IdentifiersResponse,
 } from '@azzar/types';
 import { AssistantCategory, AssistantSorts } from '@azzar/types';
-import { type CategoryItem, type CategoryListQuery } from '@azzar/market-sdk';
 
 import { normalizeLocale } from '@/locales/resources';
 
@@ -21,7 +21,7 @@ import {
   legacyGetAssistantList,
 } from './assistantsLegacy';
 import type { DiscoverService } from './index';
-import { isMarketNotFound, log, normalizeAuthorField } from './utils';
+import { log, normalizeAuthorField } from './utils';
 
 // ============================== Assistant Market ==============================
 
@@ -48,7 +48,7 @@ export const getAssistantCategories = async (
     return categories;
   } catch (error) {
     log('getAssistantCategories: error fetching from market SDK: %O', error);
-    return [];
+    return legacyGetAssistantCategories(service, rest);
   }
 };
 
@@ -77,7 +77,7 @@ export const getAssistantDetail = async (
     });
     if (!data) {
       log('getAssistantDetail: assistant not found for identifier=%s', identifier);
-      return;
+      return legacyGetAssistantDetail(service, rest);
     }
     const normalizedAuthor = normalizeAuthorField(data.author);
     const assistant = {
@@ -144,7 +144,7 @@ export const getAssistantDetail = async (
     return result;
   } catch (error) {
     log('getAssistantDetail: error fetching from market SDK: %O', error);
-    if (!isMarketNotFound(error)) throw error;
+    return legacyGetAssistantDetail(service, rest);
   }
 };
 
@@ -169,7 +169,7 @@ export const getAssistantIdentifiers = async (
     return result;
   } catch (error) {
     log('getAssistantIdentifiers: error fetching from market SDK: %O', error);
-    return [];
+    return legacyGetAssistantIdentifiers(service);
   }
 };
 
@@ -293,13 +293,7 @@ export const getAssistantList = async (
     log('getAssistantList: error fetching from market SDK: %O', error);
     if (options.throwOnError) throw error;
 
-    return {
-      currentPage: page,
-      items: [],
-      pageSize,
-      totalCount: 0,
-      totalPages: 0,
-    };
+    return legacyGetAssistantList(service, rest);
   }
 };
 

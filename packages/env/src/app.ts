@@ -29,9 +29,9 @@ const APP_URL =
 // Falls back to APP_URL if not set
 const INTERNAL_APP_URL = process.env.INTERNAL_APP_URL || APP_URL;
 
-const ASSISTANT_INDEX_URL = 'https://registry.npmmirror.com/@azzar/agents-index/v1/files/public';
+const ASSISTANT_INDEX_URL = 'https://chat-agents.lobehub.com';
 
-const PLUGINS_INDEX_URL = 'https://registry.npmmirror.com/@azzar/plugins-index/v1/files/public';
+const PLUGINS_INDEX_URL = 'https://chat-plugins.lobehub.com';
 
 export const getAppConfig = () => {
   return createEnv({
