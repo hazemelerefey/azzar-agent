@@ -14,7 +14,7 @@ import {
   Target,
 } from 'lucide-react';
 import { type FC, useCallback, useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { Link } from 'react-router';
 
 import { missionService } from '@/services/mission';
 
@@ -219,33 +219,42 @@ const collectIds = (n: CaoNode): string[] => [n.id, ...n.children.flatMap(collec
 
 const CaoTree: FC = () => {
   const { t } = useAzzarT();
-  const [searchParams] = useSearchParams();
   const data = useWorkbench((s) => s);
   const isAdminStore = useWorkbench((s) => Boolean(s.isAdmin));
   const setAdminMode = useWorkbench((s) => s.setAdminMode);
   const syncMissions = useWorkbench((s) => s.syncMissions);
   const [loading, setLoading] = useState(false);
-
-  const isAdmin = isAdminStore || searchParams.get('admin') === '1';
+  const [serverTree, setServerTree] = useState<CaoNode | null>(null);
+  const [serverForbiddenReason, setServerForbiddenReason] = useState<string | null>(null);
 
   const loadLiveState = useCallback(async () => {
-    if (process.env.NODE_ENV === 'test' || !isAdmin) return;
+    if (process.env.NODE_ENV === 'test') return;
     setLoading(true);
     try {
-      const items = await missionService.list(30);
-      syncMissions(items.map((i) => i.workbenchMission as any));
-    } catch {
-      // Keep current store state if offline
+      const res = await missionService.getCaoTree('company');
+      setServerTree(res.tree as CaoNode);
+      setServerForbiddenReason(null);
+      setAdminMode(true);
+      syncMissions(res.missions as any);
+    } catch (err: any) {
+      setServerTree(null);
+      setAdminMode(false);
+      setServerForbiddenReason(
+        err?.message ||
+          'FORBIDDEN: Server-side admin authentication and role required to access /azzar/cao tree and telemetry.',
+      );
     } finally {
       setLoading(false);
     }
-  }, [isAdmin, syncMissions]);
+  }, [setAdminMode, syncMissions]);
 
   useEffect(() => {
     void loadLiveState();
   }, [loadLiveState]);
 
-  const tree = buildCaoTree(data, 'company');
+  const isAdmin =
+    process.env.NODE_ENV === 'test' ? isAdminStore : Boolean(serverTree) && !serverForbiddenReason;
+  const tree = serverTree ?? buildCaoTree(data, 'company');
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const toggle = (id: string) =>
     setCollapsed((cur) => {
@@ -259,24 +268,23 @@ const CaoTree: FC = () => {
     return (
       <Page>
         <Header
-          subtitle="Restricted to system administrators and organization owners."
+          subtitle="Restricted to system administrators and organization owners (Server-Enforced RBAC)."
           title={t('caoTitle')}
         />
         <Card>
           <Flexbox gap={12}>
             <Flexbox horizontal align="center" gap={8}>
               <Icon icon={Lock} style={{ color: 'var(--ant-color-warning)' }} />
-              <strong>Admin-Only Surface (403 Restricted)</strong>
+              <strong>Admin-Only Surface (403 Forbidden · Server-Enforced)</strong>
             </Flexbox>
             <p style={styles.muted}>
-              The Chief Agent Orchestrator (CAO) hierarchy tree is an administrative inspection
-              surface and is not shown to standard users in the main navigation.
+              The Chief Agent Orchestrator (CAO) hierarchy tree and telemetry endpoint enforce
+              server-side administrator authentication and role checks (`users.role = &apos;admin&apos;`).
+              Client store state cannot bypass server-side access control.
             </p>
-            <div>
-              <Btn primary onClick={() => setAdminMode(true)}>
-                Enable Admin Inspector Mode
-              </Btn>
-            </div>
+            {serverForbiddenReason && (
+              <code style={{ fontSize: 12, opacity: 0.85 }}>{serverForbiddenReason}</code>
+            )}
           </Flexbox>
         </Card>
       </Page>

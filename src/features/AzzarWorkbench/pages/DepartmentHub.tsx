@@ -36,7 +36,8 @@ const DepartmentHub: FC = () => {
   const { id = '' } = useParams();
   const { bi, t } = useAzzarT();
   const [tab, setTab] = useState('overview');
-  const template = getDepartmentTemplate(id);
+  const isCustom = id === 'custom' || id.startsWith('custom-');
+  const template = getDepartmentTemplate(isCustom ? 'custom' : id);
   const dept = useWorkbench((s) => s.departments[id]);
   const installs = useWorkbench((s) => s.installs);
   const data = useWorkbench((s) => s);
@@ -48,6 +49,7 @@ const DepartmentHub: FC = () => {
   const install = useWorkbench((s) => s.installAgent);
   const [sourceName, setSourceName] = useState('');
   const [sourceContent, setSourceContent] = useState('');
+  const [sourceKind, setSourceKind] = useState<'file' | 'link' | 'note'>('file');
   const [sourceShare, setSourceShare] = useState(false);
 
   if (!template)
@@ -185,6 +187,17 @@ const DepartmentHub: FC = () => {
                 onChange={(e) => setSourceName(e.target.value)}
               />
             </Field>
+            <Field label="Source Type (file / link / note)">
+              <select
+                style={styles.field}
+                value={sourceKind}
+                onChange={(e) => setSourceKind(e.target.value as 'file' | 'link' | 'note')}
+              >
+                <option value="file">Source File (file)</option>
+                <option value="link">Reference URL (link)</option>
+                <option value="note">Context Note (note)</option>
+              </select>
+            </Field>
             <Field label={t('sourceContent')}>
               <textarea
                 rows={2}
@@ -212,7 +225,7 @@ const DepartmentHub: FC = () => {
                       {
                         content: sourceContent,
                         id: `src_${Date.now().toString(36)}`,
-                        kind: /^https?:\/\//.test(sourceContent) ? 'link' : 'note',
+                        kind: /^https?:\/\//.test(sourceContent) ? 'link' : sourceKind,
                         name: sourceName.trim(),
                         shareable: sourceShare,
                       },

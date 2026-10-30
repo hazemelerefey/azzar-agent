@@ -3,16 +3,25 @@ import { CheckCircle, ExternalLink, Power } from 'lucide-react';
 import { type FC } from 'react';
 import { Link } from 'react-router';
 
-import { DEPARTMENT_TEMPLATES, type DepartmentTemplate, STARTER_DEPARTMENT_IDS } from '../catalog';
+import {
+  AGENT_TEMPLATES,
+  DEPARTMENT_TEMPLATES,
+  type DepartmentTemplate,
+  STARTER_DEPARTMENT_IDS,
+} from '../catalog';
+import { recommendForDepartment } from '../domain/matcher';
 import { useWorkbench } from '../hooks/useWorkbench';
 import { useAzzarT } from '../ui/i18n';
-import { Btn, Card, DeptAvatar, Header, Marker, Notice, Page, styles } from '../ui/kit';
+import { BiList, Btn, Card, DeptAvatar, Header, Marker, Notice, Page, styles } from '../ui/kit';
 
 const DepartmentCard: FC<{ template: DepartmentTemplate }> = ({ template }) => {
   const { bi, t } = useAzzarT();
   const active = useWorkbench((s) => Boolean(s.departments[template.id]?.active));
+  const installs = useWorkbench((s) => s.installs);
   const activate = useWorkbench((s) => s.activateDepartment);
   const deactivate = useWorkbench((s) => s.deactivateDepartment);
+  const install = useWorkbench((s) => s.installAgent);
+  const recs = active ? recommendForDepartment(template, AGENT_TEMPLATES, installs) : [];
 
   return (
     <Card>
@@ -35,6 +44,44 @@ const DepartmentCard: FC<{ template: DepartmentTemplate }> = ({ template }) => {
           <Marker label={template.availability === 'available' ? 'available' : 'comingSoon'} />
           {active && <Marker label="active" />}
         </Flexbox>
+
+        {active && recs.length > 0 && (
+          <div
+            style={{
+              backgroundColor: 'var(--ant-color-fill-quaternary)',
+              border: '1px solid var(--ant-color-border-secondary)',
+              borderRadius: 8,
+              padding: 10,
+            }}
+          >
+            <strong style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
+              {t('recommended')} ({recs.length}) — {t('recommendedWhy')}
+            </strong>
+            {recs.slice(0, 2).map((r) => (
+              <div key={r.agent.id} style={{ fontSize: 12, marginBottom: 6 }}>
+                <div style={{ ...styles.row, justifyContent: 'space-between' }}>
+                  <span>
+                    <strong>{bi(r.agent.name)}</strong> ({r.matchedTags.join(', ')})
+                  </span>
+                  <Marker
+                    label={r.agent.availability === 'available' ? 'available' : 'comingSoon'}
+                  />
+                </div>
+                <BiList items={r.reasons.slice(0, 2).map((x) => x.does)} />
+                {r.agent.kind === 'manager' &&
+                  r.agent.availability === 'available' &&
+                  !r.installed && (
+                    <Btn
+                      primary
+                      onClick={() => install(r.agent.id, { departmentId: template.id })}
+                    >
+                      {t('install')}
+                    </Btn>
+                  )}
+              </div>
+            ))}
+          </div>
+        )}
 
         <Flexbox horizontal align="center" gap={8}>
           {active ? (

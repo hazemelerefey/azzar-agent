@@ -1,11 +1,14 @@
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { createStore, type StoreApi } from 'zustand/vanilla';
 
-import { getAgentTemplate, getDepartmentTemplate, getMissionTemplate } from '../catalog';
+import { missionService } from '@/services/mission';
+
+import { type Bi, getAgentTemplate, getDepartmentTemplate, getMissionTemplate } from '../catalog';
 import { memoryForCompletedMission } from './memory';
 import { defaultRuleSet } from './rules';
 import type {
   ActiveDepartment,
+  InstalledAgent,
   Mission,
   OwnerType,
   Project,
@@ -49,17 +52,19 @@ export interface ValidatedMissionContext {
 }
 
 export interface WorkbenchActions {
-  activateDepartment: (templateId: string) => ActionResult<ActiveDepartment>;
+  activateDepartment: (templateId: string, customName?: Bi) => ActionResult<ActiveDepartment>;
   assignAgent: (
     templateId: string,
     target: { departmentId?: string; projectId?: string },
   ) => ActionResult;
   createProject: (input: {
+    context?: string;
     departmentId: string | null;
     description: string;
     name: string;
   }) => ActionResult<Project>;
   deactivateDepartment: (templateId: string) => void;
+  hydrateFromServer: () => Promise<void>;
   installAgent: (
     templateId: string,
     target?: { departmentId?: string; projectId?: string },
@@ -71,6 +76,12 @@ export interface WorkbenchActions {
   setMode: (mode: WorkbenchMode) => void;
   setPersonalRules: (rules: RuleSet) => void;
   syncMissions: (missions: Mission[]) => void;
+  syncWorkbenchState: (payload: {
+    departments: Record<string, ActiveDepartment>;
+    installs: Record<string, InstalledAgent>;
+    isAdmin?: boolean;
+    projects: Project[];
+  }) => void;
   unassignAgent: (
     templateId: string,
     target: { departmentId?: string; projectId?: string },
@@ -78,7 +89,9 @@ export interface WorkbenchActions {
   uninstallAgent: (templateId: string) => void;
   updateDepartment: (
     templateId: string,
-    patch: Partial<Pick<ActiveDepartment, 'context' | 'instructions' | 'sources' | 'tone'>>,
+    patch: Partial<
+      Pick<ActiveDepartment, 'context' | 'customName' | 'instructions' | 'sources' | 'tone'>
+    >,
   ) => void;
   updateProject: (
     projectId: string,
@@ -132,22 +145,26 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
   const now = options.now ?? (() => new Date().toISOString());
   const newId = options.id ?? defaultId;
 
+  const isServerRuntime = options.persistKey !== null && process.env.NODE_ENV !== 'test';
+
   const creator = (
     set: StoreApi<WorkbenchState>['setState'],
     get: StoreApi<WorkbenchState>['getState'],
   ): WorkbenchState => ({
     ...emptyData(),
 
-    activateDepartment: (templateId) => {
-      const template = getDepartmentTemplate(templateId);
+    activateDepartment: (templateId, customName) => {
+      const isCustom = templateId === 'custom' || templateId.startsWith('custom-');
+      const template = getDepartmentTemplate(isCustom ? 'custom' : templateId);
       if (!template) return fail('not-found');
       const existing = get().departments[templateId];
       const dept: ActiveDepartment = existing
-        ? { ...existing, active: true }
+        ? { ...existing, active: true, customName: customName ?? existing.customName }
         : {
             activatedAt: now(),
             active: true,
             context: '',
+            customName,
             instructions: '',
             rules: defaultRuleSet(),
             sources: [],
@@ -155,6 +172,17 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
             tone: '',
           };
       set((s) => ({ departments: { ...s.departments, [templateId]: dept } }));
+      if (isServerRuntime) {
+        void missionService
+          .activateDepartment({
+            context: dept.context,
+            customName: dept.customName,
+            instructions: dept.instructions,
+            templateId,
+            tone: dept.tone,
+          })
+          .catch(() => {});
+      }
       return ok(dept);
     },
 
@@ -177,15 +205,24 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
           },
         },
       }));
+      if (isServerRuntime) {
+        void missionService
+          .assignAgent({
+            departmentId: target.departmentId,
+            projectId: target.projectId,
+            templateId,
+          })
+          .catch(() => {});
+      }
       return ok(undefined);
     },
 
-    createProject: ({ departmentId, description, name }) => {
+    createProject: ({ context = '', departmentId, description, name }) => {
       if (!name.trim()) return fail('invalid-input');
       const dept = departmentId ? get().departments[departmentId] : undefined;
       if (departmentId && !dept?.active) return fail('department-inactive');
       const project: Project = {
-        context: '',
+        context,
         createdAt: now(),
         departmentId,
         description: description.trim(),
@@ -198,6 +235,18 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
         visibility: 'private',
       };
       set((s) => ({ projects: [...s.projects, project] }));
+      if (isServerRuntime) {
+        void missionService
+          .createProject({
+            context: project.context,
+            departmentId: project.departmentId,
+            description: project.description,
+            id: project.id,
+            name: project.name,
+            visibility: project.visibility,
+          })
+          .catch(() => {});
+      }
       return ok(project);
     },
 
@@ -205,6 +254,19 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
       const d = get().departments[templateId];
       if (!d) return;
       set((s) => ({ departments: { ...s.departments, [templateId]: { ...d, active: false } } }));
+      if (isServerRuntime) {
+        void missionService.deactivateDepartment(templateId).catch(() => {});
+      }
+    },
+
+    hydrateFromServer: async () => {
+      if (!isServerRuntime) return;
+      try {
+        const state = await missionService.getWorkbenchState();
+        get().syncWorkbenchState(state);
+      } catch {
+        // Offline fallback keeps current in-memory state
+      }
     },
 
     installAgent: (templateId, target) => {
@@ -227,6 +289,15 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
           },
         }));
       }
+      if (isServerRuntime) {
+        void missionService
+          .installAgent({
+            departmentId: target?.departmentId,
+            projectId: target?.projectId,
+            templateId,
+          })
+          .catch(() => {});
+      }
       return target ? get().assignAgent(templateId, target) : ok(undefined);
     },
 
@@ -240,6 +311,9 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
       const d = get().departments[templateId];
       if (!d) return;
       set((s) => ({ departments: { ...s.departments, [templateId]: { ...d, rules } } }));
+      if (isServerRuntime) {
+        void missionService.updateDepartment({ rules, templateId }).catch(() => {});
+      }
     },
 
     setMode: (mode) => set({ mode }),
@@ -265,6 +339,15 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
       });
     },
 
+    syncWorkbenchState: (payload) => {
+      set((cur) => ({
+        departments: payload.departments,
+        installs: payload.installs,
+        isAdmin: payload.isAdmin ?? cur.isAdmin,
+        projects: payload.projects,
+      }));
+    },
+
     unassignAgent: (templateId, target) => {
       const inst = get().installs[templateId];
       if (!inst) return;
@@ -278,24 +361,54 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
           },
         },
       }));
+      if (isServerRuntime) {
+        void missionService
+          .unassignAgent({
+            departmentId: target.departmentId,
+            projectId: target.projectId,
+            templateId,
+          })
+          .catch(() => {});
+      }
     },
 
-    uninstallAgent: (templateId) =>
+    uninstallAgent: (templateId) => {
       set((s) => {
         const { [templateId]: _removed, ...rest } = s.installs;
         return { installs: rest };
-      }),
+      });
+      if (isServerRuntime) {
+        void missionService.uninstallAgent(templateId).catch(() => {});
+      }
+    },
 
     updateDepartment: (templateId, patch) => {
       const d = get().departments[templateId];
       if (!d) return;
-      set((s) => ({ departments: { ...s.departments, [templateId]: { ...d, ...patch } } }));
+      const updated = { ...d, ...patch };
+      set((s) => ({ departments: { ...s.departments, [templateId]: updated } }));
+      if (isServerRuntime) {
+        void missionService
+          .updateDepartment({
+            context: updated.context,
+            customName: updated.customName,
+            instructions: updated.instructions,
+            sources: updated.sources,
+            templateId,
+            tone: updated.tone,
+          })
+          .catch(() => {});
+      }
     },
 
-    updateProject: (projectId, patch) =>
+    updateProject: (projectId, patch) => {
       set((s) => ({
         projects: s.projects.map((p) => (p.id === projectId ? { ...p, ...patch } : p)),
-      })),
+      }));
+      if (isServerRuntime) {
+        void missionService.updateProject({ id: projectId, ...patch }).catch(() => {});
+      }
+    },
 
     validateMissionLaunch: (input) => {
       const s = get();
@@ -342,16 +455,16 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
     persist(creator, {
       name: key,
       partialize: (s): WorkbenchData => ({
-        departments: s.departments,
-        installs: s.installs,
-        isAdmin: Boolean(s.isAdmin),
+        // Departments, My Agents installs, projects, missions, and admin auth are persisted in PostgreSQL
+        departments: {},
+        installs: {},
+        isAdmin: false,
         lastSeenAt: s.lastSeenAt,
         memory: s.memory,
-        // Missions are persisted in PostgreSQL via MissionEngine, never browser localStorage
         missions: [],
         mode: s.mode,
         personalRules: s.personalRules,
-        projects: s.projects,
+        projects: [],
       }),
       storage: createJSONStorage(() => safeStorage() as Storage),
       version: 1,

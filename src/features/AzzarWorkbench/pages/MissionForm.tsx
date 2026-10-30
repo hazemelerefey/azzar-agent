@@ -139,8 +139,11 @@ const MissionForm: FC<{ onMissionCreated?: () => void }> = ({ onMissionCreated }
       const res = await missionService.createAndRun({
         departmentId: valid.value.departmentId ?? undefined,
         goal: goal.trim(),
+        managerId: script.managerId,
         mode: mode ?? 'company',
         modelId,
+        projectId: valid.value.projectId,
+        scriptId: script.id,
       });
       if (res.detail?.workbenchMission) {
         syncMissions([res.detail.workbenchMission as any, ...missions]);
