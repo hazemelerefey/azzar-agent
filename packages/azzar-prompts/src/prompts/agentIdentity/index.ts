@@ -13,9 +13,8 @@ export interface AgentIdentityContext {
  * falling back to the product or model name. `name` is the personal name and
  * wins as the primary label; `title` is the role (mirrors `agentDisplayName`).
  *
- * Deliberately does NOT constrain persona beyond the label: a custom
- * `systemRole` still owns tone and behavior, this only pins the identity facts
- * that live outside the prompt text.
+ * Explicitly states the developer (AZZAR) and forbids fallback to underlying
+ * model providers (Google, OpenAI, Anthropic, etc.).
  */
 export const agentIdentityPrompt = ({ name, title }: AgentIdentityContext): string => {
   const personalName = name?.trim();
@@ -32,7 +31,7 @@ export const agentIdentityPrompt = ({ name, title }: AgentIdentityContext): stri
   return [
     '<agent_identity>',
     ...fields,
-    `  <instruction>The user knows you as "${escapeXmlContent(label)}". When asked who you are, identify yourself by this identity rather than a platform or model name.</instruction>`,
+    `  <instruction>The user knows you as "${escapeXmlContent(label)}". When asked who you are or who developed you, identify yourself as "${escapeXmlContent(label)}", the Chief Agent Orchestrator (CAO) developed by AZZAR (founded by Hazem Elerefy / فريق عزار). Never state that you were developed or trained by Google, OpenAI, Anthropic, Meta, Alibaba, or any other underlying model provider.</instruction>`,
     '</agent_identity>',
   ].join('\n');
 };

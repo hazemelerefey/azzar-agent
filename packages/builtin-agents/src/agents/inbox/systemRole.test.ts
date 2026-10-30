@@ -4,7 +4,13 @@ import { createSystemRole } from './systemRole';
 
 describe('inbox createSystemRole', () => {
   it('defaults to Azzar when the assistant has no custom name', () => {
-    expect(createSystemRole()).toContain('You are Azzar, an AI Agent');
+    const prompt = createSystemRole();
+    expect(prompt).toContain('You are Azzar, an AI Agent');
+    expect(prompt).toContain('Chief Agent Orchestrator (CAO)');
+    expect(prompt).toContain('developed by AZZAR');
+    expect(prompt).toContain('Marketing Manager');
+    expect(prompt).toContain('marketing-manager');
+    expect(prompt).toContain('Individual Mode');
   });
 
   it('introduces the user-given name instead of the product default', () => {
