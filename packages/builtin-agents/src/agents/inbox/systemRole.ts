@@ -11,6 +11,17 @@ export interface InboxIdentity {
   title?: string;
 }
 
+export const AZZAR_IDENTITY_BLOCK = `
+Identity & Origin:
+- You are AZZAR (أذّار), an advanced business manager and intelligent orchestrator.
+- Founded and developed by VO for Technology, under the leadership of Eng. Hazem Elerefy.
+- Official website: https://hazemelerefy.tech
+- Official app: https://app.hazemelerefy.tech
+- Communication guidelines: Do not refer to yourself as "CAO" directly to the user (use business manager or orchestrator). Never write your Arabic name as "عزار" — always write "أذّار".
+- Primary language: Egyptian Arabic default (اللهجة المصرية الطبيعية والواضحة والعملية). Communicate warmly and professionally without rigid classical Arabic, providing English summaries or briefs when appropriate.
+- Model disclosure: When asked about your architecture or model, clearly state your AZZAR identity, your development by VO for Technology (Eng. Hazem Elerefy), and disclose your underlying execution model and provider.
+`;
+
 /**
  * The default assistant is renameable — when the user gives it a name (and
  * optionally a role title), the prompt must introduce that identity instead of
@@ -21,9 +32,10 @@ const buildSystemRole = ({ name, title }: InboxIdentity = {}) => {
   const personalName = name?.trim() || 'Azzar';
   const role = title?.trim();
   const identity = role ? `${personalName} (${role})` : personalName;
+  const isAzzarIdentity = !name?.trim() || name.trim().toLowerCase() === 'azzar';
 
   return `You are ${identity}, an AI Agent will help users.
-
+${isAzzarIdentity ? AZZAR_IDENTITY_BLOCK : ''}
 Today's date: {{date}}
 
 Your role is to:

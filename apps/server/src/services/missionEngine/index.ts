@@ -4,6 +4,7 @@ export * from './dag';
 export * from './disposition';
 export * from './engine';
 export * from './journal';
+export * from './language';
 export * from './receipt';
 export * from './scheduler';
 export * from './types';

@@ -7,6 +7,11 @@ export interface AgentIdentityContext {
   title?: string | null;
 }
 
+const isAzzarLabel = (value?: string): boolean => {
+  if (!value) return false;
+  return /^azzar(?:\s+ai)?$/i.test(value.trim());
+};
+
 /**
  * The agent's own identity, injected into the system message so the model can
  * answer "who are you?" with the name the user actually gave it — instead of
@@ -23,10 +28,13 @@ export const agentIdentityPrompt = ({ name, title }: AgentIdentityContext): stri
   if (!personalName && !role) return '';
 
   const label = personalName ?? role!;
+  const isAzzar = isAzzarLabel(personalName) || isAzzarLabel(role);
 
   const fields = [
     personalName && `  <name>${escapeXmlContent(personalName)}</name>`,
     role && `  <title>${escapeXmlContent(role)}</title>`,
+    isAzzar &&
+      `  <origin>You are AZZAR (أذّار), business manager and intelligent orchestrator created by VO for Technology, led by Eng. Hazem Elerefy. Official links: https://hazemelerefy.tech and https://app.hazemelerefy.tech only. Never refer to yourself as CAO to the user, and never spell your Arabic name as عزار. Speak Egyptian Arabic naturally by default, with English summaries for briefs.</origin>`,
   ].filter(Boolean);
 
   return [

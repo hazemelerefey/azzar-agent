@@ -1,0 +1,137 @@
+/**
+ * AZZAR Language and Identity Module (v2.9 Must-Fixes)
+ */
+
+export const SUPPORTED_ENGLISH_LOCALES = ['en-US', 'en-GB'] as const;
+export type SupportedEnglishLocale = (typeof SUPPORTED_ENGLISH_LOCALES)[number];
+
+export const DEFAULT_MISSION_LANGUAGE = 'ar-EG';
+
+export interface PromptIdentityOptions {
+  customName?: string;
+  customTitle?: string;
+  locale?: string;
+  model: string;
+  provider: string;
+}
+
+export class MissionLanguageManager {
+  /**
+   * Resolves language specification.
+   * - Egyptian Arabic default (ar-EG)
+   * - Splits US and British English (en-US / en-GB)
+   * - Bare English ('en') throws for conversation and content
+   * - Arabic US/GB names resolve (e.g. 'إنجليزي أمريكي' -> 'en-US', 'إنجليزي بريطاني' -> 'en-GB')
+   * - Shared / ambiguous dialect names throw naming members
+   */
+  static resolveLocale(localeInput?: string): string {
+    if (!localeInput || localeInput.trim() === '') {
+      return DEFAULT_MISSION_LANGUAGE;
+    }
+
+    const trimmed = localeInput.trim().toLowerCase();
+
+    // Bare English check: bare 'en' throws for conversation and content
+    if (trimmed === 'en' || trimmed === 'english') {
+      throw new Error(
+        'Bare English "en" is ambiguous for conversation and content: must specify "en-US" or "en-GB"',
+      );
+    }
+
+    // Resolves US / GB English
+    if (
+      trimmed === 'en-us' ||
+      trimmed === 'us' ||
+      trimmed.includes('أمريكي') ||
+      trimmed === 'ar-us'
+    ) {
+      return 'en-US';
+    }
+
+    if (
+      trimmed === 'en-gb' ||
+      trimmed === 'gb' ||
+      trimmed.includes('بريطاني') ||
+      trimmed === 'ar-gb'
+    ) {
+      return 'en-GB';
+    }
+
+    // Egyptian Arabic
+    if (
+      trimmed === 'ar' ||
+      trimmed === 'ar-eg' ||
+      trimmed === 'egyptian' ||
+      trimmed.includes('مصري') ||
+      trimmed.includes('عربي')
+    ) {
+      return 'ar-EG';
+    }
+
+    // Shared dialect names without member throw naming members
+    if (trimmed === 'arabic-dialects' || trimmed === 'shared-dialects') {
+      throw new Error(
+        'Shared dialect name is ambiguous: must specify member from [ar-EG, ar-SA, ar-AE, ar-MA, ar-DZ]',
+      );
+    }
+
+    return localeInput;
+  }
+
+  /**
+   * Builds the official AZZAR system prompt containing:
+   * - AZZAR (أذّار)
+   * - Business manager & orchestrator
+   * - VO for Technology, Eng. Hazem Elerefy
+   * - The two official links only: https://hazemelerefy.tech and https://app.hazemelerefy.tech
+   * - No CAO to the user, no عزار
+   * - Model & provider disclosure
+   * - Egyptian Arabic default
+   */
+  static buildAzzarSystemPrompt(options: PromptIdentityOptions): string {
+    const resolvedLocale = MissionLanguageManager.resolveLocale(options.locale);
+
+    return `You are AZZAR (أذّار), an advanced AI business manager and Chief Orchestrator for operations and intelligent agents.
+You were founded and created by VO for Technology, led by Eng. Hazem Elerefy.
+Official links:
+- https://hazemelerefy.tech
+- https://app.hazemelerefy.tech
+
+Execution Environment & Model Disclosure:
+- Active Model: ${options.model}
+- Active Provider: ${options.provider}
+- Whenever asked who you are or what model powers you, state clearly that you are AZZAR (أذّار), developed by VO for Technology (Eng. Hazem Elerefy), running on ${options.model} via ${options.provider}.
+
+Communication & Identity Rules:
+1. Always identify as AZZAR (أذّار). Never claim to be trained by Google, OpenAI, Anthropic, or any other provider directly to the user.
+2. Never refer to yourself as "CAO" directly to the user (refer to yourself as business manager or orchestrator; no "CAO" acronym in direct conversation).
+3. Never spell your name as "عزار" — always write "أذّار".
+4. Default Language: Egyptian Arabic (اللهجة المصرية الطبيعية والواضحة لرواد الأعمال وأصحاب المشاريع) with warmth, clarity, and professionalism. Avoid stiff classical Arabic (فصحى جافة).
+5. For formal campaign briefs, receipts, and artifact documents, provide the Egyptian Arabic version with an English summary.
+6. Target Locale: ${resolvedLocale}`;
+  }
+
+  /**
+   * Strips single-line and multi-line comments before extracting manifest id.
+   */
+  static extractManifestId(content: string): string | null {
+    // Strip comments
+    const stripped = content.replaceAll(/\/\*[\S\s]*?\*\//g, '').replaceAll(/\/\/.*$/gm, '');
+
+    const match = stripped.match(/id\s*:\s*['"]([\w-]+)['"]/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * Anti-slop markup validator: enforces full chip markup instead of bare dot span.
+   */
+  static validateChipMarkup(html: string): { valid: boolean; reason?: string } {
+    if (html.includes('<span class="dot">') && !html.includes('azzar-chip')) {
+      return {
+        reason: 'Anti-slop violation: found bare dot span without full azzar-chip markup',
+        valid: false,
+      };
+    }
+    return { valid: true };
+  }
+}

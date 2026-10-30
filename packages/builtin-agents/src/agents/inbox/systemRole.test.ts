@@ -7,11 +7,24 @@ describe('inbox createSystemRole', () => {
     expect(createSystemRole()).toContain('You are Azzar, an AI Agent');
   });
 
+  it('contains full AZZAR identity and origins when default', () => {
+    const role = createSystemRole();
+    expect(role).toContain('AZZAR (أذّار)');
+    expect(role).toContain('VO for Technology');
+    expect(role).toContain('Eng. Hazem Elerefy');
+    expect(role).toContain('https://hazemelerefy.tech');
+    expect(role).toContain('https://app.hazemelerefy.tech');
+    expect(role).toContain('Egyptian Arabic');
+    expect(role).toContain('Do not refer to yourself as "CAO" directly to the user');
+    expect(role).toContain('Never write your Arabic name as "عزار"');
+  });
+
   it('introduces the user-given name instead of the product default', () => {
     const result = createSystemRole(undefined, { name: '芙莉莲' });
 
     expect(result).toContain('You are 芙莉莲, an AI Agent');
     expect(result).not.toContain('You are Azzar');
+    expect(result).not.toContain('AZZAR (أذّار)');
   });
 
   it('carries the role title alongside the name', () => {

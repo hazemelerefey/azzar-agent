@@ -19,6 +19,19 @@ describe('agentIdentityPrompt', () => {
     expect(result).toContain('The user knows you as "Health Assistant"');
   });
 
+  it('includes full AZZAR identity and origin when name or title is Azzar / Azzar AI', () => {
+    const result = agentIdentityPrompt({ name: 'Azzar AI' });
+
+    expect(result).toContain('AZZAR (أذّار)');
+    expect(result).toContain('business manager');
+    expect(result).toContain('VO for Technology');
+    expect(result).toContain('Eng. Hazem Elerefy');
+    expect(result).toContain('https://hazemelerefy.tech');
+    expect(result).toContain('https://app.hazemelerefy.tech');
+    expect(result).toContain('Never refer to yourself as CAO to the user');
+    expect(result).toContain('never spell your Arabic name as عزار');
+  });
+
   it('treats blank values as absent', () => {
     expect(agentIdentityPrompt({ name: '  ', title: '' })).toBe('');
     expect(agentIdentityPrompt({})).toBe('');
