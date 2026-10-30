@@ -29,8 +29,8 @@ import type { AzzarChatDatabase } from '../type';
 export class MissionModel {
   private readonly db: AzzarChatDatabase;
 
-  constructor(db: AzzarChatDatabase) {
-    this.db = db;
+  constructor(db?: AzzarChatDatabase) {
+    this.db = db!;
   }
 
   // ── Mission CRUD ──────────────────────────────────────────

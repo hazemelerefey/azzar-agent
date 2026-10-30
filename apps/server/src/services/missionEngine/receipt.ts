@@ -3,6 +3,17 @@ import { MissionModel } from '@/database/models/mission';
 import type { MissionDAG } from './dag';
 import type { MissionReceipt, NodeStatus, ReceiptApprovalStep, ReceiptToolCall } from './types';
 
+/** LLM usage counters contain "token" but are not secrets. */
+const NON_SECRET_TOKEN_COUNT_KEYS = new Set([
+  'completiontokens',
+  'prompttokens',
+  'tokens',
+  'tokenrollup',
+  'tokensused',
+  'tokenusage',
+  'totaltokens',
+]);
+
 export class MissionReceiptManager {
   private missionModel: MissionModel;
 
@@ -11,9 +22,14 @@ export class MissionReceiptManager {
   }
 
   /**
-   * Redact sensitive secrets from payloads (tokens, keys, bearer headers).
+   * Redact sensitive secrets from payloads: by key name (tokens, keys, passwords,
+   * authorization, cookies, credentials) and by value shape (Bearer headers, provider
+   * key prefixes, JWTs, secrets in URL query strings), at any depth.
    */
   static redactSecrets(obj: any): any {
+    if (typeof obj === 'string') {
+      return MissionReceiptManager.redactString(obj);
+    }
     if (!obj || typeof obj !== 'object') {
       return obj;
     }
@@ -26,21 +42,39 @@ export class MissionReceiptManager {
     for (const [key, value] of Object.entries(obj)) {
       const lower = key.toLowerCase();
       if (
-        lower.includes('secret') ||
-        lower.includes('token') ||
-        lower.includes('password') ||
-        lower.includes('authorization') ||
-        lower.includes('apikey') ||
-        lower.includes('api_key')
+        !NON_SECRET_TOKEN_COUNT_KEYS.has(lower) &&
+        (lower.includes('secret') ||
+          lower.includes('token') ||
+          lower.includes('password') ||
+          lower.includes('passwd') ||
+          lower.includes('authorization') ||
+          lower.includes('cookie') ||
+          lower.includes('credential') ||
+          lower.includes('private_key') ||
+          lower.includes('privatekey') ||
+          lower.includes('apikey') ||
+          lower.includes('api_key') ||
+          lower.includes('api-key'))
       ) {
         redacted[key] = '[REDACTED]';
-      } else if (typeof value === 'object' && value !== null) {
-        redacted[key] = MissionReceiptManager.redactSecrets(value);
       } else {
-        redacted[key] = value;
+        redacted[key] = MissionReceiptManager.redactSecrets(value);
       }
     }
     return redacted;
+  }
+
+  static redactString(value: string): string {
+    return value
+      .replaceAll(/\bBearer\s+[\w+./~=-]{8,}/gi, 'Bearer [REDACTED]')
+      .replaceAll(/\bsk-[\w-]{16,}/g, '[REDACTED]')
+      .replaceAll(/\bgh[opsu]_\w{20,}/g, '[REDACTED]')
+      .replaceAll(/\bAKIA[\dA-Z]{16}\b/g, '[REDACTED]')
+      .replaceAll(/\beyJ[\w-]{8,}\.[\w-]{8,}\.[\w-]{8,}/g, '[REDACTED]')
+      .replaceAll(
+        /([?&](?:api[_-]?key|access[_-]?token|token|secret|password|key)=)[^&\s]+/gi,
+        '$1[REDACTED]',
+      );
   }
 
   /**
@@ -97,7 +131,7 @@ export class MissionReceiptManager {
       toolCalls: params.toolCalls.map((tc) => ({
         input: MissionReceiptManager.redactSecrets(tc.input),
         output: MissionReceiptManager.redactSecrets(tc.output),
-        sources: tc.sources || [],
+        sources: (tc.sources || []).map((s) => MissionReceiptManager.redactString(s)),
         toolCallId: tc.toolCallId,
         toolId: tc.toolId,
       })),

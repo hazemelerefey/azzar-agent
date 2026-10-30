@@ -38,6 +38,8 @@ export interface MissionStepResult {
 }
 
 export interface CheckpointSnapshot {
+  /** `before_tap_tool` marks a checkpoint taken immediately before a tap tool runs. */
+  checkpointKind?: 'before_tap_tool' | 'node_commit';
   committedToolResults: Record<
     string,
     { input: any; output: any; sources?: string[]; toolCallId: string }
@@ -46,6 +48,7 @@ export interface CheckpointSnapshot {
   cost: number;
   missionId: string;
   nodeStatuses: Record<string, NodeStatus>;
+  pendingTap?: { approvalId: string; nodeId: string; toolCallId: string; toolId: string };
   rounds: number;
   tokenRollup?: {
     completionTokens: number;
@@ -62,7 +65,8 @@ export interface JournalEvent {
     | 'tool_result'
     | 'context_rewrite'
     | 'node_status_change'
-    | 'approval_decision';
+    | 'approval_decision'
+    | 'before_tap_tool';
   id?: string;
   missionId: string;
   payload: Record<string, any>;

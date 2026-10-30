@@ -13,8 +13,8 @@ export default {
   'flow.skip': 'Skip',
   'flow.steps.chiefAgent.avatarUpload': 'Upload your own avatar',
   'flow.steps.chiefAgent.birthday': 'Born {{date}}',
-  'flow.steps.chiefAgent.defaultName': 'Potato',
-  'flow.steps.chiefAgent.hint': 'Customize your chief agent operator',
+  'flow.steps.chiefAgent.defaultName': 'Azzar',
+  'flow.steps.chiefAgent.hint': 'Customize your AZZAR business manager',
   'flow.steps.chiefAgent.hire': 'Hire this agent',
   'flow.steps.chiefAgent.hireError': 'Failed to hire this agent, please try again',
   'flow.steps.chiefAgent.namePlaceholder': 'Name your agent',
@@ -50,7 +50,7 @@ export default {
     'I notice the details others miss — usually first.',
   'flow.steps.chiefAgent.personas.sienna.intro':
     'I love turning any idea into something vivid and story-like.',
-  'flow.steps.chiefAgent.title': 'Meet your Chief Agent',
+  'flow.steps.chiefAgent.title': 'Meet your AZZAR Assistant',
   'flow.steps.connectApps.apps.github.description':
     'We analyze your repos and contributions to understand your tech stack, skills, and work style',
   'flow.steps.connectApps.apps.gmail.description':
@@ -125,7 +125,7 @@ export default {
   'flow.steps.starterTasks.quoteHighlight': 'save you time.',
   'flow.steps.starterTasks.sectionLabel': 'Suggested starter tasks',
   'flow.steps.starterTasks.subline':
-    'Assign clear tasks to your CAO, then track its progress as it completes each one.',
+    'Assign clear tasks to your AZZAR assistant, then track its progress as it completes each one.',
   'flow.steps.starterTasks.title': 'See exactly how we get things done.',
   'interests.area.business': 'Business & Strategy',
   'interests.area.coding': 'Programming & Development',

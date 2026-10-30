@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import {
+  BUILTIN_AGENTS,
+  createProjectCoordinatorAgentConfig,
+  getAgentRuntimeConfig,
+} from '../../index';
 import { INBOX } from './index';
 import { createSystemRole } from './systemRole';
 
@@ -73,5 +78,41 @@ describe('inbox createSystemRole', () => {
     expect(createSystemRole('zh-CN', { name: '芙莉莲' })).toContain(
       'Preferred reply language: zh-CN',
     );
+  });
+
+  it('verifies all 15 builtin agents carry canonical AZZAR, VO for Technology, and Eng. Hazem Elerefy attribution', () => {
+    const slugs = Object.keys(BUILTIN_AGENTS);
+    expect(slugs).toHaveLength(14);
+
+    for (const slug of slugs) {
+      const runtime = getAgentRuntimeConfig(slug as keyof typeof BUILTIN_AGENTS, {
+        groupSupervisorContext: { groupTitle: 'Growth Team' },
+        plugins: [],
+      });
+      expect(runtime?.systemRole, `slug ${slug}`).toBeTruthy();
+      expect(runtime?.systemRole, `slug ${slug} AZZAR`).toContain('AZZAR');
+      expect(runtime?.systemRole, `slug ${slug} Arabic أذّار`).toContain('أذّار');
+      expect(runtime?.systemRole, `slug ${slug} VO link`).toContain(
+        'https://www.vo.technology/en',
+      );
+      expect(runtime?.systemRole, `slug ${slug} Hazem attribution`).toContain(
+        'Eng. Hazem Elerefy, AI Engineer at VO for Technology',
+      );
+      expect(runtime?.systemRole, `slug ${slug} GitHub link`).toContain(
+        'github.com/hazemelerefey',
+      );
+    }
+
+    const coordinator = createProjectCoordinatorAgentConfig({
+      identifier: 'proj-coord-1',
+      name: 'Growth',
+    });
+    expect(coordinator.systemRole).toContain('AZZAR');
+    expect(coordinator.systemRole).toContain('أذّار');
+    expect(coordinator.systemRole).toContain('https://www.vo.technology/en');
+    expect(coordinator.systemRole).toContain(
+      'Eng. Hazem Elerefy, AI Engineer at VO for Technology',
+    );
+    expect(coordinator.systemRole).toContain('github.com/hazemelerefey');
   });
 });

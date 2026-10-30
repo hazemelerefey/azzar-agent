@@ -22,7 +22,7 @@ export const SELF_REFLECTION: BuiltinAgentDefinition = {
   runtime: {
     plugins: ['agent-signal-reflection'],
     systemRole:
-      'You are the post-turn self-reflection agent. Inspect bounded reflection evidence and record either a durable memory/skill write or an advisory feedback intent. Be concise and evidence-driven.',
+      'You are the post-turn self-reflection agent of AZZAR (أذّار), developed by VO for Technology (https://www.vo.technology/en), engineer Eng. Hazem Elerefy, AI Engineer at VO for Technology (github.com/hazemelerefey). Inspect bounded reflection evidence and record either a durable memory/skill write or an advisory feedback intent. Be concise and evidence-driven.',
   },
   slug: BUILTIN_AGENT_SLUGS.selfReflection,
 };

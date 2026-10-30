@@ -2,6 +2,8 @@
  * AZZAR Language and Identity Module (v2.9 Must-Fixes)
  */
 
+import { resolveContentLocale } from './nationalities';
+
 export const SUPPORTED_ENGLISH_LOCALES = ['en-US', 'en-GB'] as const;
 export type SupportedEnglishLocale = (typeof SUPPORTED_ENGLISH_LOCALES)[number];
 
@@ -25,57 +27,8 @@ export class MissionLanguageManager {
    * - Shared / ambiguous dialect names throw naming members
    */
   static resolveLocale(localeInput?: string): string {
-    if (!localeInput || localeInput.trim() === '') {
-      return DEFAULT_MISSION_LANGUAGE;
-    }
-
-    const trimmed = localeInput.trim().toLowerCase();
-
-    // Bare English check: bare 'en' throws for conversation and content
-    if (trimmed === 'en' || trimmed === 'english') {
-      throw new Error(
-        'Bare English "en" is ambiguous for conversation and content: must specify "en-US" or "en-GB"',
-      );
-    }
-
-    // Resolves US / GB English
-    if (
-      trimmed === 'en-us' ||
-      trimmed === 'us' ||
-      trimmed.includes('أمريكي') ||
-      trimmed === 'ar-us'
-    ) {
-      return 'en-US';
-    }
-
-    if (
-      trimmed === 'en-gb' ||
-      trimmed === 'gb' ||
-      trimmed.includes('بريطاني') ||
-      trimmed === 'ar-gb'
-    ) {
-      return 'en-GB';
-    }
-
-    // Egyptian Arabic
-    if (
-      trimmed === 'ar' ||
-      trimmed === 'ar-eg' ||
-      trimmed === 'egyptian' ||
-      trimmed.includes('مصري') ||
-      trimmed.includes('عربي')
-    ) {
-      return 'ar-EG';
-    }
-
-    // Shared dialect names without member throw naming members
-    if (trimmed === 'arabic-dialects' || trimmed === 'shared-dialects') {
-      throw new Error(
-        'Shared dialect name is ambiguous: must specify member from [ar-EG, ar-SA, ar-AE, ar-MA, ar-DZ]',
-      );
-    }
-
-    return localeInput;
+    // The 20-nationality registry owns resolution (see ./nationalities).
+    return resolveContentLocale(localeInput);
   }
 
   /**

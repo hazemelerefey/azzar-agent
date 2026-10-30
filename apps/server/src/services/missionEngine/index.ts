@@ -6,6 +6,8 @@ export * from './engine';
 export * from './journal';
 export * from './language';
 export * from './marketingMission';
+export * from './nationalities';
+export * from './toolGate';
 export * from './receipt';
 export * from './scheduler';
 export * from './types';

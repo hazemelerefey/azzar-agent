@@ -1,5 +1,6 @@
 import { MissionModel } from '@/database/models/mission';
 
+import { MissionReceiptManager } from './receipt';
 import type { JournalEvent } from './types';
 
 export class MissionJournalManager {
@@ -16,7 +17,8 @@ export class MissionJournalManager {
     return this.missionModel.appendJournal({
       eventType: event.eventType,
       missionId: event.missionId,
-      payloadJson: event.payload,
+      // The journal is persisted and shown in the UI: secrets never enter it either.
+      payloadJson: MissionReceiptManager.redactSecrets(event.payload),
       sourceEventId: event.sourceEventId,
     });
   }
@@ -31,7 +33,7 @@ export class MissionJournalManager {
       eventType: entry.eventType,
       id: entry.id,
       missionId: entry.missionId,
-      payload: entry.payloadJson,
+      payload: entry.payloadJson as Record<string, any> | undefined,
       sourceEventId: entry.sourceEventId,
     }));
   }

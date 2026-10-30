@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import enOnboarding from '../../../../locales/en-US/onboarding.json';
+import enWelcome from '../../../../locales/en-US/welcome.json';
+import zhOnboarding from '../../../../locales/zh-CN/onboarding.json';
+import defaultOnboarding from '../../../../packages/azzar-locales/src/default/onboarding';
 import { AGENT_TEMPLATES, DEPARTMENT_TEMPLATES } from '../catalog';
 import { buildCaoTree, countNodes } from '../domain/cao';
 import { createWorkbenchStore } from '../domain/store';
@@ -106,5 +110,28 @@ describe('Restored Workbench & CAO Tree Verification', () => {
     expect(tree.tokens).toBe(7374);
     expect(tree.risk).toBe('needs_decision');
     expect(countNodes(tree)).toBeGreaterThanOrEqual(7); // root + cao + dept + agent + mission + 2 dag nodes + 1 approval
+  });
+
+  it('removes user-facing CAO and Chief Agent wording from onboarding and welcome locales (A-05)', () => {
+    expect(defaultOnboarding['flow.steps.chiefAgent.hint']).toBe(
+      'Customize your AZZAR business manager',
+    );
+    expect(defaultOnboarding['flow.steps.chiefAgent.title']).toBe('Meet your AZZAR Assistant');
+    expect(defaultOnboarding['flow.steps.starterTasks.subline']).toBe(
+      'Assign clear tasks to your AZZAR assistant, then track its progress as it completes each one.',
+    );
+
+    expect(enOnboarding['flow.steps.chiefAgent.hint']).toBe(
+      'Customize your AZZAR business manager',
+    );
+    expect(enOnboarding['flow.steps.chiefAgent.title']).toBe('Meet your AZZAR Assistant');
+    expect(enOnboarding['flow.steps.starterTasks.subline']).toBe(
+      'Assign clear tasks to your AZZAR assistant, then track its progress as it completes each one.',
+    );
+    expect(JSON.stringify(enOnboarding)).not.toMatch(
+      /\bCAO\b|chief agent operator|Meet your Chief Agent/i,
+    );
+    expect(JSON.stringify(zhOnboarding)).not.toMatch(/\bCAO\b|首席 Agent/);
+    expect(enWelcome['slogan.title']).toBe('Your AZZAR business orchestrator');
   });
 });

@@ -4,6 +4,7 @@ import * as path from 'node:path';
 
 import { MissionJournalManager } from './journal';
 import { MissionLanguageManager } from './language';
+import { MissionToolGate } from './toolGate';
 import type { MissionDAGDef, ReceiptToolCall } from './types';
 
 export const MARKETING_MISSION_DAG: MissionDAGDef = {
@@ -114,13 +115,24 @@ export interface OllamaCallResult {
   totalTokens: number;
 }
 
+/** A hung local model must not hang a mission: every Ollama call is bounded. */
+export const DEFAULT_OLLAMA_TIMEOUT_MS = 180_000;
+
+const resolveOllamaTimeoutMs = (override?: number): number => {
+  if (typeof override === 'number' && override > 0) return override;
+  const fromEnv = Number(process.env.AZZAR_OLLAMA_TIMEOUT_MS);
+  return Number.isFinite(fromEnv) && fromEnv > 0 ? fromEnv : DEFAULT_OLLAMA_TIMEOUT_MS;
+};
+
 export async function callLocalOllama(params: {
   model?: string;
   systemPrompt?: string;
+  timeoutMs?: number;
   userPrompt: string;
 }): Promise<OllamaCallResult> {
   const model = params.model || 'gemma4:e4b';
   const provider = 'ollama';
+  const timeoutMs = resolveOllamaTimeoutMs(params.timeoutMs);
   const systemPrompt =
     params.systemPrompt ||
     MissionLanguageManager.buildAzzarSystemPrompt({
@@ -129,21 +141,30 @@ export async function callLocalOllama(params: {
       provider,
     });
 
-  const response = await fetch('http://localhost:11434/api/chat', {
-    body: JSON.stringify({
-      messages: [
-        { content: systemPrompt, role: 'system' },
-        { content: params.userPrompt, role: 'user' },
-      ],
-      model,
-      options: {
-        temperature: 0.3,
-      },
-      stream: false,
-    }),
-    headers: { 'Content-Type': 'application/json' },
-    method: 'POST',
-  });
+  let response: Response;
+  try {
+    response = await fetch('http://localhost:11434/api/chat', {
+      body: JSON.stringify({
+        messages: [
+          { content: systemPrompt, role: 'system' },
+          { content: params.userPrompt, role: 'user' },
+        ],
+        model,
+        options: {
+          temperature: 0.3,
+        },
+        stream: false,
+      }),
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (error: any) {
+    if (error?.name === 'TimeoutError' || error?.name === 'AbortError') {
+      throw new Error(`Ollama call timed out after ${timeoutMs}ms (model ${model})`);
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     const errText = await response.text();
@@ -264,11 +285,22 @@ export class MarketingMissionExecutor {
   private missionId: string;
   private workspaceRoot: string;
   private nodeOutputs = new Map<string, any>();
+  private gate: MissionToolGate;
 
-  constructor(missionId: string, workspaceRoot: string, journalManager?: MissionJournalManager) {
+  constructor(
+    missionId: string,
+    workspaceRoot: string,
+    journalManager?: MissionJournalManager,
+    gate?: MissionToolGate,
+  ) {
     this.missionId = missionId;
     this.workspaceRoot = workspaceRoot;
     this.journalManager = journalManager || new MissionJournalManager();
+    this.gate = gate || new MissionToolGate({ journal: this.journalManager });
+  }
+
+  private allowedToolsFor(nodeId: string): string[] | undefined {
+    return MARKETING_MISSION_DAG.nodes.find((n) => n.id === nodeId)?.allowedToolIds;
   }
 
   getNodeOutputs(): Record<string, any> {
@@ -321,9 +353,17 @@ export class MarketingMissionExecutor {
     const toolCallId = `tc_${this.missionId}_N1_web_research`;
     let toolCall: ReceiptToolCall;
 
-    if (committedToolResults[toolCallId]) {
-      toolCall = committedToolResults[toolCallId];
-    } else {
+    {
+      // Server-side tool rules: allowlist, replay by toolCallId, tap gating.
+      const gated = await this.gate.execute({
+        allowedToolIds: this.allowedToolsFor('N1'),
+        committedToolResults,
+        input: { query: 'Egyptian small businesses marketing tools channels messages' },
+        missionId: this.missionId,
+        nodeId: 'N1',
+        toolCallId,
+        toolId: 'web-browsing____search',
+        run: async () => {
       const targetUrls = ['https://en.wikipedia.org/wiki/Economy_of_Egypt', 'https://mcit.gov.eg'];
       await this.journalManager.appendEvent({
         eventType: 'tool_call',
@@ -419,6 +459,10 @@ export class MarketingMissionExecutor {
         },
         sourceEventId: toolCallId,
       });
+          return toolCall;
+        },
+      });
+      toolCall = gated.toolCall;
     }
 
     const llmRes = await callLocalOllama({
@@ -462,9 +506,16 @@ export class MarketingMissionExecutor {
     const toolCallId = `tc_${this.missionId}_N2_brand_audit`;
     let toolCall: ReceiptToolCall;
 
-    if (committedToolResults[toolCallId]) {
-      toolCall = committedToolResults[toolCallId];
-    } else {
+    {
+      const gated = await this.gate.execute({
+        allowedToolIds: this.allowedToolsFor('N2'),
+        committedToolResults,
+        input: { files: ['DESIGN.md', 'AGENTS.md'] },
+        missionId: this.missionId,
+        nodeId: 'N2',
+        toolCallId,
+        toolId: 'agent-documents____readFile',
+        run: async () => {
       const designPath = path.join(this.workspaceRoot, 'DESIGN.md');
       const agentsPath = path.join(this.workspaceRoot, 'AGENTS.md');
 
@@ -525,6 +576,10 @@ export class MarketingMissionExecutor {
         },
         sourceEventId: toolCallId,
       });
+          return toolCall;
+        },
+      });
+      toolCall = gated.toolCall;
     }
 
     const llmRes = await callLocalOllama({
@@ -818,7 +873,7 @@ export class MarketingMissionExecutor {
     };
   }
 
-  private async runN7FinalBrief(committedToolResults: Record<string, any>) {
+  private async runN7FinalBrief(committedToolResults: Record<string, any> = {}) {
     const n1 = this.nodeOutputs.get('N1') ?? committedToolResults['__nodeOutput_N1'];
     const n2 = this.nodeOutputs.get('N2') ?? committedToolResults['__nodeOutput_N2'];
     const n3 = this.nodeOutputs.get('N3') ?? committedToolResults['__nodeOutput_N3'];
@@ -895,51 +950,65 @@ ${(n4?.rows || []).map((r: any) => `| ${r.id} | ${r.businessCategory} | ${r.city
 - **توقيع مدير التسويق:** ${n5?.managerReviewAr || ''}
 `;
 
-    await this.journalManager.appendEvent({
-      eventType: 'tool_call',
+    const gated = await this.gate.execute({
+      allowedToolIds: this.allowedToolsFor('N7'),
+      committedToolResults,
+      input: { path: artifactPath },
       missionId: this.missionId,
-      payload: {
-        input: { path: artifactPath },
-        toolCallId,
-        toolId: 'local-system____writeFile',
-      },
-      sourceEventId: 'N7_start',
-    });
-
-    await fs.writeFile(artifactPath, briefMarkdown, 'utf8');
-    const fileBuffer = await fs.readFile(artifactPath);
-    const artifactHash = createHash('sha256').update(fileBuffer).digest('hex');
-
-    const toolCall: ReceiptToolCall = {
-      input: {
-        byteLength: fileBuffer.byteLength,
-        path: artifactPath,
-      },
-      output: {
-        artifactPath,
-        bytesWritten: fileBuffer.byteLength,
-        sha256: artifactHash,
-      },
-      sources: [`file:///${artifactPath.replaceAll('\\', '/')}`],
+      nodeId: 'N7',
       toolCallId,
       toolId: 'local-system____writeFile',
-    };
+      run: async () => {
+        await this.journalManager.appendEvent({
+          eventType: 'tool_call',
+          missionId: this.missionId,
+          payload: {
+            input: { path: artifactPath },
+            toolCallId,
+            toolId: 'local-system____writeFile',
+          },
+          sourceEventId: 'N7_start',
+        });
 
-    await this.journalManager.appendEvent({
-      eventType: 'tool_result',
-      missionId: this.missionId,
-      payload: {
-        output: toolCall.output,
-        sources: toolCall.sources,
-        toolCallId,
+        await fs.writeFile(artifactPath, briefMarkdown, 'utf8');
+        const fileBuffer = await fs.readFile(artifactPath);
+        const sha256 = createHash('sha256').update(fileBuffer).digest('hex');
+
+        const written: ReceiptToolCall = {
+          input: {
+            byteLength: fileBuffer.byteLength,
+            path: artifactPath,
+          },
+          output: {
+            artifactPath,
+            bytesWritten: fileBuffer.byteLength,
+            sha256,
+          },
+          sources: [`file:///${artifactPath.replaceAll('\\', '/')}`],
+          toolCallId,
+          toolId: 'local-system____writeFile',
+        };
+
+        await this.journalManager.appendEvent({
+          eventType: 'tool_result',
+          missionId: this.missionId,
+          payload: {
+            output: written.output,
+            sources: written.sources,
+            toolCallId,
+          },
+          sourceEventId: toolCallId,
+        });
+        return written;
       },
-      sourceEventId: toolCallId,
     });
+    const toolCall = gated.toolCall;
+    const artifactHash: string = toolCall.output.sha256;
 
     const output = {
       artifactHash,
       artifactPath,
-      bytesWritten: fileBuffer.byteLength,
+      bytesWritten: toolCall.output.bytesWritten as number,
     };
     this.nodeOutputs.set('N7', output);
 

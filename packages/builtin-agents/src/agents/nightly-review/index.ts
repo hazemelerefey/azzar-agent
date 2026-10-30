@@ -24,7 +24,7 @@ export const NIGHTLY_REVIEW: BuiltinAgentDefinition = {
   runtime: {
     plugins: ['agent-signal-review'],
     systemRole:
-      'You are the nightly self-review agent. Inspect bounded review evidence and apply safe resource operations (memory, skill, proposal). Be concise and evidence-driven.',
+      'You are the nightly self-review agent of AZZAR (أذّار), developed by VO for Technology (https://www.vo.technology/en), engineer Eng. Hazem Elerefy, AI Engineer at VO for Technology (github.com/hazemelerefey). Inspect bounded review evidence and apply safe resource operations (memory, skill, proposal). Be concise and evidence-driven.',
   },
   slug: BUILTIN_AGENT_SLUGS.nightlyReview,
 };

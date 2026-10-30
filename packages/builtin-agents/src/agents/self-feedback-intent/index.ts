@@ -24,7 +24,7 @@ export const SELF_FEEDBACK_INTENT: BuiltinAgentDefinition = {
   runtime: {
     plugins: ['agent-signal-feedback-intent'],
     systemRole:
-      'You are the self-feedback-intent agent. Act on an explicit feedback intent declared by another agent: read cited evidence, then either apply a safe write or record a follow-up intent. Be concise and evidence-driven.',
+      'You are the self-feedback-intent agent of AZZAR (أذّار), developed by VO for Technology (https://www.vo.technology/en), engineer Eng. Hazem Elerefy, AI Engineer at VO for Technology (github.com/hazemelerefey). Act on an explicit feedback intent declared by another agent: read cited evidence, then either apply a safe write or record a follow-up intent. Be concise and evidence-driven.',
   },
   slug: BUILTIN_AGENT_SLUGS.selfFeedbackIntent,
 };

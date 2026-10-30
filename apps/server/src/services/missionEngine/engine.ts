@@ -22,6 +22,8 @@ export interface RunMissionContext {
     inputs: any,
   ) => Promise<{
     approvalPayload?: any;
+    /** Approvals consumed by tap tools inside this node (recorded in the checkpoint). */
+    consumedApprovalIds?: string[];
     cost?: number;
     error?: string;
     modelDisclosure?: { model: string; provider: string };
@@ -194,6 +196,10 @@ export class MissionEngine {
           totalCost += execRes.cost;
         }
 
+        for (const id of execRes.consumedApprovalIds ?? []) {
+          consumedApprovalIds.add(id);
+        }
+
         if (execRes.toolCalls) {
           for (const tc of execRes.toolCalls) {
             accumulatedToolCalls.push(tc);
@@ -272,12 +278,30 @@ export class MissionEngine {
     const finalStatus: MissionStatus = result.status;
     let finalReceipt: MissionReceipt | null = null;
 
+    // Recorded-path reconciliation (v2.9 must-fix), against the DB rows: persist any
+    // consumption this run recorded, then require checkpoint and mission_approvals to agree.
+    const latestCheckpoint = await this.checkpointManager.getLatestCheckpoint(missionId);
+    const checkpointIds = new Set(latestCheckpoint?.consumedApprovalIds ?? []);
+    const localIds = [...consumedApprovalIds];
+    if (localIds.length !== checkpointIds.size || localIds.some((id) => !checkpointIds.has(id))) {
+      await this.checkpointManager.saveCheckpoint(missionId, {
+        committedToolResults,
+        consumedApprovalIds: localIds,
+        cost: totalCost,
+        missionId,
+        nodeStatuses: result.nodeStatuses,
+        rounds,
+        tokenRollup: { ...tokenRollup },
+      });
+    }
+    const returnedConsumedIds = await this.reconcileConsumedApprovals(missionId);
+
     if (finalStatus === 'completed') {
       // Build receipt
       let approvalStep: ReceiptApprovalStep | undefined;
       const approvals = await this.missionModel.getApprovals(missionId);
-      if (approvals.length > 0) {
-        const lastAppr = approvals.at(-1);
+      const lastAppr = approvals.at(-1);
+      if (lastAppr) {
         approvalStep = {
           consumedAt: lastAppr.consumedAt?.toISOString(),
           decidedAt: lastAppr.decidedAt?.toISOString(),
@@ -305,10 +329,6 @@ export class MissionEngine {
     } else if (finalStatus === 'failed') {
       await this.missionModel.updateMission(missionId, { status: 'failed' });
     }
-
-    // Enforce recorded-path reconciliation rule (v2.9 must-fix)
-    const returnedConsumedIds = [...consumedApprovalIds];
-    MissionDispositionManager.reconcileRecordedPath(consumedApprovalIds, returnedConsumedIds);
 
     return {
       consumedApprovalIds: returnedConsumedIds,
@@ -382,6 +402,9 @@ export class MissionEngine {
       });
       await this.receiptManager.saveReceipt(receipt);
 
+      // Rejection consumes nothing: the DB and the checkpoint must agree on that too.
+      await this.reconcileConsumedApprovals(params.missionId);
+
       return MissionDispositionManager.createStep('reject', {
         disposition: 'rejected',
         error: `Mission rejected by ${params.decidedBy} at node ${decidedAppr?.nodeId || 'N6'}`,
@@ -425,11 +448,38 @@ export class MissionEngine {
           [consumedAppr.nodeId]: 'completed',
         },
       });
+    } else {
+      await this.checkpointManager.saveCheckpoint(params.missionId, {
+        committedToolResults: {},
+        consumedApprovalIds: [...consumedApprovalIds],
+        cost: 0,
+        missionId: params.missionId,
+        nodeStatuses: { [consumedAppr.nodeId]: 'completed' },
+        rounds: 0,
+      });
     }
+
+    // Recorded-path reconciliation against the DB consumed rows before returning.
+    await this.reconcileConsumedApprovals(params.missionId);
 
     return MissionDispositionManager.createStep('resume', {
       disposition: 'resumed',
       output: { approvalId: params.approvalId, nodeId: consumedAppr.nodeId, status: 'consumed' },
     });
+  }
+
+  /**
+   * Recorded-path reconciliation against the database (v2.9 must-fix).
+   * The consumed set recorded in the latest checkpoint must equal the approvals whose
+   * `consumed_at` is set in `mission_approvals`. Throws on any mismatch, otherwise returns
+   * the consumed approval ids as the database has them.
+   */
+  async reconcileConsumedApprovals(missionId: string): Promise<string[]> {
+    const checkpoint = await this.checkpointManager.getLatestCheckpoint(missionId);
+    const recorded = checkpoint?.consumedApprovalIds ?? [];
+    const approvals = await this.missionModel.getApprovals(missionId);
+    const dbConsumed = approvals.filter((a) => a.consumedAt).map((a) => a.id);
+    MissionDispositionManager.reconcileRecordedPath(dbConsumed, recorded);
+    return dbConsumed;
   }
 }
