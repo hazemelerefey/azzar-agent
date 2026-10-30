@@ -5,6 +5,7 @@ export * from './disposition';
 export * from './engine';
 export * from './journal';
 export * from './language';
+export * from './marketingMission';
 export * from './receipt';
 export * from './scheduler';
 export * from './types';

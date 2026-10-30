@@ -110,13 +110,22 @@ export class MissionEngine {
 
     // Check if resuming from checkpoint
     const checkpoint = await this.checkpointManager.getLatestCheckpoint(missionId);
+    if (checkpoint?.nodeStatuses) {
+      for (const [nId, st] of Object.entries(checkpoint.nodeStatuses)) {
+        if (st === 'completed' || !nodeStatuses[nId] || nodeStatuses[nId] === 'running') {
+          nodeStatuses[nId] = st === 'running' ? 'pending' : st;
+        }
+      }
+    }
     const consumedApprovalIds = new Set<string>(checkpoint?.consumedApprovalIds || []);
     const committedToolResults: Record<string, any> = {
       ...checkpoint?.committedToolResults,
     };
     let totalCost = checkpoint?.cost || 0;
     let rounds = checkpoint?.rounds || 0;
-    const accumulatedToolCalls: ReceiptToolCall[] = [];
+    const accumulatedToolCalls: ReceiptToolCall[] = Object.values(
+      committedToolResults,
+    ) as ReceiptToolCall[];
     const tokenRollup = { completionTokens: 0, promptTokens: 0, totalTokens: 0 };
     let modelDisclosure = { model: 'gemma4:e4b', provider: 'ollama' };
 
@@ -313,7 +322,11 @@ export class MissionEngine {
     missionId: string;
   }) {
     // 1. Record decision
-    await this.approvalManager.decideApproval(params.approvalId, params.decision, params.decidedBy);
+    const decidedAppr = await this.approvalManager.decideApproval(
+      params.approvalId,
+      params.decision,
+      params.decidedBy,
+    );
 
     if (params.decision === 'rejected') {
       // Mark mission rejected and create rejection receipt
@@ -333,31 +346,57 @@ export class MissionEngine {
       const dbNodes = await this.missionModel.getNodes(params.missionId);
       const nodeStatuses: Record<string, NodeStatus> = {};
       for (const n of dbNodes) nodeStatuses[n.nodeId] = n.status as NodeStatus;
+      if (decidedAppr?.nodeId) {
+        nodeStatuses[decidedAppr.nodeId] = 'failed';
+      }
+
+      const checkpoint = await this.checkpointManager.getLatestCheckpoint(params.missionId);
+      const toolCalls = Object.values(checkpoint?.committedToolResults || {}) as ReceiptToolCall[];
 
       const receipt = this.receiptManager.buildReceipt({
         approvalStep: {
-          decision: 'rejected',
-          decidedAt: new Date().toISOString(),
+          decidedAt: decidedAppr?.decidedAt?.toISOString() || new Date().toISOString(),
           decidedBy: params.decidedBy,
-          nodeId: 'N6',
-          shownPayloadHash: '',
+          decision: 'rejected',
+          nodeId: decidedAppr?.nodeId || 'N6',
+          shownPayloadHash: decidedAppr?.shownPayloadHash || '',
         },
         dag,
         missionId: params.missionId,
         modelDisclosure: { model: 'gemma4:e4b', provider: 'ollama' },
         nodeStatuses,
-        toolCalls: [],
+        toolCalls,
       });
       await this.receiptManager.saveReceipt(receipt);
 
       return MissionDispositionManager.createStep('reject', {
         disposition: 'rejected',
-        error: `Mission rejected by ${params.decidedBy}`,
+        error: `Mission rejected by ${params.decidedBy} at node ${decidedAppr?.nodeId || 'N6'}`,
       });
     }
 
     // 2. Consume approval atomically (v2.9 must-fix)
-    await this.approvalManager.consumeApproval(params.approvalId, params.currentPayload);
+    const consumedAppr = await this.approvalManager.consumeApproval(
+      params.approvalId,
+      params.currentPayload,
+    );
+
+    await this.journalManager.appendEvent({
+      eventType: 'approval_decision',
+      missionId: params.missionId,
+      payload: {
+        approvalId: params.approvalId,
+        consumedAt: consumedAppr.consumedAt?.toISOString(),
+        decidedBy: params.decidedBy,
+        decision: 'approved',
+        nodeId: consumedAppr.nodeId,
+      },
+    });
+
+    // Mark the approval gate node completed in DB
+    await this.missionModel.updateNode(params.missionId, consumedAppr.nodeId, {
+      status: 'completed',
+    });
 
     // 3. Update checkpoint with consumed approval
     const checkpoint = await this.checkpointManager.getLatestCheckpoint(params.missionId);
@@ -368,11 +407,16 @@ export class MissionEngine {
       await this.checkpointManager.saveCheckpoint(params.missionId, {
         ...checkpoint,
         consumedApprovalIds: [...consumedApprovalIds],
+        nodeStatuses: {
+          ...checkpoint.nodeStatuses,
+          [consumedAppr.nodeId]: 'completed',
+        },
       });
     }
 
-    return MissionDispositionManager.createStep('approval_consumed', {
-      output: { approvalId: params.approvalId, status: 'consumed' },
+    return MissionDispositionManager.createStep('resume', {
+      disposition: 'resumed',
+      output: { approvalId: params.approvalId, nodeId: consumedAppr.nodeId, status: 'consumed' },
     });
   }
 }
