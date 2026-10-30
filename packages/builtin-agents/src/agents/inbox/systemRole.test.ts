@@ -11,9 +11,11 @@ describe('inbox createSystemRole', () => {
     const role = createSystemRole();
     expect(role).toContain('AZZAR (أذّار)');
     expect(role).toContain('VO for Technology');
-    expect(role).toContain('Eng. Hazem Elerefy');
-    expect(role).toContain('https://hazemelerefy.tech');
-    expect(role).toContain('https://app.hazemelerefy.tech');
+    expect(role).toContain('https://www.vo.technology/en');
+    expect(role).toContain('Eng. Hazem Elerefy, AI Engineer at VO for Technology');
+    expect(role).toContain('github.com/hazemelerefey');
+    expect(role).not.toContain('https://hazemelerefy.tech');
+    expect(role).not.toContain('under the leadership of');
     expect(role).toContain('Egyptian Arabic');
     expect(role).toContain('Do not refer to yourself as "CAO" directly to the user');
     expect(role).toContain('Never write your Arabic name as "عزار"');

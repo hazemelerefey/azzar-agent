@@ -34,7 +34,7 @@ describe('Marketing Mission Specification & Guardrail Contracts', () => {
         },
         {
           descriptionAr: 'تحكم كامل معاك في كل خطوة',
-          sourceRef: 'https://hazemelerefy.tech',
+          sourceRef: 'https://www.vo.technology/en',
           title: 'Idea 3',
         },
       ],

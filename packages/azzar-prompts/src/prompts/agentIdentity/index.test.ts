@@ -25,9 +25,11 @@ describe('agentIdentityPrompt', () => {
     expect(result).toContain('AZZAR (أذّار)');
     expect(result).toContain('business manager');
     expect(result).toContain('VO for Technology');
-    expect(result).toContain('Eng. Hazem Elerefy');
-    expect(result).toContain('https://hazemelerefy.tech');
-    expect(result).toContain('https://app.hazemelerefy.tech');
+    expect(result).toContain('https://www.vo.technology/en');
+    expect(result).toContain('Eng. Hazem Elerefy, AI Engineer at VO for Technology');
+    expect(result).toContain('github.com/hazemelerefey');
+    expect(result).not.toContain('https://hazemelerefy.tech');
+    expect(result).not.toContain('led by');
     expect(result).toContain('Never refer to yourself as CAO to the user');
     expect(result).toContain('never spell your Arabic name as عزار');
   });

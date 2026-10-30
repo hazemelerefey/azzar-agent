@@ -343,7 +343,7 @@ export class MarketingMissionExecutor {
       let fetchStatus = 200;
       try {
         const res = await fetch(wikiUrl, {
-          headers: { 'User-Agent': 'AZZAR-Agent/1.0 (https://hazemelerefy.tech)' },
+          headers: { 'User-Agent': 'AZZAR-Agent/1.0 (https://www.vo.technology/en)' },
         });
         fetchStatus = res.status;
         if (res.ok) {
@@ -368,7 +368,7 @@ export class MarketingMissionExecutor {
           claim:
             'Egyptian small businesses prioritize practical Arabic-first tools that save time on daily content creation, lead tracking, and customer follow-up without requiring a full marketing agency.',
           dateChecked,
-          sourceUrl: 'https://hazemelerefy.tech',
+          sourceUrl: 'https://www.vo.technology/en',
         },
       ];
 
@@ -378,7 +378,7 @@ export class MarketingMissionExecutor {
           query: 'Egyptian small businesses marketing tools channels messages',
         },
         output: { findings, status: fetchStatus },
-        sources: ['https://en.wikipedia.org/wiki/Economy_of_Egypt', 'https://hazemelerefy.tech'],
+        sources: ['https://en.wikipedia.org/wiki/Economy_of_Egypt', 'https://www.vo.technology/en'],
         toolCallId,
         toolId: 'web-browsing____search',
       };
@@ -458,7 +458,7 @@ export class MarketingMissionExecutor {
 
       const brandFacts = [
         {
-          fact: 'AZZAR (أذّار) is built by VO for Technology, led by Eng. Hazem Elerefy, with official web presence at https://hazemelerefy.tech and https://app.hazemelerefy.tech.',
+          fact: 'AZZAR (أذّار) is developed by VO for Technology (https://www.vo.technology/en), engineer Eng. Hazem Elerefy, AI Engineer at VO for Technology (github.com/hazemelerefey).',
           sourceFile: 'AGENTS.md',
         },
         {
@@ -570,12 +570,12 @@ export class MarketingMissionExecutor {
       budgetSpend: 0,
       channels: ['Facebook Pages & Reels', 'WhatsApp Business', 'Instagram', 'LinkedIn Egypt'],
       englishSummary:
-        'AZZAR (أذّار), developed by VO for Technology (Eng. Hazem Elerefy), launches its Marketing Agent for Egyptian small businesses. It plans campaigns, audits brand assets, prepares structured briefs in natural Egyptian Arabic, and enforces human approval gates before any publishing or spend.',
+        'AZZAR (أذّار), developed by VO for Technology (https://www.vo.technology/en), engineer Eng. Hazem Elerefy, AI Engineer at VO for Technology (github.com/hazemelerefey), launches its Marketing Agent for Egyptian small businesses. It plans campaigns, audits brand assets, prepares structured briefs in natural Egyptian Arabic, and enforces human approval gates before any publishing or spend.',
       ideas: [
         {
           descriptionAr:
             'حملة "رتّب تسويق شغلك في خطوة واحدة": فيديو قصير يوضح إزاي أذّار بيقرأ ملفات شركتك ويطلعلك خطة تسويق واضحة من غير ما تدفع لمكتب تسويق كبير، وكل خطوة بموافقتك.',
-          sourceRef: 'DESIGN.md & https://hazemelerefy.tech',
+          sourceRef: 'DESIGN.md & https://www.vo.technology/en',
           title: 'رتّب تسويق شغلك مع أذّار',
         },
         {
@@ -587,7 +587,7 @@ export class MarketingMissionExecutor {
         {
           descriptionAr:
             'حملة "قرارك في إيدك دايماً": إبراز ميزة بوابة الموافقة البشرية وإيصال المراجعة (Mission Receipt) عشان صاحب البيزنس يطمن إن مفيش أي نشر أو خطوة بتتم من ورا ظهره.',
-          sourceRef: 'AGENTS.md & https://app.hazemelerefy.tech',
+          sourceRef: 'AGENTS.md & github.com/hazemelerefey',
           title: 'أمان وتحكم كامل في كل حملة',
         },
       ],
@@ -807,10 +807,10 @@ export class MarketingMissionExecutor {
     const briefMarkdown = `# موجز الحملة الإعلانية — أذّار (AZZAR Marketing Agent Launch Brief)
 
 **المهمة (Mission ID):** \`${this.missionId}\`
-**العلامة التجارية:** AZZAR (أذّار) — VO for Technology (Eng. Hazem Elerefy)
+**العلامة التجارية:** AZZAR (أذّار) — VO for Technology (Eng. Hazem Elerefy, AI Engineer at VO for Technology)
 **الروابط الرسمية:**
-- https://hazemelerefy.tech
-- https://app.hazemelerefy.tech
+- https://www.vo.technology/en
+- github.com/hazemelerefey
 **النموذج والمزود (Model & Provider):** \`gemma4:e4b\` via \`ollama\`
 
 ---
@@ -849,8 +849,8 @@ ${n3?.llmGeneratedCopy || ''}
 
 ## 4. English Version of the Final Brief
 **Subject:** AZZAR (أذّار) Marketing Agent Launch for Egyptian Small Businesses
-**Developer:** VO for Technology, led by Eng. Hazem Elerefy
-**Official Links:** https://hazemelerefy.tech | https://app.hazemelerefy.tech
+**Developer:** VO for Technology (https://www.vo.technology/en) — Engineer: Eng. Hazem Elerefy, AI Engineer at VO for Technology (github.com/hazemelerefey)
+**Official Links:** https://www.vo.technology/en | github.com/hazemelerefey
 **Summary:** ${n3?.englishSummary}
 
 ---

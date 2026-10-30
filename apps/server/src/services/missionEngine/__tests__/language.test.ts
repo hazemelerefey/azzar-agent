@@ -44,9 +44,10 @@ describe('MissionLanguageManager & v2.9 Identity/Language Contracts', () => {
     expect(prompt).toContain('AZZAR (أذّار)');
     expect(prompt).toContain('business manager');
     expect(prompt).toContain('VO for Technology');
-    expect(prompt).toContain('Eng. Hazem Elerefy');
-    expect(prompt).toContain('https://hazemelerefy.tech');
-    expect(prompt).toContain('https://app.hazemelerefy.tech');
+    expect(prompt).toContain('https://www.vo.technology/en');
+    expect(prompt).toContain('Eng. Hazem Elerefy, AI Engineer at VO for Technology');
+    expect(prompt).toContain('github.com/hazemelerefey');
+    expect(prompt).not.toContain('https://hazemelerefy.tech');
     expect(prompt).toContain('gemma4:e4b');
     expect(prompt).toContain('ollama');
     expect(prompt).toContain('Egyptian Arabic');
