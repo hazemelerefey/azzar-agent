@@ -60,6 +60,7 @@ export class MissionEngine {
       departmentId: dagDef.departmentId || 'marketing',
       id: dagDef.id,
       mode: dagDef.mode || 'company',
+      projectId: dagDef.projectId ?? null,
       status: 'pending',
       title: dagDef.title,
     });

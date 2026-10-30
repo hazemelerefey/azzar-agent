@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import { MissionJournalManager } from './journal';
 import { MissionLanguageManager } from './language';
 import { MissionToolGate } from './toolGate';
-import type { MissionDAGDef, ReceiptToolCall } from './types';
+import type { MissionDAGDef, MissionOrgContext, ReceiptToolCall } from './types';
 
 export const MARKETING_MISSION_DAG: MissionDAGDef = {
   departmentId: 'marketing',
@@ -286,17 +286,24 @@ export class MarketingMissionExecutor {
   private workspaceRoot: string;
   private nodeOutputs = new Map<string, any>();
   private gate: MissionToolGate;
+  private orgContext?: MissionOrgContext;
 
   constructor(
     missionId: string,
     workspaceRoot: string,
     journalManager?: MissionJournalManager,
     gate?: MissionToolGate,
+    orgContext?: MissionOrgContext,
   ) {
     this.missionId = missionId;
     this.workspaceRoot = workspaceRoot;
     this.journalManager = journalManager || new MissionJournalManager();
     this.gate = gate || new MissionToolGate({ journal: this.journalManager });
+    this.orgContext = orgContext;
+  }
+
+  getOrgContext(): MissionOrgContext | undefined {
+    return this.orgContext;
   }
 
   private allowedToolsFor(nodeId: string): string[] | undefined {
@@ -465,8 +472,13 @@ export class MarketingMissionExecutor {
       toolCall = gated.toolCall;
     }
 
+    const orgCtx = this.orgContext;
+    const orgSection = orgCtx
+      ? `\nDepartment: ${orgCtx.departmentName || orgCtx.departmentId || 'Marketing'}\nDepartment Context: ${orgCtx.departmentContext || 'N/A'}\nDepartment Instructions: ${orgCtx.departmentInstructions || 'N/A'}\nProject: ${orgCtx.projectName || orgCtx.projectId || 'None'}\nProject Context: ${orgCtx.projectContext || 'N/A'}\n`
+      : '';
+
     const llmRes = await callLocalOllama({
-      userPrompt: `You are the Marketing Research Specialist for AZZAR. Summarize these verified research findings on how Egyptian small businesses discover marketing tools and channels in 3 concise bullet points in Egyptian Arabic:\n${JSON.stringify(toolCall.output.findings)}`,
+      userPrompt: `You are the Marketing Research Specialist for AZZAR.${orgSection} Summarize these verified research findings on how Egyptian small businesses discover marketing tools and channels in 3 concise bullet points in Egyptian Arabic:\n${JSON.stringify(toolCall.output.findings)}`,
     });
 
     await this.journalManager.appendEvent({
@@ -885,9 +897,16 @@ export class MarketingMissionExecutor {
     await fs.mkdir(artifactDir, { recursive: true });
     const artifactPath = path.join(artifactDir, `azzar-marketing-brief-${this.missionId}.md`);
 
+    const orgCtx = this.orgContext;
+    const orgBlock = orgCtx
+      ? `\n**القسم (Department):** \`${orgCtx.departmentId || 'marketing'}\`${orgCtx.departmentName ? ` (${orgCtx.departmentName})` : ''}
+**المشروع (Project):** \`${orgCtx.projectId || 'standalone'}\`${orgCtx.projectName ? ` (${orgCtx.projectName})` : ''}
+${orgCtx.departmentContext ? `**سياق القسم (Department Context):** ${orgCtx.departmentContext}\n` : ''}${orgCtx.departmentInstructions ? `**تعليمات القسم (Department Instructions):** ${orgCtx.departmentInstructions}\n` : ''}${orgCtx.projectContext ? `**سياق المشروع (Project Context):** ${orgCtx.projectContext}\n` : ''}${orgCtx.departmentSources?.length ? `**مصادر القسم (Department Sources):** ${orgCtx.departmentSources.map((s) => `${s.name} (${s.kind})`).join('، ')}\n` : ''}`
+      : '';
+
     const briefMarkdown = `# موجز الحملة الإعلانية — أذّار (AZZAR Marketing Agent Launch Brief)
 
-**المهمة (Mission ID):** \`${this.missionId}\`
+**المهمة (Mission ID):** \`${this.missionId}\`${orgBlock}
 **العلامة التجارية:** AZZAR (أذّار) — VO for Technology (Eng. Hazem Elerefy, AI Engineer at VO for Technology)
 **الروابط الرسمية:**
 - https://www.vo.technology/en

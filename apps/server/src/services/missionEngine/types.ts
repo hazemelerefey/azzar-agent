@@ -11,11 +11,27 @@ export interface MissionNodeDef {
   title?: string;
 }
 
+export interface MissionOrgContext {
+  departmentContext?: string;
+  departmentId?: string | null;
+  departmentInstructions?: string;
+  departmentName?: string;
+  departmentSources?: Array<{ content?: string; kind: string; name: string }>;
+  departmentTone?: string;
+  projectContext?: string;
+  projectDescription?: string;
+  projectId?: string | null;
+  projectName?: string;
+  projectSources?: Array<{ content?: string; kind: string; name: string }>;
+}
+
 export interface MissionDAGDef {
   departmentId?: string;
   id: string;
   mode?: string;
   nodes: MissionNodeDef[];
+  orgContext?: MissionOrgContext;
+  projectId?: string | null;
   title: string;
 }
 

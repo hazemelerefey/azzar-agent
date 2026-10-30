@@ -1,7 +1,24 @@
 import { TRPCError } from '@trpc/server';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
+import {
+  AGENT_TEMPLATES,
+  getAgentTemplate,
+  getDepartmentTemplate,
+  getMissionTemplate,
+} from '@/features/AzzarWorkbench/catalog';
+import { buildCaoTree } from '@/features/AzzarWorkbench/domain/cao';
+import { recommendForDepartment } from '@/features/AzzarWorkbench/domain/matcher';
+import { defaultRuleSet } from '@/features/AzzarWorkbench/domain/rules';
+import type {
+  ActiveDepartment,
+  InstalledAgent,
+  Project,
+  WorkbenchData,
+} from '@/features/AzzarWorkbench/domain/types';
 import { MissionModel } from '@/database/models/mission';
+import { users } from '@/database/schemas/user';
 import { publicProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { MissionEngine } from '@/server/services/missionEngine/engine';
@@ -10,7 +27,11 @@ import {
   MARKETING_MISSION_DAG,
   MarketingMissionExecutor,
 } from '@/server/services/missionEngine/marketingMission';
-import type { MissionDAGDef, MissionReceipt } from '@/server/services/missionEngine/types';
+import type {
+  MissionDAGDef,
+  MissionOrgContext,
+  MissionReceipt,
+} from '@/server/services/missionEngine/types';
 
 const missionProcedure = publicProcedure.use(serverDatabase);
 
@@ -311,9 +332,9 @@ async function buildFullMissionDetail(missionModel: MissionModel, missionId: str
     managerId: 'marketing-manager',
     modelId: receipt?.modelDisclosure?.model || 'gemma4:e4b',
     nodes: mappedNodes,
-    ownerId: dbMission.departmentId || 'marketing',
-    ownerType: 'department' as const,
-    projectId: null,
+    ownerId: dbMission.projectId || dbMission.departmentId || 'marketing',
+    ownerType: (dbMission.projectId ? 'project' : 'department') as 'department' | 'project',
+    projectId: dbMission.projectId ?? null,
     report:
       dbMission.status === 'completed'
         ? {
@@ -425,7 +446,230 @@ async function buildFullMissionDetail(missionModel: MissionModel, missionId: str
   };
 }
 
+function mapDbDepartment(row: any): ActiveDepartment {
+  const rulesObj =
+    row.rulesJson && typeof row.rulesJson === 'object' && Object.keys(row.rulesJson).length > 0
+      ? row.rulesJson
+      : defaultRuleSet();
+  return {
+    activatedAt: row.activatedAt ? new Date(row.activatedAt).toISOString() : new Date().toISOString(),
+    active: Boolean(row.active),
+    context: row.context || '',
+    customName: row.customNameJson || undefined,
+    instructions: row.instructions || '',
+    rules: rulesObj,
+    sources: Array.isArray(row.sourcesJson) ? row.sourcesJson : [],
+    templateId: row.templateId,
+    tone: row.tone || '',
+  };
+}
+
+function mapDbProject(row: any): Project {
+  return {
+    context: row.context || '',
+    createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : new Date().toISOString(),
+    departmentId: row.departmentId ?? null,
+    description: row.description || '',
+    id: row.id,
+    inherit:
+      row.inheritJson && typeof row.inheritJson === 'object'
+        ? row.inheritJson
+        : { policies: true, sources: false, tone: true },
+    name: row.name,
+    sources: Array.isArray(row.sourcesJson) ? row.sourcesJson : [],
+    visibility: row.visibility === 'shared' ? 'shared' : 'private',
+  };
+}
+
+function mapDbInstall(row: any): InstalledAgent {
+  return {
+    departmentIds: Array.isArray(row.departmentIdsJson) ? row.departmentIdsJson : [],
+    installedAt: row.installedAt ? new Date(row.installedAt).toISOString() : new Date().toISOString(),
+    projectIds: Array.isArray(row.projectIdsJson) ? row.projectIdsJson : [],
+    status: row.status === 'paused' ? 'paused' : 'active',
+    templateId: row.templateId,
+  };
+}
+
+async function resolveOrgContext(
+  missionModel: MissionModel,
+  departmentId?: string | null,
+  projectId?: string | null,
+): Promise<MissionOrgContext | undefined> {
+  const deptRow = departmentId ? await missionModel.getDepartment(departmentId) : null;
+  const projRow = projectId ? await missionModel.getProject(projectId) : null;
+  if (!deptRow && !projRow) return undefined;
+
+  const deptTpl = departmentId ? getDepartmentTemplate(departmentId) : undefined;
+  const customName = (deptRow?.customNameJson as { ar?: string; en?: string } | undefined)?.en;
+  const inherit = (projRow?.inheritJson as { policies?: boolean; sources?: boolean; tone?: boolean }) || {
+    policies: true,
+    sources: false,
+    tone: true,
+  };
+
+  return {
+    departmentContext: deptRow?.context || undefined,
+    departmentId: departmentId ?? projRow?.departmentId ?? null,
+    departmentInstructions:
+      !projRow || inherit.policies !== false ? deptRow?.instructions || undefined : undefined,
+    departmentName: customName || deptTpl?.name.en || departmentId || undefined,
+    departmentSources:
+      !projRow || inherit.sources
+        ? Array.isArray(deptRow?.sourcesJson)
+          ? (deptRow.sourcesJson as any[])
+          : undefined
+        : undefined,
+    departmentTone: !projRow || inherit.tone !== false ? deptRow?.tone || undefined : undefined,
+    projectContext: projRow?.context || undefined,
+    projectDescription: projRow?.description || undefined,
+    projectId: projRow?.id ?? projectId ?? null,
+    projectName: projRow?.name || undefined,
+    projectSources: Array.isArray(projRow?.sourcesJson) ? (projRow.sourcesJson as any[]) : undefined,
+  };
+}
+
+async function resolveServerAdmin(ctx: any): Promise<boolean> {
+  if (ctx?.isAdmin === true) return true;
+  const adminIdsEnv = (process.env.AZZAR_ADMIN_USER_IDS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (ctx?.userId && adminIdsEnv.includes(ctx.userId)) {
+    return true;
+  }
+  if (ctx?.userId && ctx?.serverDB) {
+    try {
+      const rows = await ctx.serverDB
+        .select({ role: users.role })
+        .from(users)
+        .where(eq(users.id, ctx.userId))
+        .limit(1);
+      if (rows[0]?.role === 'admin') return true;
+    } catch {
+      // Fallback if users table query fails
+    }
+  }
+  return false;
+}
+
+async function buildPostgreSQLWorkbenchState(
+  missionModel: MissionModel,
+  ctx: any,
+): Promise<{
+  departments: Record<string, ActiveDepartment>;
+  installs: Record<string, InstalledAgent>;
+  isAdmin: boolean;
+  projects: Project[];
+}> {
+  const [deptRows, projRows, installRows, isAdmin] = await Promise.all([
+    missionModel.listDepartments(),
+    missionModel.listProjects(),
+    missionModel.listAgentInstalls(),
+    resolveServerAdmin(ctx),
+  ]);
+
+  const departments: Record<string, ActiveDepartment> = {};
+  for (const r of deptRows) {
+    departments[r.templateId] = mapDbDepartment(r);
+  }
+
+  const installs: Record<string, InstalledAgent> = {};
+  for (const r of installRows) {
+    installs[r.templateId] = mapDbInstall(r);
+  }
+
+  const projects = projRows.map(mapDbProject);
+  return { departments, installs, isAdmin, projects };
+}
+
 export const missionRouter = router({
+  activateDepartment: missionProcedure
+    .input(
+      z.object({
+        context: z.string().optional(),
+        customName: z.object({ ar: z.string(), en: z.string() }).optional(),
+        instructions: z.string().optional(),
+        templateId: z.string().min(1),
+        tone: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const isCustom = input.templateId === 'custom' || input.templateId.startsWith('custom-');
+      const template = getDepartmentTemplate(isCustom ? 'custom' : input.templateId);
+      if (!template) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `Department template "${input.templateId}" not found.`,
+        });
+      }
+
+      const missionModel = new MissionModel(ctx.serverDB);
+      const row = await missionModel.upsertDepartment({
+        activatedAt: new Date(),
+        active: true,
+        context: input.context ?? '',
+        customNameJson: input.customName ?? undefined,
+        instructions: input.instructions ?? '',
+        rulesJson: defaultRuleSet(),
+        sourcesJson: [],
+        templateId: input.templateId,
+        tone: input.tone ?? '',
+      });
+
+      const installRows = await missionModel.listAgentInstalls();
+      const installsMap: Record<string, InstalledAgent> = {};
+      for (const r of installRows) installsMap[r.templateId] = mapDbInstall(r);
+
+      const recommendations = recommendForDepartment(template, AGENT_TEMPLATES, installsMap);
+      return {
+        department: mapDbDepartment(row),
+        recommendations,
+      };
+    }),
+
+  assignAgent: missionProcedure
+    .input(
+      z.object({
+        departmentId: z.string().optional(),
+        projectId: z.string().optional(),
+        templateId: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+      const existing = await missionModel.getAgentInstall(input.templateId);
+      if (!existing) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: `Agent "${input.templateId}" is not installed in My Agents.`,
+        });
+      }
+      if (input.departmentId) {
+        const dept = await missionModel.getDepartment(input.departmentId);
+        if (!dept || !dept.active) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: `Department "${input.departmentId}" is not active in PostgreSQL.`,
+          });
+        }
+      }
+      if (input.projectId) {
+        const proj = await missionModel.getProject(input.projectId);
+        if (!proj) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: `Project "${input.projectId}" not found in PostgreSQL.`,
+          });
+        }
+      }
+      const updated = await missionModel.assignAgent(input.templateId, {
+        departmentId: input.departmentId,
+        projectId: input.projectId,
+      });
+      return mapDbInstall(updated);
+    }),
+
   cancel: missionProcedure
     .input(z.object({ missionId: z.string().min(1) }))
     .mutation(async ({ input, ctx }) => {
@@ -443,40 +687,181 @@ export const missionRouter = router({
   createAndRun: missionProcedure
     .input(
       z.object({
+        agentId: z.string().optional(),
         departmentId: z.string().optional(),
         goal: z.string().min(1),
+        managerId: z.string().optional(),
         mode: z.enum(['company', 'individual']).optional(),
         modelId: z.string().optional(),
+        projectId: z.string().nullable().optional(),
+        scriptId: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+
+      // 1. Server-side enforcement of Available vs Coming soon for agent/manager, script, and department
+      const requestedAgentId = input.managerId || input.agentId;
+      if (requestedAgentId) {
+        const agentTpl = getAgentTemplate(requestedAgentId);
+        if (!agentTpl) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: `Refused by server: Agent "${requestedAgentId}" does not exist in catalog.`,
+          });
+        }
+        if (agentTpl.availability !== 'available') {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: `Refused by server: Agent "${requestedAgentId}" (${agentTpl.name.en}) is Coming soon and cannot create or run missions. Only Marketing Manager (marketing-manager) is Available.`,
+          });
+        }
+      }
+
+      if (input.scriptId) {
+        const scriptTpl = getMissionTemplate(input.scriptId);
+        if (!scriptTpl) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: `Refused by server: Mission script "${input.scriptId}" is not available. Only Marketing scripts are Available.`,
+          });
+        }
+      }
+
+      const targetDeptId = input.departmentId || 'marketing';
+      const isCustomDept = targetDeptId === 'custom' || targetDeptId.startsWith('custom-');
+      if (!isCustomDept) {
+        const deptTpl = getDepartmentTemplate(targetDeptId);
+        if (!deptTpl) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: `Refused by server: Department "${targetDeptId}" not found.`,
+          });
+        }
+        if (deptTpl.availability !== 'available') {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: `Refused by server: Department "${targetDeptId}" (${deptTpl.name.en}) is Coming soon and cannot create or run missions. Only Marketing is Available.`,
+          });
+        }
+      }
+
+      // 2. Verify project & My Agents installation/assignment in PostgreSQL when projectId or installs exist
+      if (input.projectId) {
+        const proj = await missionModel.getProject(input.projectId);
+        if (!proj) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: `Refused by server: Project "${input.projectId}" not found in PostgreSQL.`,
+          });
+        }
+        const installRow = await missionModel.getAgentInstall('marketing-manager');
+        if (!installRow || installRow.status !== 'active') {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message:
+              'Refused by server: Marketing Manager (marketing-manager) must be installed and active in My Agents (PostgreSQL) before launching a project mission.',
+          });
+        }
+        const deptIds = Array.isArray(installRow.departmentIdsJson)
+          ? (installRow.departmentIdsJson as string[])
+          : [];
+        const projIds = Array.isArray(installRow.projectIdsJson)
+          ? (installRow.projectIdsJson as string[])
+          : [];
+        if (!projIds.includes(input.projectId) && !deptIds.includes(targetDeptId)) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: `Refused by server: Marketing Manager (marketing-manager) is not assigned to department "${targetDeptId}" or project "${input.projectId}" in PostgreSQL.`,
+          });
+        }
+      }
+
       try {
-        const missionModel = new MissionModel(ctx.serverDB);
         const engine = new MissionEngine(missionModel);
         const journalManager = new MissionJournalManager(missionModel);
         const missionId = `mission_${Date.now()}`;
+        const orgContext = await resolveOrgContext(missionModel, targetDeptId, input.projectId);
 
         const dagDef: MissionDAGDef = {
           ...MARKETING_MISSION_DAG,
-          departmentId: input.departmentId || 'marketing',
+          departmentId: targetDeptId,
           id: missionId,
           mode: input.mode || 'company',
+          orgContext,
+          projectId: input.projectId ?? null,
           title: input.goal.trim(),
         };
 
         await engine.createMission(dagDef);
-        const executor = new MarketingMissionExecutor(missionId, process.cwd(), journalManager);
+        const executor = new MarketingMissionExecutor(
+          missionId,
+          process.cwd(),
+          journalManager,
+          undefined,
+          orgContext,
+        );
         const runResult = await engine.runMission(missionId, executor, { concurrencyCap: 2 });
         const detail = await buildFullMissionDetail(missionModel, missionId);
 
-        return { detail, missionId, runResult };
+        return { detail, missionId, orgContext, runResult };
       } catch (error: any) {
+        if (error instanceof TRPCError) throw error;
         throw new TRPCError({
           cause: error,
           code: 'INTERNAL_SERVER_ERROR',
           message: error?.message || 'Failed to create and run mission',
         });
       }
+    }),
+
+  createProject: missionProcedure
+    .input(
+      z.object({
+        context: z.string().optional(),
+        departmentId: z.string().nullable().optional(),
+        description: z.string().default(''),
+        id: z.string().optional(),
+        name: z.string().min(1),
+        visibility: z.enum(['private', 'shared']).optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+      const deptId = input.departmentId ?? null;
+      let inherit = { policies: false, sources: false, tone: false };
+      if (deptId) {
+        const dept = await missionModel.getDepartment(deptId);
+        if (!dept || !dept.active) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: `Department "${deptId}" must be activated in PostgreSQL before creating a project inside it.`,
+          });
+        }
+        const rules = (dept.rulesJson as any) || defaultRuleSet();
+        inherit = rules.inherit || { policies: true, sources: false, tone: true };
+      }
+
+      const id = input.id || `prj_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+      const row = await missionModel.createProject({
+        context: input.context ?? '',
+        departmentId: deptId,
+        description: input.description.trim(),
+        id,
+        inheritJson: inherit,
+        name: input.name.trim(),
+        sourcesJson: [],
+        visibility: input.visibility ?? 'private',
+      });
+      return mapDbProject(row);
+    }),
+
+  deactivateDepartment: missionProcedure
+    .input(z.object({ templateId: z.string().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+      const row = await missionModel.deactivateDepartment(input.templateId);
+      return row ? mapDbDepartment(row) : null;
     }),
 
   decideApproval: missionProcedure
@@ -503,10 +888,18 @@ export const missionRouter = router({
 
         let runResult = null;
         if (input.decision === 'approved' && step.disposition === 'resumed') {
+          const dbMission = await missionModel.getMission(input.missionId);
+          const orgContext = await resolveOrgContext(
+            missionModel,
+            dbMission?.departmentId,
+            dbMission?.projectId,
+          );
           const executor = new MarketingMissionExecutor(
             input.missionId,
             process.cwd(),
             journalManager,
+            undefined,
+            orgContext,
           );
           runResult = await engine.runMission(input.missionId, executor, { concurrencyCap: 2 });
         }
@@ -522,6 +915,14 @@ export const missionRouter = router({
       }
     }),
 
+  deleteProject: missionProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+      await missionModel.deleteProject(input.id);
+      return { deleted: true, id: input.id };
+    }),
+
   getById: missionProcedure
     .input(z.object({ id: z.string().min(1) }))
     .query(async ({ input, ctx }) => {
@@ -531,6 +932,100 @@ export const missionRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: `Mission ${input.id} not found` });
       }
       return detail;
+    }),
+
+  getCaoTree: missionProcedure
+    .input(
+      z
+        .object({
+          mode: z.enum(['company', 'individual']).default('company'),
+        })
+        .optional(),
+    )
+    .query(async ({ input, ctx }) => {
+      const isAdmin = await resolveServerAdmin(ctx);
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message:
+            'FORBIDDEN: Server-side admin authentication and role required to access /azzar/cao tree and telemetry.',
+        });
+      }
+
+      const missionModel = new MissionModel(ctx.serverDB);
+      const [wbState, missionRows] = await Promise.all([
+        buildPostgreSQLWorkbenchState(missionModel, ctx),
+        missionModel.listMissions(30),
+      ]);
+      const missionDetails = await Promise.all(
+        missionRows.map((r) => buildFullMissionDetail(missionModel, r.id)),
+      );
+      const missions = missionDetails
+        .filter((d): d is NonNullable<typeof d> => d !== null)
+        .map((d) => d.workbenchMission as any);
+
+      const data: WorkbenchData = {
+        departments: wbState.departments,
+        installs: wbState.installs,
+        isAdmin: true,
+        lastSeenAt: null,
+        memory: [],
+        missions,
+        mode: input?.mode ?? 'company',
+        personalRules: defaultRuleSet(),
+        projects: wbState.projects,
+      };
+
+      return {
+        isAdmin: true,
+        missions,
+        tree: buildCaoTree(data, input?.mode ?? 'company'),
+      };
+    }),
+
+  getWorkbenchState: missionProcedure.query(async ({ ctx }) => {
+    const missionModel = new MissionModel(ctx.serverDB);
+    return buildPostgreSQLWorkbenchState(missionModel, ctx);
+  }),
+
+  installAgent: missionProcedure
+    .input(
+      z.object({
+        departmentId: z.string().optional(),
+        projectId: z.string().optional(),
+        templateId: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const template = getAgentTemplate(input.templateId);
+      if (!template) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `Refused by server: Agent "${input.templateId}" does not exist in catalog.`,
+        });
+      }
+      if (template.availability !== 'available') {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: `Refused by server: Agent "${input.templateId}" (${template.name.en}) is Coming soon and cannot be installed. Only Marketing Manager (marketing-manager) is Available.`,
+        });
+      }
+      if (template.kind === 'specialist') {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: `Refused by server: Specialist "${input.templateId}" is managed by its department manager (${template.parentId}) and is not installed standalone.`,
+        });
+      }
+
+      const missionModel = new MissionModel(ctx.serverDB);
+      const row = await missionModel.installAgent({
+        departmentIdsJson: input.departmentId ? [input.departmentId] : [],
+        installedAt: new Date(),
+        projectIdsJson: input.projectId ? [input.projectId] : [],
+        status: 'active',
+        templateId: input.templateId,
+      });
+      return mapDbInstall(row);
     }),
 
   list: missionProcedure
@@ -551,10 +1046,18 @@ export const missionRouter = router({
         const missionModel = new MissionModel(ctx.serverDB);
         const engine = new MissionEngine(missionModel);
         const journalManager = new MissionJournalManager(missionModel);
+        const dbMission = await missionModel.getMission(input.missionId);
+        const orgContext = await resolveOrgContext(
+          missionModel,
+          dbMission?.departmentId,
+          dbMission?.projectId,
+        );
         const executor = new MarketingMissionExecutor(
           input.missionId,
           process.cwd(),
           journalManager,
+          undefined,
+          orgContext,
         );
         const runResult = await engine.runMission(input.missionId, executor, { concurrencyCap: 2 });
         const detail = await buildFullMissionDetail(missionModel, input.missionId);
@@ -566,5 +1069,112 @@ export const missionRouter = router({
           message: error?.message || 'Failed to resume mission',
         });
       }
+    }),
+
+  unassignAgent: missionProcedure
+    .input(
+      z.object({
+        departmentId: z.string().optional(),
+        projectId: z.string().optional(),
+        templateId: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+      const updated = await missionModel.unassignAgent(input.templateId, {
+        departmentId: input.departmentId,
+        projectId: input.projectId,
+      });
+      return updated ? mapDbInstall(updated) : null;
+    }),
+
+  uninstallAgent: missionProcedure
+    .input(z.object({ templateId: z.string().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+      const removed = await missionModel.uninstallAgent(input.templateId);
+      return { removed, templateId: input.templateId };
+    }),
+
+  updateDepartment: missionProcedure
+    .input(
+      z.object({
+        context: z.string().optional(),
+        customName: z.object({ ar: z.string(), en: z.string() }).optional(),
+        instructions: z.string().optional(),
+        rules: z.any().optional(),
+        sources: z
+          .array(
+            z.object({
+              content: z.string().optional(),
+              id: z.string(),
+              kind: z.enum(['file', 'link', 'note']),
+              name: z.string(),
+              shareable: z.boolean(),
+            }),
+          )
+          .optional(),
+        templateId: z.string().min(1),
+        tone: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+      const existing = await missionModel.getDepartment(input.templateId);
+      const row = await missionModel.upsertDepartment({
+        active: existing ? existing.active : true,
+        context: input.context ?? existing?.context ?? '',
+        customNameJson: input.customName ?? (existing?.customNameJson as any),
+        instructions: input.instructions ?? existing?.instructions ?? '',
+        rulesJson: input.rules ?? existing?.rulesJson ?? defaultRuleSet(),
+        sourcesJson: input.sources ?? (existing?.sourcesJson as any) ?? [],
+        templateId: input.templateId,
+        tone: input.tone ?? existing?.tone ?? '',
+      });
+      return mapDbDepartment(row);
+    }),
+
+  updateProject: missionProcedure
+    .input(
+      z.object({
+        context: z.string().optional(),
+        description: z.string().optional(),
+        id: z.string().min(1),
+        inherit: z
+          .object({
+            policies: z.boolean(),
+            sources: z.boolean(),
+            tone: z.boolean(),
+          })
+          .optional(),
+        name: z.string().optional(),
+        sources: z
+          .array(
+            z.object({
+              content: z.string().optional(),
+              id: z.string(),
+              kind: z.enum(['file', 'link', 'note']),
+              name: z.string(),
+              shareable: z.boolean(),
+            }),
+          )
+          .optional(),
+        visibility: z.enum(['private', 'shared']).optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const missionModel = new MissionModel(ctx.serverDB);
+      const updated = await missionModel.updateProject(input.id, {
+        context: input.context,
+        description: input.description,
+        inheritJson: input.inherit,
+        name: input.name,
+        sourcesJson: input.sources,
+        visibility: input.visibility,
+      });
+      if (!updated) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: `Project ${input.id} not found` });
+      }
+      return mapDbProject(updated);
     }),
 });
