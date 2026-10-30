@@ -11,6 +11,7 @@ export const missions = pgTable(
     id: text('id').primaryKey().notNull(),
     title: text('title').notNull(),
     departmentId: text('department_id').notNull().default('marketing'),
+    projectId: text('project_id'),
     mode: text('mode').notNull().default('company'),
     status: text('status').notNull().default('pending'),
     dagJson: jsonb('dag_json').notNull(),
@@ -19,6 +20,7 @@ export const missions = pgTable(
   },
   (t) => [
     index('missions_department_id_idx').on(t.departmentId),
+    index('missions_project_id_idx').on(t.projectId),
     index('missions_status_idx').on(t.status),
   ],
 );
@@ -191,3 +193,70 @@ export type NewMissionJournal = typeof missionJournal.$inferInsert;
 
 export type MissionReceiptItem = typeof missionReceipts.$inferSelect;
 export type NewMissionReceipt = typeof missionReceipts.$inferInsert;
+
+// ── 7. Azzar Departments (Phase 2 PostgreSQL Persistence) ─
+
+export const azzarDepartments = pgTable(
+  'azzar_departments',
+  {
+    templateId: text('template_id').primaryKey().notNull(),
+    active: boolean('active').notNull().default(true),
+    customNameJson: jsonb('custom_name_json'),
+    context: text('context').notNull().default(''),
+    instructions: text('instructions').notNull().default(''),
+    tone: text('tone').notNull().default(''),
+    sourcesJson: jsonb('sources_json').notNull().default([]),
+    rulesJson: jsonb('rules_json').notNull().default({}),
+    activatedAt: timestamptz('activated_at').notNull().defaultNow(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('azzar_departments_active_idx').on(t.active)],
+);
+
+// ── 8. Azzar Projects (Phase 2 PostgreSQL Persistence) ────
+
+export const azzarProjects = pgTable(
+  'azzar_projects',
+  {
+    id: text('id').primaryKey().notNull(),
+    name: text('name').notNull(),
+    description: text('description').notNull().default(''),
+    departmentId: text('department_id'),
+    context: text('context').notNull().default(''),
+    visibility: text('visibility').notNull().default('private'),
+    inheritJson: jsonb('inherit_json')
+      .notNull()
+      .default({ policies: true, sources: false, tone: true }),
+    sourcesJson: jsonb('sources_json').notNull().default([]),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('azzar_projects_department_id_idx').on(t.departmentId)],
+);
+
+// ── 9. Azzar Agent Installs / My Agents (Phase 2 PostgreSQL Persistence) ─
+
+export const azzarAgentInstalls = pgTable(
+  'azzar_agent_installs',
+  {
+    templateId: text('template_id').primaryKey().notNull(),
+    status: text('status').notNull().default('active'),
+    departmentIdsJson: jsonb('department_ids_json').notNull().default([]),
+    projectIdsJson: jsonb('project_ids_json').notNull().default([]),
+    installedAt: timestamptz('installed_at').notNull().defaultNow(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('azzar_agent_installs_status_idx').on(t.status)],
+);
+
+export type AzzarDepartmentItem = typeof azzarDepartments.$inferSelect;
+export type NewAzzarDepartment = typeof azzarDepartments.$inferInsert;
+
+export type AzzarProjectItem = typeof azzarProjects.$inferSelect;
+export type NewAzzarProject = typeof azzarProjects.$inferInsert;
+
+export type AzzarAgentInstallItem = typeof azzarAgentInstalls.$inferSelect;
+export type NewAzzarAgentInstall = typeof azzarAgentInstalls.$inferInsert;
+

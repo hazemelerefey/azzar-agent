@@ -3,12 +3,18 @@ import { createHash } from 'node:crypto';
 import { and, desc, eq, isNull } from 'drizzle-orm';
 
 import type {
+  AzzarAgentInstallItem,
+  AzzarDepartmentItem,
+  AzzarProjectItem,
   MissionApprovalItem,
   MissionCheckpointItem,
   MissionItem,
   MissionJournalItem,
   MissionNodeItem,
   MissionReceiptItem,
+  NewAzzarAgentInstall,
+  NewAzzarDepartment,
+  NewAzzarProject,
   NewMission,
   NewMissionApproval,
   NewMissionCheckpoint,
@@ -17,6 +23,9 @@ import type {
   NewMissionReceipt,
 } from '../schemas/mission';
 import {
+  azzarAgentInstalls,
+  azzarDepartments,
+  azzarProjects,
   missionApprovals,
   missionCheckpoints,
   missionJournal,
@@ -294,5 +303,213 @@ export class MissionModel {
       where: eq(missionReceipts.missionId, missionId),
     });
     return item ?? null;
+  }
+
+  // ── Phase 2: Departments (PostgreSQL) ────────────────────
+
+  async upsertDepartment(data: NewAzzarDepartment): Promise<AzzarDepartmentItem> {
+    const existing = await this.getDepartment(data.templateId);
+    if (existing) {
+      const updated = await this.db
+        .update(azzarDepartments)
+        .set({
+          active: data.active ?? existing.active,
+          context: data.context ?? existing.context,
+          customNameJson:
+            data.customNameJson !== undefined ? data.customNameJson : existing.customNameJson,
+          instructions: data.instructions ?? existing.instructions,
+          rulesJson: data.rulesJson ?? existing.rulesJson,
+          sourcesJson: data.sourcesJson ?? existing.sourcesJson,
+          tone: data.tone ?? existing.tone,
+          updatedAt: new Date(),
+        })
+        .where(eq(azzarDepartments.templateId, data.templateId))
+        .returning();
+      return updated[0];
+    }
+    const inserted = await this.db.insert(azzarDepartments).values(data).returning();
+    return inserted[0];
+  }
+
+  async getDepartment(templateId: string): Promise<AzzarDepartmentItem | null> {
+    const rows = await this.db
+      .select()
+      .from(azzarDepartments)
+      .where(eq(azzarDepartments.templateId, templateId))
+      .limit(1);
+    return rows[0] ?? null;
+  }
+
+  async listDepartments(): Promise<AzzarDepartmentItem[]> {
+    return this.db.select().from(azzarDepartments).orderBy(azzarDepartments.activatedAt);
+  }
+
+  async deactivateDepartment(templateId: string): Promise<AzzarDepartmentItem | null> {
+    const existing = await this.getDepartment(templateId);
+    if (!existing) return null;
+    const updated = await this.db
+      .update(azzarDepartments)
+      .set({ active: false, updatedAt: new Date() })
+      .where(eq(azzarDepartments.templateId, templateId))
+      .returning();
+    return updated[0] ?? null;
+  }
+
+  // ── Phase 2: Projects (PostgreSQL) ───────────────────────
+
+  async createProject(data: NewAzzarProject): Promise<AzzarProjectItem> {
+    const inserted = await this.db.insert(azzarProjects).values(data).returning();
+    return inserted[0];
+  }
+
+  async updateProject(
+    id: string,
+    patch: Partial<
+      Pick<
+        NewAzzarProject,
+        'context' | 'departmentId' | 'description' | 'inheritJson' | 'name' | 'sourcesJson' | 'visibility'
+      >
+    >,
+  ): Promise<AzzarProjectItem | null> {
+    const updated = await this.db
+      .update(azzarProjects)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(azzarProjects.id, id))
+      .returning();
+    return updated[0] ?? null;
+  }
+
+  async getProject(id: string): Promise<AzzarProjectItem | null> {
+    const rows = await this.db
+      .select()
+      .from(azzarProjects)
+      .where(eq(azzarProjects.id, id))
+      .limit(1);
+    return rows[0] ?? null;
+  }
+
+  async listProjects(departmentId?: string): Promise<AzzarProjectItem[]> {
+    if (departmentId) {
+      return this.db
+        .select()
+        .from(azzarProjects)
+        .where(eq(azzarProjects.departmentId, departmentId))
+        .orderBy(desc(azzarProjects.createdAt));
+    }
+    return this.db.select().from(azzarProjects).orderBy(desc(azzarProjects.createdAt));
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    await this.db.delete(azzarProjects).where(eq(azzarProjects.id, id));
+  }
+
+  // ── Phase 2: Agent Installs / My Agents (PostgreSQL) ─────
+
+  async installAgent(data: NewAzzarAgentInstall): Promise<AzzarAgentInstallItem> {
+    const existing = await this.getAgentInstall(data.templateId);
+    if (existing) {
+      const deptIds = Array.from(
+        new Set([
+          ...((existing.departmentIdsJson as string[]) || []),
+          ...((data.departmentIdsJson as string[]) || []),
+        ]),
+      );
+      const projIds = Array.from(
+        new Set([
+          ...((existing.projectIdsJson as string[]) || []),
+          ...((data.projectIdsJson as string[]) || []),
+        ]),
+      );
+      const updated = await this.db
+        .update(azzarAgentInstalls)
+        .set({
+          departmentIdsJson: deptIds,
+          projectIdsJson: projIds,
+          status: data.status ?? existing.status,
+          updatedAt: new Date(),
+        })
+        .where(eq(azzarAgentInstalls.templateId, data.templateId))
+        .returning();
+      return updated[0];
+    }
+    const inserted = await this.db.insert(azzarAgentInstalls).values(data).returning();
+    return inserted[0];
+  }
+
+  async assignAgent(
+    templateId: string,
+    target: { departmentId?: string; projectId?: string },
+  ): Promise<AzzarAgentInstallItem> {
+    const existing = await this.getAgentInstall(templateId);
+    if (!existing) {
+      throw new Error(`Agent ${templateId} is not installed in My Agents.`);
+    }
+    const deptIds = Array.from(
+      new Set([
+        ...((existing.departmentIdsJson as string[]) || []),
+        ...(target.departmentId ? [target.departmentId] : []),
+      ]),
+    );
+    const projIds = Array.from(
+      new Set([
+        ...((existing.projectIdsJson as string[]) || []),
+        ...(target.projectId ? [target.projectId] : []),
+      ]),
+    );
+    const updated = await this.db
+      .update(azzarAgentInstalls)
+      .set({
+        departmentIdsJson: deptIds,
+        projectIdsJson: projIds,
+        updatedAt: new Date(),
+      })
+      .where(eq(azzarAgentInstalls.templateId, templateId))
+      .returning();
+    return updated[0];
+  }
+
+  async unassignAgent(
+    templateId: string,
+    target: { departmentId?: string; projectId?: string },
+  ): Promise<AzzarAgentInstallItem | null> {
+    const existing = await this.getAgentInstall(templateId);
+    if (!existing) return null;
+    const deptIds = ((existing.departmentIdsJson as string[]) || []).filter(
+      (id) => id !== target.departmentId,
+    );
+    const projIds = ((existing.projectIdsJson as string[]) || []).filter(
+      (id) => id !== target.projectId,
+    );
+    const updated = await this.db
+      .update(azzarAgentInstalls)
+      .set({
+        departmentIdsJson: deptIds,
+        projectIdsJson: projIds,
+        updatedAt: new Date(),
+      })
+      .where(eq(azzarAgentInstalls.templateId, templateId))
+      .returning();
+    return updated[0] ?? null;
+  }
+
+  async uninstallAgent(templateId: string): Promise<boolean> {
+    const deleted = await this.db
+      .delete(azzarAgentInstalls)
+      .where(eq(azzarAgentInstalls.templateId, templateId))
+      .returning();
+    return deleted.length > 0;
+  }
+
+  async getAgentInstall(templateId: string): Promise<AzzarAgentInstallItem | null> {
+    const rows = await this.db
+      .select()
+      .from(azzarAgentInstalls)
+      .where(eq(azzarAgentInstalls.templateId, templateId))
+      .limit(1);
+    return rows[0] ?? null;
+  }
+
+  async listAgentInstalls(): Promise<AzzarAgentInstallItem[]> {
+    return this.db.select().from(azzarAgentInstalls).orderBy(azzarAgentInstalls.installedAt);
   }
 }
