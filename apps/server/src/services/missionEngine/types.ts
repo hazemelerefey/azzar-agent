@@ -47,6 +47,11 @@ export interface CheckpointSnapshot {
   missionId: string;
   nodeStatuses: Record<string, NodeStatus>;
   rounds: number;
+  tokenRollup?: {
+    completionTokens: number;
+    promptTokens: number;
+    totalTokens: number;
+  };
 }
 
 export interface JournalEvent {

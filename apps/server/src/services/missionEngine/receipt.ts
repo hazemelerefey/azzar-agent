@@ -1,4 +1,4 @@
-import { MissionModel } from '@azzar/database';
+import { MissionModel } from '@/database/models/mission';
 
 import type { MissionDAG } from './dag';
 import type { MissionReceipt, NodeStatus, ReceiptApprovalStep, ReceiptToolCall } from './types';

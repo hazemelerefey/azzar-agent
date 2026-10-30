@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { MissionModel } from '@azzar/database';
+import { MissionModel } from '@/database/models/mission';
 
 export class MissionApprovalManager {
   private missionModel: MissionModel;

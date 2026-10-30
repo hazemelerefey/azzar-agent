@@ -38,11 +38,19 @@ export class MissionModel {
     return result[0];
   }
 
+  async createMission(data: NewMission): Promise<MissionItem> {
+    return this.create(data);
+  }
+
   async findById(id: string): Promise<MissionItem | null> {
     const item = await this.db.query.missions.findFirst({
       where: eq(missions.id, id),
     });
     return item ?? null;
+  }
+
+  async getMission(id: string): Promise<MissionItem | null> {
+    return this.findById(id);
   }
 
   async updateStatus(id: string, status: string): Promise<MissionItem | null> {
@@ -54,6 +62,10 @@ export class MissionModel {
     return result[0] ?? null;
   }
 
+  async updateMission(id: string, patch: { status: string }): Promise<MissionItem | null> {
+    return this.updateStatus(id, patch.status);
+  }
+
   // ── Nodes ────────────────────────────────────────────────
 
   async createNodes(nodesData: NewMissionNode[]): Promise<MissionNodeItem[]> {
@@ -61,8 +73,17 @@ export class MissionModel {
     return this.db.insert(missionNodes).values(nodesData).returning();
   }
 
+  async createNode(nodeData: NewMissionNode): Promise<MissionNodeItem> {
+    const rows = await this.createNodes([nodeData]);
+    return rows[0];
+  }
+
   async findNodesByMissionId(missionId: string): Promise<MissionNodeItem[]> {
     return this.db.select().from(missionNodes).where(eq(missionNodes.missionId, missionId));
+  }
+
+  async getNodes(missionId: string): Promise<MissionNodeItem[]> {
+    return this.findNodesByMissionId(missionId);
   }
 
   async findNode(missionId: string, nodeId: string): Promise<MissionNodeItem | null> {
@@ -85,6 +106,14 @@ export class MissionModel {
     return result[0] ?? null;
   }
 
+  async updateNode(
+    missionId: string,
+    nodeId: string,
+    patch: { status: string },
+  ): Promise<MissionNodeItem | null> {
+    return this.updateNodeStatus(missionId, nodeId, patch.status);
+  }
+
   // ── Approvals ────────────────────────────────────────────
 
   async createApproval(data: NewMissionApproval): Promise<MissionApprovalItem> {
@@ -97,6 +126,18 @@ export class MissionModel {
       where: eq(missionApprovals.id, id),
     });
     return item ?? null;
+  }
+
+  async getApproval(id: string): Promise<MissionApprovalItem | null> {
+    return this.findApprovalById(id);
+  }
+
+  async getApprovals(missionId: string): Promise<MissionApprovalItem[]> {
+    return this.db
+      .select()
+      .from(missionApprovals)
+      .where(eq(missionApprovals.missionId, missionId))
+      .orderBy(missionApprovals.createdAt);
   }
 
   async findApprovalByHash(missionId: string, hash: string): Promise<MissionApprovalItem | null> {
@@ -170,6 +211,10 @@ export class MissionModel {
     return result[0];
   }
 
+  async saveCheckpoint(data: NewMissionCheckpoint): Promise<MissionCheckpointItem> {
+    return this.createCheckpoint(data);
+  }
+
   async getLatestCheckpoint(missionId: string): Promise<MissionCheckpointItem | null> {
     const items = await this.db
       .select()
@@ -200,6 +245,19 @@ export class MissionModel {
   async createReceipt(data: NewMissionReceipt): Promise<MissionReceiptItem> {
     const result = await this.db.insert(missionReceipts).values(data).returning();
     return result[0];
+  }
+
+  async saveReceipt(data: NewMissionReceipt): Promise<MissionReceiptItem> {
+    const existing = await this.getReceipt(data.missionId);
+    if (existing) {
+      const updated = await this.db
+        .update(missionReceipts)
+        .set({ receiptJson: data.receiptJson })
+        .where(eq(missionReceipts.missionId, data.missionId))
+        .returning();
+      return updated[0];
+    }
+    return this.createReceipt(data);
   }
 
   async getReceipt(missionId: string): Promise<MissionReceiptItem | null> {

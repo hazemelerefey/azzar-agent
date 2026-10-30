@@ -1,4 +1,4 @@
-import { MissionModel } from '@azzar/database';
+import { MissionModel } from '@/database/models/mission';
 
 import { MissionApprovalManager } from './approval';
 import { MissionCheckpointManager } from './checkpoint';
@@ -126,7 +126,11 @@ export class MissionEngine {
     const accumulatedToolCalls: ReceiptToolCall[] = Object.values(
       committedToolResults,
     ) as ReceiptToolCall[];
-    const tokenRollup = { completionTokens: 0, promptTokens: 0, totalTokens: 0 };
+    const tokenRollup = {
+      completionTokens: checkpoint?.tokenRollup?.completionTokens || 0,
+      promptTokens: checkpoint?.tokenRollup?.promptTokens || 0,
+      totalTokens: checkpoint?.tokenRollup?.totalTokens || 0,
+    };
     let modelDisclosure = { model: 'gemma4:e4b', provider: 'ollama' };
 
     // Update mission status in DB
@@ -167,6 +171,7 @@ export class MissionEngine {
             missionId,
             nodeStatuses: scheduler.getStatuses(),
             rounds,
+            tokenRollup: { ...tokenRollup },
           });
 
           return { requiresApproval: true, status: 'paused' };
@@ -215,6 +220,7 @@ export class MissionEngine {
             missionId,
             nodeStatuses: scheduler.getStatuses(),
             rounds,
+            tokenRollup: { ...tokenRollup },
           });
 
           return { requiresApproval: true, status: 'paused' };
@@ -230,6 +236,7 @@ export class MissionEngine {
             missionId,
             nodeStatuses: scheduler.getStatuses(),
             rounds,
+            tokenRollup: { ...tokenRollup },
           });
         } else if (execRes.status === 'failed') {
           await this.missionModel.updateNode(missionId, nodeId, { status: 'failed' });

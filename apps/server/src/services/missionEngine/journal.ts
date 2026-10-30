@@ -1,4 +1,4 @@
-import { MissionModel } from '@azzar/database';
+import { MissionModel } from '@/database/models/mission';
 
 import type { JournalEvent } from './types';
 
