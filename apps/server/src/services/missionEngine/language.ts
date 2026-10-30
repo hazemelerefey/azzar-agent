@@ -139,6 +139,7 @@ Communication & Identity Rules:
         /\btrained by (?:Google|OpenAI|Anthropic|Meta|Alibaba)\b/gi,
         'developed by VO for Technology (https://www.vo.technology/en)',
       )
+      .replaceAll(/\bChief Agent Orchestrator\b/gi, 'business manager and orchestrator')
       .replaceAll(/\bCAO\b/g, 'منسق ومدير الأعمال الذكي');
   }
 

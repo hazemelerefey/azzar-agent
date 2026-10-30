@@ -340,6 +340,7 @@ export class MessagesEngine {
           video: capabilities?.isCanUseVideo?.(model, provider),
           vision: capabilities?.isCanUseVision?.(model, provider),
         },
+        provider,
       }),
       // Workspace context (app origin + workspace slug → correct in-app links).
       // Sits with the other environment facts (date / model) after the

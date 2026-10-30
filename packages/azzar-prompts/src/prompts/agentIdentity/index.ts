@@ -1,6 +1,8 @@
 import { escapeXmlContent } from '../search/xmlEscape';
 
 export interface AgentIdentityContext {
+  /** Fall back to canonical AZZAR identity when neither name nor title is set. */
+  defaultToAzzar?: boolean;
   /** Personal name the user addresses the agent by ("Alice", "小艾"). */
   name?: string | null;
   /** The role the agent plays ("Health Assistant"). */
@@ -9,7 +11,8 @@ export interface AgentIdentityContext {
 
 const isAzzarLabel = (value?: string): boolean => {
   if (!value) return false;
-  return /^azzar(?:\s+ai)?$/i.test(value.trim());
+  const trimmed = value.trim();
+  return /^azzar(?:\s+ai)?$/i.test(trimmed) || trimmed === 'أذّار';
 };
 
 /**
@@ -22,13 +25,17 @@ const isAzzarLabel = (value?: string): boolean => {
  * `systemRole` still owns tone and behavior, this only pins the identity facts
  * that live outside the prompt text.
  */
-export const agentIdentityPrompt = ({ name, title }: AgentIdentityContext): string => {
-  const personalName = name?.trim();
+export const agentIdentityPrompt = ({
+  defaultToAzzar,
+  name,
+  title,
+}: AgentIdentityContext): string => {
+  const personalName = name?.trim() || (defaultToAzzar && !title?.trim() ? 'Azzar' : undefined);
   const role = title?.trim();
   if (!personalName && !role) return '';
 
   const label = personalName ?? role!;
-  const isAzzar = isAzzarLabel(personalName) || isAzzarLabel(role);
+  const isAzzar = Boolean(defaultToAzzar) || isAzzarLabel(personalName) || isAzzarLabel(role);
 
   const fields = [
     personalName && `  <name>${escapeXmlContent(personalName)}</name>`,

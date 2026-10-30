@@ -34,9 +34,14 @@ describe('agentIdentityPrompt', () => {
     expect(result).toContain('never spell your Arabic name as عزار');
   });
 
-  it('treats blank values as absent', () => {
+  it('treats blank values as absent unless defaultToAzzar is enabled', () => {
     expect(agentIdentityPrompt({ name: '  ', title: '' })).toBe('');
     expect(agentIdentityPrompt({})).toBe('');
+
+    const fallback = agentIdentityPrompt({ defaultToAzzar: true, name: '  ', title: '' });
+    expect(fallback).toContain('<name>Azzar</name>');
+    expect(fallback).toContain('AZZAR (أذّار)');
+    expect(fallback).toContain('VO for Technology (https://www.vo.technology/en)');
   });
 
   it('escapes XML-sensitive characters', () => {

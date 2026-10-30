@@ -156,6 +156,12 @@ export class MissionModel {
     return item ?? null;
   }
 
+  private static hashShownPayload(shownPayload: unknown): string {
+    const serialized =
+      typeof shownPayload === 'string' ? shownPayload : JSON.stringify(shownPayload);
+    return createHash('sha256').update(serialized).digest('hex');
+  }
+
   async decideApproval(
     id: string,
     decision: 'approved' | 'rejected',
@@ -165,9 +171,7 @@ export class MissionModel {
     if (!existing) {
       throw new Error(`Approval ${id} not found.`);
     }
-    const recomputedHash = createHash('sha256')
-      .update(JSON.stringify(existing.shownPayload))
-      .digest('hex');
+    const recomputedHash = MissionModel.hashShownPayload(existing.shownPayload);
     if (recomputedHash !== existing.shownPayloadHash) {
       throw new Error(
         `Approval ${id} payload hash integrity check failed: stored ${existing.shownPayloadHash} != recomputed ${recomputedHash}`,
@@ -196,9 +200,7 @@ export class MissionModel {
     if (!existing) {
       throw new Error(`Approval ${id} not found.`);
     }
-    const recomputedHash = createHash('sha256')
-      .update(JSON.stringify(existing.shownPayload))
-      .digest('hex');
+    const recomputedHash = MissionModel.hashShownPayload(existing.shownPayload);
     if (recomputedHash !== existing.shownPayloadHash) {
       throw new Error(
         `Approval ${id} payload hash integrity check failed: stored ${existing.shownPayloadHash} != recomputed ${recomputedHash}`,

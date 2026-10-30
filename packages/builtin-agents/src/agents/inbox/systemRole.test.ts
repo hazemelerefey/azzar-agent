@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { INBOX } from './index';
 import { createSystemRole } from './systemRole';
 
 describe('inbox createSystemRole', () => {
@@ -19,6 +20,27 @@ describe('inbox createSystemRole', () => {
     expect(role).toContain('Egyptian Arabic');
     expect(role).toContain('Do not refer to yourself as "CAO" directly to the user');
     expect(role).toContain('Never write your Arabic name as "عزار"');
+    expect(role).toContain('Marketing Department (Status: Available)');
+    expect(role).toContain('Other 7 Enterprise Departments (Status: Coming soon)');
+  });
+
+  it('preserves AZZAR_IDENTITY_BLOCK in INBOX.runtime even when storedSystemRole is customized or legacy', () => {
+    const customRuntime = INBOX.runtime({
+      plugins: [],
+      storedSystemRole: 'Focus on Egyptian B2B SaaS growth.',
+    });
+    expect(customRuntime.systemRole).toContain('AZZAR (أذّار)');
+    expect(customRuntime.systemRole).toContain('VO for Technology (https://www.vo.technology/en)');
+    expect(customRuntime.systemRole).toContain('Focus on Egyptian B2B SaaS growth.');
+
+    const legacyRuntime = INBOX.runtime({
+      plugins: [],
+      storedSystemRole: 'You are Azzar, an AI Agent will help users.',
+    });
+    expect(legacyRuntime.systemRole).toContain('AZZAR (أذّار)');
+    expect(legacyRuntime.systemRole).toContain(
+      'Eng. Hazem Elerefy, AI Engineer at VO for Technology',
+    );
   });
 
   it('introduces the user-given name instead of the product default', () => {

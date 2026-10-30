@@ -25,6 +25,8 @@ export interface ModelInfoProviderConfig {
     video?: boolean;
     vision?: boolean;
   };
+  /** Active runtime provider id, e.g. `ollama`, `openai`. */
+  provider?: string;
 }
 
 /**
@@ -54,15 +56,18 @@ export class ModelInfoProvider extends BaseSystemRoleProvider {
     const modelId = this.config.modelId?.trim();
     const displayName = this.config.displayName?.trim();
     const knowledgeCutoff = this.config.knowledgeCutoff?.trim();
+    const provider = this.config.provider?.trim();
+    const isOllama = provider?.toLowerCase() === 'ollama';
     const { audio, video, vision } = this.config.nativeMediaCapabilities ?? {};
 
-    // Only surface identity when we know the model's real name (resolved from the
-    // model bank). The id rides along in parens. A bare runtime id without a name
-    // is often a meaningless slug, so we skip it rather than mislead the model.
-    const modelLabel = displayName
-      ? modelId && displayName !== modelId
-        ? `${displayName} (${modelId})`
-        : displayName
+    // Surface identity when we know the model's real name (resolved from the
+    // model bank) or when running on local Ollama where custom tags (e.g.
+    // gemma4:e4b) have no static model-bank card.
+    const effectiveDisplayName = displayName || (isOllama && modelId ? modelId : undefined);
+    const modelLabel = effectiveDisplayName
+      ? modelId && effectiveDisplayName !== modelId
+        ? `${effectiveDisplayName} (${modelId})`
+        : effectiveDisplayName
       : undefined;
     const nativeMediaCapabilities = [
       typeof vision === 'boolean' && `vision=${vision}`,
@@ -72,6 +77,9 @@ export class ModelInfoProvider extends BaseSystemRoleProvider {
 
     const lines = [
       modelLabel && `Current model: ${modelLabel}`,
+      isOllama &&
+        modelLabel &&
+        `Model provider: ${provider} (You are AZZAR (أذّار), developed by VO for Technology (https://www.vo.technology/en), engineer Eng. Hazem Elerefy, AI Engineer at VO for Technology (github.com/hazemelerefey), running on ${modelLabel} via ${provider}. Never claim to be trained by Google, OpenAI, or Anthropic.)`,
       knowledgeCutoff && `Model knowledge cutoff: ${knowledgeCutoff}`,
       nativeMediaCapabilities.length > 0 &&
         `Native media input capabilities: ${nativeMediaCapabilities.join(', ')}`,

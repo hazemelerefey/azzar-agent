@@ -1,4 +1,6 @@
 // @vitest-environment node
+import { createHash } from 'node:crypto';
+
 import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -114,15 +116,16 @@ describe('MissionModel', () => {
       });
     });
 
-    it('creates, decides, and consumes an approval exactly once', async () => {
+    it('creates, decides, and consumes an approval exactly once, and rejects tampered payload hashes', async () => {
       const approvalId = 'appr_test_1';
-      const payloadHash = 'hash_abc123';
+      const shownPayload = JSON.stringify({ draft: 'Sample Campaign' });
+      const payloadHash = createHash('sha256').update(shownPayload).digest('hex');
 
       await model.createApproval({
         id: approvalId,
         missionId: testMissionId,
         nodeId: 'N6',
-        shownPayload: JSON.stringify({ draft: 'Sample Campaign' }),
+        shownPayload,
         shownPayloadHash: payloadHash,
       });
 
@@ -145,6 +148,22 @@ describe('MissionModel', () => {
 
       // Second consumption attempt throws
       await expect(model.consumeApproval(approvalId)).rejects.toThrow(/already been consumed/);
+
+      // Tampered payload hash throws on decideApproval / consumeApproval
+      const tamperedId = 'appr_test_tampered';
+      await model.createApproval({
+        id: tamperedId,
+        missionId: testMissionId,
+        nodeId: 'N6',
+        shownPayload,
+        shownPayloadHash: 'tampered_wrong_hash_000000',
+      });
+      await expect(model.decideApproval(tamperedId, 'approved', 'hazem')).rejects.toThrow(
+        /payload hash integrity check failed/,
+      );
+      await expect(model.consumeApproval(tamperedId)).rejects.toThrow(
+        /payload hash integrity check failed/,
+      );
     });
   });
 

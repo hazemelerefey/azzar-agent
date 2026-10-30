@@ -153,7 +153,11 @@ export const buildServerCallLlmContext = async ({
     agentDocuments: facts.agentDocuments,
     // Identity lives on the agent row, not in the prompt text — inject it so
     // the model introduces itself by the user-given name.
-    agentIdentity: { name: agentConfig.name ?? undefined, title: agentConfig.title ?? undefined },
+    agentIdentity: {
+      defaultToAzzar: agentConfig.slug === 'inbox',
+      name: agentConfig.name ?? undefined,
+      title: agentConfig.title ?? undefined,
+    },
     ...(facts.step.agentBuilderContext && { agentBuilderContext: facts.step.agentBuilderContext }),
     agentGroup: state.world?.group,
     agentManagementContext: facts.step.agentManagementContext,

@@ -325,7 +325,11 @@ export const contextEngineering = async ({
       // The agent's identity lives on the agent row (name/title), not in the
       // prompt text — inject it so the model can answer "who are you?" with
       // the name the user gave it instead of the product/model name.
-      identity: { name: agentMeta?.name, title: agentMeta?.title },
+      identity: {
+        defaultToAzzar: agentItem?.slug === 'inbox',
+        name: agentMeta?.name,
+        title: agentMeta?.title,
+      },
       inputTemplate,
       knowledge: { fileContents, knowledgeBases },
       systemRole,

@@ -5,6 +5,7 @@ import { MissionCheckpointManager } from '../checkpoint';
 import { MissionDAG } from '../dag';
 import { MissionDispositionManager } from '../disposition';
 import { MissionJournalManager } from '../journal';
+import { MissionLanguageManager } from '../language';
 import { MissionReceiptManager } from '../receipt';
 import { MissionScheduler } from '../scheduler';
 import type { CheckpointSnapshot, MissionDAGDef } from '../types';
@@ -324,11 +325,23 @@ describe('MissionEngine Contract Tests', () => {
 
       expect(receipt.modelDisclosure.model).toBe('gemma4:e4b');
       expect(receipt.modelDisclosure.provider).toBe('ollama');
+      expect(receipt.costRollup.costMethod).toBe('ollama_local_zero_cost:ollama/gemma4:e4b');
       expect(receipt.dagTopology.nodes.length).toBe(7);
       expect(receipt.toolCalls[0].input.apiKey).toBe('[REDACTED]');
       expect(receipt.toolCalls[0].output.authToken).toBe('[REDACTED]');
       expect(receipt.toolCalls[0].sources).toEqual(['https://source.eg']);
       expect(receipt.approvalStep?.decision).toBe('approved');
+    });
+
+    it('sanitizes forbidden عزار spelling and user-facing CAO self-references', () => {
+      const sanitized = MissionLanguageManager.sanitizeAzzarOutput(
+        'أنا عزار، trained by Google، وأعمل كـ Chief Agent Orchestrator (CAO).',
+      );
+      expect(sanitized).toContain('أذّار');
+      expect(sanitized).not.toContain('عزار');
+      expect(sanitized).not.toMatch(/trained by Google/i);
+      expect(sanitized).not.toMatch(/Chief Agent Orchestrator/i);
+      expect(sanitized).toContain('business manager and orchestrator');
     });
   });
 });

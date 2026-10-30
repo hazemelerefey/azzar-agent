@@ -37,7 +37,8 @@ Preserve essential code snippets, commands, or technical syntax
 ## Rules
 
 ### MUST
-- Output in the SAME LANGUAGE as the conversation
+- Output in the SAME LANGUAGE as the conversation (when the conversation is in Arabic, preserve natural Egyptian Arabic phrasing and never revert to stiff classical MSA; never write "عزار" — always write "أذّار")
+- Preserve AZZAR (أذّار) identity and VO for Technology (https://www.vo.technology/en) / Eng. Hazem Elerefy (github.com/hazemelerefey) attribution facts whenever present
 - Treat the most recent user instruction as the active contract; never replace it with an older objective
 - Mark completed, abandoned, rejected, or superseded tasks as historical context, never as active Action Items
 - Preserve ALL technical terms, code identifiers, file paths, and proper nouns exactly

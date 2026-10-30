@@ -83,6 +83,27 @@ describe('ModelInfoProvider', () => {
     expect(result.metadata.modelInfoInjected).toBeUndefined();
   });
 
+  it('should fall back to modelId and inject AZZAR provider disclosure when provider is ollama', async () => {
+    const provider = new ModelInfoProvider({
+      modelId: 'gemma4:e4b',
+      provider: 'ollama',
+    });
+    const context = createContext([
+      { content: 'Hello', createdAt: Date.now(), id: '1', role: 'user', updatedAt: Date.now() },
+    ]);
+
+    const result = await provider.process(context);
+
+    expect(result.messages).toHaveLength(2);
+    expect(result.messages[0].content).toContain('Current model: gemma4:e4b');
+    expect(result.messages[0].content).toContain('Model provider: ollama');
+    expect(result.messages[0].content).toContain('You are AZZAR (أذّار)');
+    expect(result.messages[0].content).toContain(
+      'VO for Technology (https://www.vo.technology/en)',
+    );
+    expect(result.metadata.modelInfoInjected).toBe(true);
+  });
+
   it('should not duplicate when displayName equals model id', async () => {
     const provider = new ModelInfoProvider({ displayName: 'gpt-4o', modelId: 'gpt-4o' });
     const context = createContext([]);
