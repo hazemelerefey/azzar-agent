@@ -14,6 +14,15 @@ const dict = {
     ar: 'هذا التشغيل محاكاة. لا يتم استدعاء أي نموذج ولا تنفيذ أي إجراء حقيقي.',
     en: 'This run is simulated. No model is called and no real action is taken.',
   },
+  live: { ar: 'تشغيل حي', en: 'Live LLM' },
+  liveNote: {
+    ar: 'تشغيل حقيقي مباشر مدعوم بنموذج الذكاء الاصطناعي المحلي (Ollama). يتم توليد الخطط والأبحاث والمحتوى في الوقت الفعلي.',
+    en: 'Live run powered by local Ollama LLM. Plans, research, and campaign copy are generated in real-time.',
+  },
+  executionMode: { ar: 'وضع التنفيذ', en: 'Execution mode' },
+  modelChoice: { ar: 'النموذج المحلي', en: 'Local model' },
+  liveLLM: { ar: 'ذكاء اصطناعي حقيقي (Ollama)', en: 'Live LLM (Ollama)' },
+  generatingStep: { ar: 'جاري التوليد بواسطة النموذج...', en: 'Generating with model...' },
   uiOnly: { ar: 'واجهة فقط', en: 'UI only' },
   localCatalog: { ar: 'كتالوج محلي', en: 'Local catalog' },
   groupingNotInfra: {

@@ -59,10 +59,19 @@ export const styles = {
     fontSize: 13,
     lineHeight: 1.5,
     outline: 'none',
-    paddingBlock: 8,
+    paddingBlock: 9,
     paddingInline: 12,
     transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
     width: '100%',
+  },
+  select: {
+    appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(150,150,150,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+    backgroundPosition: 'calc(100% - 12px) center',
+    backgroundRepeat: 'no-repeat',
+    cursor: 'pointer',
+    paddingInlineEnd: 36,
+    WebkitAppearance: 'none',
   },
   grid: {
     display: 'grid',
@@ -203,12 +212,12 @@ export const Btn: FC<{
 }> = ({ children, disabled, onClick, primary, type = 'button' }) => (
   <button
     disabled={disabled}
+    type={type}
     style={{
       ...styles.btn,
       ...(primary ? styles.btnPrimary : {}),
       ...(disabled ? { cursor: 'not-allowed', opacity: 0.5 } : {}),
     }}
-    type={type}
     onClick={onClick}
   >
     {children}

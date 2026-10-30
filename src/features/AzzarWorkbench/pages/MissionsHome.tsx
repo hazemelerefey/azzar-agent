@@ -14,6 +14,7 @@ const MissionsHome: FC = () => {
   const missions = useWorkbench((s) => s.missions);
   const reset = useWorkbench((s) => s.reset);
   const waiting = missions.filter((m) => m.status === 'waiting_approval');
+  const hasLive = missions.some((m) => m.executionMode === 'live' || !m.simulated);
 
   return (
     <Page>
@@ -33,7 +34,7 @@ const MissionsHome: FC = () => {
           </Flexbox>
         }
       />
-      <Notice>{t('simulatedNote')}</Notice>
+      <Notice>{hasLive ? t('liveNote') : t('simulatedNote')}</Notice>
       {waiting.length > 0 && (
         <>
           <h2 style={styles.h2}>{t('needsYou')}</h2>

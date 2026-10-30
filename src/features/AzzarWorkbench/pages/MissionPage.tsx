@@ -25,6 +25,7 @@ const MissionPage: FC = () => {
   const { bi, t } = useAzzarT();
   const mission = useWorkbench((s) => s.missions.find((m) => m.id === id));
   const advance = useWorkbench((s) => s.advance);
+  const advanceLive = useWorkbench((s) => s.advanceLive);
   const resolve = useWorkbench((s) => s.resolveApproval);
   const cancel = useWorkbench((s) => s.cancelMission);
 
@@ -48,6 +49,8 @@ const MissionPage: FC = () => {
     return a ? bi(a.name) : agentId;
   };
 
+  const isLive = mission.executionMode === 'live' || !mission.simulated;
+
   return (
     <Page>
       <Header
@@ -56,11 +59,16 @@ const MissionPage: FC = () => {
         actions={
           <Flexbox horizontal align="center" gap={6}>
             <Marker label={statusKey(mission.status)} />
-            <Marker label="simulated" />
+            <Marker label={isLive ? 'live' : 'simulated'} />
           </Flexbox>
         }
       />
-      <Notice>{t('simulatedNote')}</Notice>
+      <Notice>{isLive ? t('liveNote') : t('simulatedNote')}</Notice>
+      {mission.isGenerating && (
+        <Notice style={{ borderColor: 'var(--ant-color-primary)', borderWidth: 2 }}>
+          {t('generatingStep')} ({mission.modelId || 'qwen2.5:7b'})
+        </Notice>
+      )}
 
       {/* Pending Approvals */}
       {pending.map((a) => (
@@ -86,18 +94,25 @@ const MissionPage: FC = () => {
 
       {/* Mission Controls */}
       <Flexbox horizontal align="center" gap={10} wrap="wrap">
-        <Btn disabled={!running} onClick={() => advance(mission.id)}>
+        <Btn
+          disabled={!running || Boolean(mission.isGenerating)}
+          onClick={() => (isLive ? void advanceLive(mission.id) : advance(mission.id))}
+        >
           <Icon icon={Play} size="small" />
           <span>{t('step')}</span>
         </Btn>
         <Btn
           primary
-          disabled={!running}
-          onClick={() => {
+          disabled={!running || Boolean(mission.isGenerating)}
+          onClick={async () => {
             for (let i = 0; i < 80; i++) {
               const m = workbenchSnapshot(mission.id);
               if (!m || m.status !== 'running') break;
-              advance(mission.id);
+              if (isLive) {
+                await advanceLive(mission.id);
+              } else {
+                advance(mission.id);
+              }
             }
           }}
         >
@@ -105,7 +120,11 @@ const MissionPage: FC = () => {
           <span>{t('runAll')}</span>
         </Btn>
         <Btn
-          disabled={mission.status === 'completed' || mission.status === 'cancelled'}
+          disabled={
+            mission.status === 'completed' ||
+            mission.status === 'cancelled' ||
+            Boolean(mission.isGenerating)
+          }
           onClick={() => cancel(mission.id)}
         >
           <Icon icon={StopCircle} size="small" />

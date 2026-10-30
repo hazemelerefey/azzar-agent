@@ -197,8 +197,11 @@ export interface Mission {
   deadline: string;
   departmentId: string | null;
   events: RunEvent[];
+  executionMode?: 'live' | 'simulated';
   goal: string;
   id: string;
+  isGenerating?: boolean;
+  modelId?: string;
   nodes: GraphNode[];
   ownerId: string;
   ownerType: OwnerType;
@@ -206,8 +209,8 @@ export interface Mission {
   report?: MissionReport;
   reported: ReportedAction[];
   scriptId: string;
-  /** Always true in this prototype. Every screen shows "Simulated". */
-  simulated: true;
+  /** Whether the mission was executed as simulation or with live LLM. */
+  simulated: boolean;
   status: MissionStatus;
   successCriteria: string[];
 }

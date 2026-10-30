@@ -193,6 +193,10 @@ export const getWorkbenchAssistantDetail = (
   return {
     ...baseItem,
     config: {
+      chatConfig: { displayMode: 'chat' },
+      model: 'qwen2.5:7b',
+      params: { temperature: 0.6 },
+      provider: 'ollama',
       systemRole: isAr ? item.systemRole.ar : item.systemRole.en,
     } as any,
     currentVersion: '1.0.0',

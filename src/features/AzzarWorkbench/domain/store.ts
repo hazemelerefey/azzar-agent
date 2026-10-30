@@ -9,6 +9,7 @@ import {
   type EngineContext,
   resolveApproval as resolveApprovalPure,
 } from '../runner/engine';
+import { generateOllamaMissionStep } from '../runner/ollamaRunner';
 import { getScript } from '../runner/registry';
 import { memoryForCompletedMission } from './memory';
 import { defaultRuleSet } from './rules';
@@ -43,7 +44,9 @@ const fail = (reason: ActionError): ActionResult<never> => ({ ok: false, reason 
 export interface LaunchMissionInput {
   approvalsNeeded: string[];
   deadline: string;
+  executionMode?: 'live' | 'simulated';
   goal: string;
+  modelId?: string;
   ownerId: string;
   ownerType: OwnerType;
   scriptId: string;
@@ -53,6 +56,7 @@ export interface LaunchMissionInput {
 export interface WorkbenchActions {
   activateDepartment: (templateId: string) => ActionResult<ActiveDepartment>;
   advance: (missionId: string) => void;
+  advanceLive: (missionId: string) => Promise<void>;
   assignAgent: (
     templateId: string,
     target: { departmentId?: string; projectId?: string },
@@ -203,6 +207,78 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
       set((cur) => withCompletionMemory(replaceMission(cur, after), before, after, t));
     },
 
+    advanceLive: async (missionId) => {
+      const s = get();
+      const before = s.missions.find((m) => m.id === missionId);
+      if (!before || before.status !== 'running') return;
+      const t = now();
+      const ctx = engineContext(s, before, t);
+      if (!ctx) return;
+
+      const step = ctx.script.steps[before.cursor];
+      if (!step) {
+        get().advance(missionId);
+        return;
+      }
+
+      if (before.executionMode === 'live' && (step.kind === 'work' || step.kind === 'plan')) {
+        set((cur) => ({
+          missions: cur.missions.map((m) =>
+            m.id === missionId ? { ...m, isGenerating: true } : m,
+          ),
+        }));
+
+        try {
+          const generatedOutput = await generateOllamaMissionStep({
+            actor: step.actor,
+            defaultOutput: step.output || step.title,
+            goal: before.goal,
+            model: before.modelId || 'qwen2.5:7b',
+            stepKind: step.kind,
+            stepTitle: step.title,
+          });
+
+          const freshState = get();
+          const freshBefore = freshState.missions.find((m) => m.id === missionId);
+          if (!freshBefore || freshBefore.status !== 'running') return;
+          const freshCtx = engineContext(freshState, freshBefore, now());
+          if (!freshCtx) return;
+
+          const modifiedSteps = [...freshCtx.script.steps];
+          modifiedSteps[freshBefore.cursor] = {
+            ...step,
+            output: generatedOutput,
+          };
+          const liveCtx = {
+            ...freshCtx,
+            script: {
+              ...freshCtx.script,
+              steps: modifiedSteps,
+            },
+          };
+
+          const after = advanceMission(freshBefore, liveCtx);
+          set((cur) =>
+            withCompletionMemory(
+              replaceMission(cur, { ...after, isGenerating: false }),
+              freshBefore,
+              after,
+              now(),
+            ),
+          );
+        } catch {
+          set((cur) => ({
+            missions: cur.missions.map((m) =>
+              m.id === missionId ? { ...m, isGenerating: false } : m,
+            ),
+          }));
+          get().advance(missionId);
+        }
+      } else {
+        get().advance(missionId);
+      }
+    },
+
     assignAgent: (templateId, target) => {
       const inst = get().installs[templateId];
       if (!inst) return fail('agent-not-installed');
@@ -321,8 +397,10 @@ export const createWorkbenchStore = (options: StoreOptions = {}): StoreApi<Workb
         approvalsNeeded: input.approvalsNeeded,
         deadline: input.deadline,
         departmentId,
+        executionMode: input.executionMode,
         goal: input.goal,
         id: newId('msn'),
+        modelId: input.modelId,
         now: now(),
         ownerId: input.ownerId,
         ownerType: input.ownerType,

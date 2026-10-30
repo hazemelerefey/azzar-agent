@@ -33,13 +33,16 @@ export interface NewMissionInput {
   budget?: { maxRounds: number; maxTotalCostUsd: number };
   deadline: string;
   departmentId: string | null;
+  executionMode?: 'live' | 'simulated';
   goal: string;
   id: string;
+  modelId?: string;
   now: string;
   ownerId: string;
   ownerType: OwnerType;
   projectId: string | null;
   scriptId: string;
+  simulated?: boolean;
   successCriteria: string[];
 }
 
@@ -54,6 +57,7 @@ export const createMission = (input: NewMissionInput): Mission => {
   if (input.successCriteria.filter((c) => c.trim()).length === 0) {
     throw new Error('A mission needs at least one success criterion.');
   }
+  const isLive = input.executionMode === 'live';
   return {
     activeSpecialists: [],
     approvals: [],
@@ -66,15 +70,17 @@ export const createMission = (input: NewMissionInput): Mission => {
     deadline: input.deadline,
     departmentId: input.departmentId,
     events: [],
+    executionMode: input.executionMode ?? (input.simulated === false ? 'live' : 'simulated'),
     goal,
     id: input.id,
+    modelId: input.modelId ?? 'qwen2.5:7b',
     nodes: [],
     ownerId: input.ownerId,
     ownerType: input.ownerType,
     projectId: input.projectId,
     reported: [],
     scriptId: input.scriptId,
-    simulated: true,
+    simulated: input.executionMode ? !isLive : (input.simulated ?? true),
     status: 'running',
     successCriteria: input.successCriteria.filter((c) => c.trim()),
   };

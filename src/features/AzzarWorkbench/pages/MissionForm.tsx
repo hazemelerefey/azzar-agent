@@ -1,4 +1,4 @@
-import { Flexbox, Icon } from '@azzar/ui';
+import { Flexbox, Icon, Segmented } from '@azzar/ui';
 import { Flag, Play, Shield, Target } from 'lucide-react';
 import { type FC, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -82,6 +82,8 @@ const MissionForm: FC = () => {
   const [deadline, setDeadline] = useState('');
   const [criteria, setCriteria] = useState('');
   const [approvals, setApprovals] = useState<string[]>([]);
+  const [execMode, setExecMode] = useState<'live' | 'simulated'>('simulated');
+  const [modelId, setModelId] = useState('qwen2.5:7b');
   const [error, setError] = useState<string | null>(null);
 
   const manager = script ? installs[script.managerId] : undefined;
@@ -114,7 +116,9 @@ const MissionForm: FC = () => {
     const res = launchMission({
       approvalsNeeded: approvals,
       deadline,
+      executionMode: execMode,
       goal,
+      modelId,
       ownerId: owner.id,
       ownerType: owner.type,
       scriptId: script.id,
@@ -140,7 +144,7 @@ const MissionForm: FC = () => {
             <Icon icon={Target} style={{ color: 'var(--ant-color-primary)' }} />
             <h2 style={{ ...styles.h2, margin: 0 }}>{t('newMission')}</h2>
           </Flexbox>
-          <Marker label="simulated" />
+          <Marker label={execMode === 'live' ? 'live' : 'simulated'} />
         </Flexbox>
 
         {/* Configuration Row */}
@@ -153,7 +157,7 @@ const MissionForm: FC = () => {
         >
           <Field label={t('missionScript')}>
             <select
-              style={styles.field}
+              style={{ ...styles.field, ...styles.select }}
               value={script.id}
               onChange={(e) => setScriptId(e.target.value)}
             >
@@ -167,7 +171,7 @@ const MissionForm: FC = () => {
 
           <Field label={t('missionOwner')}>
             <select
-              style={styles.field}
+              style={{ ...styles.field, ...styles.select }}
               value={owner.key}
               onChange={(e) => setOwnerSel(e.target.value)}
             >
@@ -178,6 +182,32 @@ const MissionForm: FC = () => {
               ))}
             </select>
           </Field>
+
+          <Field label={t('executionMode')}>
+            <Segmented
+              value={execMode}
+              options={[
+                { label: t('simulated'), value: 'simulated' },
+                { label: t('liveLLM'), value: 'live' },
+              ]}
+              onChange={(val) => setExecMode(val as any)}
+            />
+          </Field>
+
+          {execMode === 'live' && (
+            <Field label={t('modelChoice')}>
+              <select
+                style={{ ...styles.field, ...styles.select }}
+                value={modelId}
+                onChange={(e) => setModelId(e.target.value)}
+              >
+                <option value="qwen2.5:7b">Qwen 2.5 7B (Default · Fast · Multilingual)</option>
+                <option value="gemma4:e4b">Gemma 4 e4b (Google 7.5B · Vision & Thinking)</option>
+                <option value="qwen2.5:14b">Qwen 2.5 14B (High Precision · Reasoning)</option>
+                <option value="qwen3:4b-instruct">Qwen 3 4B Instruct (Compact)</option>
+              </select>
+            </Field>
+          )}
         </div>
 
         <p style={{ ...styles.muted, fontSize: 12, marginTop: -8 }}>{bi(script.description)}</p>

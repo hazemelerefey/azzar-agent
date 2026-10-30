@@ -211,10 +211,70 @@ const ollamaChatModels: AIChatModelCard[] = [
     abilities: {
       functionCall: true,
     },
+    contextWindowTokens: 32_768,
+    description:
+      'Qwen2.5 7B is Alibaba’s premier 7B open model with strong multilingual and tool calling capabilities.',
+    displayName: 'Qwen2.5 7B',
+    enabled: true,
+    family: 'qwen',
+    generation: 'qwen2.5',
+    id: 'qwen2.5:7b',
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+    },
+    contextWindowTokens: 32_768,
+    description:
+      'Qwen2.5 14B is a balanced high-performance open model with superior reasoning and tool calling.',
+    displayName: 'Qwen2.5 14B',
+    enabled: true,
+    family: 'qwen',
+    generation: 'qwen2.5',
+    id: 'qwen2.5:14b',
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 262_144,
+    description:
+      'Qwen3 4B Instruct model optimized for fast responses, reasoning, and tool calling.',
+    displayName: 'Qwen3 4B Instruct',
+    enabled: true,
+    family: 'qwen',
+    generation: 'qwen3',
+    id: 'qwen3:4b-instruct',
+    type: 'chat',
+  },
+  {
+    abilities: {
+      audio: true,
+      functionCall: true,
+      reasoning: true,
+      vision: true,
+    },
+    contextWindowTokens: 131_072,
+    description: 'Gemma 4 e4b is a multimodal, reasoning-capable open weight model from Google.',
+    displayName: 'Gemma 4 e4b',
+    enabled: true,
+    family: 'gemma',
+    generation: 'gemma',
+    id: 'gemma4:e4b',
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+    },
     contextWindowTokens: 128_000,
     description:
       'Qwen2.5 is Alibaba’s next-generation large language model with strong performance across diverse use cases.',
     displayName: 'Qwen2.5 7B',
+    enabled: true,
     family: 'qwen',
     generation: 'qwen2.5',
     id: 'qwen2.5',
