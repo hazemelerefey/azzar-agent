@@ -66,7 +66,7 @@ export const WorkbenchNav: FC = () => {
 
   return (
     <nav aria-label="AZZAR" style={navStyle}>
-      <Flexbox horizontal wrap align="center" gap={4}>
+      <Flexbox horizontal align="center" gap={4} wrap="wrap">
         {ITEMS.filter(
           (i) => (mode === 'company' || !i.companyOnly) && (!i.adminOnly || isAdmin),
         ).map((i) => (

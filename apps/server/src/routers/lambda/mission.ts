@@ -149,7 +149,7 @@ async function buildFullMissionDetail(missionModel: MissionModel, missionId: str
     missionModel.getReceipt(missionId),
   ]);
 
-  const stateJson = (checkpoint?.stateJson || {}) as Record<string, any>;
+  const stateJson = (checkpoint?.snapshotJson || {}) as Record<string, any>;
   const committedToolResults = (stateJson.committedToolResults || {}) as Record<string, any>;
   const tokenRollup = stateJson.tokenRollup || {
     completionTokens: 0,
@@ -243,12 +243,10 @@ async function buildFullMissionDetail(missionModel: MissionModel, missionId: str
     };
   });
 
-  const activeSpecialists = mappedNodes
-    .filter((n) => n.status === 'running')
-    .map((n) => n.agentId);
+  const activeSpecialists = mappedNodes.filter((n) => n.status === 'running').map((n) => n.agentId);
 
   const mappedEvents = journal.map((j) => {
-    const p = (j.payload || {}) as Record<string, any>;
+    const p = (j.payloadJson || {}) as Record<string, any>;
     const evType =
       j.eventType === 'tool_call' || j.eventType === 'tool_result'
         ? ('tool_used' as const)
@@ -375,7 +373,7 @@ async function buildFullMissionDetail(missionModel: MissionModel, missionId: str
     simulated: false as const,
     status: wbStatus,
     stepsUsed: sortedNodes.filter((n) => n.status === 'completed').length,
-     successCriteria: [
+    successCriteria: [
       'Market & competitor research backed by sources',
       'Egyptian Arabic campaign draft + 5 SAMPLE leads',
       'Deterministic guardrail pass + single-consume N6 approval + N7 brief artifact',
@@ -397,7 +395,7 @@ async function buildFullMissionDetail(missionModel: MissionModel, missionId: str
             createdAt: checkpoint.createdAt.toISOString(),
             id: checkpoint.id,
             missionId: checkpoint.missionId,
-            stateJson: checkpoint.stateJson,
+            stateJson: checkpoint.snapshotJson,
           }
         : null,
       journal: journal.map((j) => ({
@@ -405,7 +403,7 @@ async function buildFullMissionDetail(missionModel: MissionModel, missionId: str
         eventType: j.eventType,
         id: j.id,
         missionId: j.missionId,
-        payload: j.payload,
+        payload: j.payloadJson,
         sourceEventId: j.sourceEventId,
       })),
       mission: {

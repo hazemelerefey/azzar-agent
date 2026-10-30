@@ -139,7 +139,7 @@ const MissionForm: FC<{ onMissionCreated?: () => void }> = ({ onMissionCreated }
       const res = await missionService.createAndRun({
         departmentId: valid.value.departmentId ?? undefined,
         goal: goal.trim(),
-        mode,
+        mode: mode ?? 'company',
         modelId,
       });
       if (res.detail?.workbenchMission) {
@@ -310,7 +310,7 @@ const MissionForm: FC<{ onMissionCreated?: () => void }> = ({ onMissionCreated }
 
         {/* Action Button */}
         <div>
-          <Btn disabled={submitting} primary onClick={() => void submit()}>
+          <Btn primary disabled={submitting} onClick={() => void submit()}>
             <Icon icon={Play} size="small" />
             <span>{submitting ? t('generatingStep') : t('launch')}</span>
           </Btn>

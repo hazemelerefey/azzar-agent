@@ -1,11 +1,11 @@
 {
   "approvalStep": {
-    "consumedAt": "2026-10-30T20:28:38.549Z",
-    "decidedAt": "2026-10-30T20:28:38.540Z",
+    "consumedAt": "2026-10-30T22:04:56.161Z",
+    "decidedAt": "2026-10-30T22:04:56.149Z",
     "decidedBy": "Eng. Hazem Elerefy",
     "decision": "approved",
     "nodeId": "N6",
-    "shownPayloadHash": "b4fcc00105a1b5e967e97b14bbcade458fc3d9b02ed71e3133120b0b41b88b75"
+    "shownPayloadHash": "e697efe660d37b0bf0c2c28365d7412f38ff17d7cb991c7bae29a94e61cc5cc9"
   },
   "assignees": {
     "N1": "Marketing Research Specialist",
@@ -17,6 +17,7 @@
     "N7": "Marketing Manager"
   },
   "costRollup": {
+    "costMethod": "ollama_local_zero_cost:ollama/gemma4:e4b",
     "currency": "USD",
     "totalCost": 0
   },
@@ -53,24 +54,24 @@
     ],
     "nodes": ["N1", "N2", "N3", "N4", "N5", "N6", "N7"]
   },
-  "missionId": "mission_live_1793392030200",
+  "missionId": "mission_live_1793397809127",
   "modelDisclosure": {
     "model": "gemma4:e4b",
     "provider": "ollama"
   },
   "nodeStatuses": {
-    "N3": "completed",
-    "N2": "completed",
     "N1": "completed",
     "N7": "completed",
+    "N3": "completed",
+    "N2": "completed",
     "N4": "completed",
     "N5": "completed",
     "N6": "completed"
   },
   "tokenRollup": {
-    "completionTokens": 6054,
-    "promptTokens": 3329,
-    "totalTokens": 9383
+    "completionTokens": 5617,
+    "promptTokens": 3433,
+    "totalTokens": 9050
   },
   "toolCalls": [
     {
@@ -103,13 +104,16 @@
         "file:///c:/Users/abdoh/azzar_agent/DESIGN.md",
         "file:///c:/Users/abdoh/azzar_agent/AGENTS.md"
       ],
-      "toolCallId": "tc_mission_live_1793392030200_N2_brand_audit",
+      "toolCallId": "tc_mission_live_1793397809127_N2_brand_audit",
       "toolId": "agent-documents____readFile"
     },
     {
       "input": {
         "query": "Egyptian small businesses marketing tools channels messages",
-        "endpoint": "https://en.wikipedia.org/api/rest_v1/page/summary/Economy_of_Egypt"
+        "endpoints": [
+          "https://en.wikipedia.org/api/rest_v1/page/summary/Economy_of_Egypt",
+          "https://www.vo.technology/en"
+        ]
       },
       "output": {
         "status": 200,
@@ -119,33 +123,42 @@
             "sourceUrl": "https://en.wikipedia.org/wiki/Economy_of_Egypt",
             "httpStatus": 200,
             "dateChecked": "2026-10-30",
-            "liveSnippet": "Egypt has a developing mixed economy, combining private business with government regulation. It is the 2nd largest economy in Africa, and 41st in worldwide ranking as of 2026. It is a major emerging market economy and a member of the Africa"
+            "liveSnippet": "Egypt has a developing mixed economy, combining private business with government regulation. It is the 2nd largest economy in Africa, and 41st in worldwide ranking as of 2026. It is a major emerging market economy and a member of the African Union, BRICS, and a signatory to the A",
+            "bytesFetched": 3059
           },
           {
-            "claim": "Egyptian small businesses prioritize practical Arabic-first tools that save time on daily content creation, lead tracking, and customer follow-up without requiring a full marketing agency.",
+            "claim": "Egyptian small businesses prioritize practical Arabic-first AI tools built by VO for Technology (https://www.vo.technology/en) that save time on daily content creation, lead tracking, and customer follow-up without requiring a full marketing agency.",
             "sourceUrl": "https://www.vo.technology/en",
-            "dateChecked": "2026-10-30"
+            "httpStatus": 200,
+            "dateChecked": "2026-10-30",
+            "bytesFetched": 50841
           }
-        ]
+        ],
+        "httpEvidence": {
+          "voBytes": 50841,
+          "voStatus": 200,
+          "wikiBytes": 3059,
+          "wikiStatus": 200
+        }
       },
       "sources": ["https://en.wikipedia.org/wiki/Economy_of_Egypt", "https://www.vo.technology/en"],
-      "toolCallId": "tc_mission_live_1793392030200_N1_web_research",
+      "toolCallId": "tc_mission_live_1793397809127_N1_web_research",
       "toolId": "web-browsing____search"
     },
     {
       "input": {
-        "byteLength": 11155,
-        "path": "C:\\Users\\abdoh\\azzar_agent\\artifacts\\azzar-marketing-brief-mission_live_1793392030200.md"
+        "byteLength": 11011,
+        "path": "C:\\Users\\abdoh\\azzar_agent\\artifacts\\azzar-marketing-brief-mission_live_1793397809127.md"
       },
       "output": {
-        "artifactPath": "C:\\Users\\abdoh\\azzar_agent\\artifacts\\azzar-marketing-brief-mission_live_1793392030200.md",
-        "bytesWritten": 11155,
-        "sha256": "6659c0bace0b3f77de2485ebb58189bd4d00b6326f23346ce646cbb871c2893e"
+        "artifactPath": "C:\\Users\\abdoh\\azzar_agent\\artifacts\\azzar-marketing-brief-mission_live_1793397809127.md",
+        "bytesWritten": 11011,
+        "sha256": "ced3edb193c220e20ee23e0602f447d7bfb49e065c56b0d9c102568f3448857e"
       },
       "sources": [
-        "file:///C:/Users/abdoh/azzar_agent/artifacts/azzar-marketing-brief-mission_live_1793392030200.md"
+        "file:///C:/Users/abdoh/azzar_agent/artifacts/azzar-marketing-brief-mission_live_1793397809127.md"
       ],
-      "toolCallId": "tc_mission_live_1793392030200_N7_write_brief",
+      "toolCallId": "tc_mission_live_1793397809127_N7_write_brief",
       "toolId": "local-system____writeFile"
     }
   ]

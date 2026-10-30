@@ -384,12 +384,12 @@ const Marketplace: FC = () => {
                   <h2 style={styles.h2}>Community Agents ({filteredCommunityAgents.length})</h2>
                 </Flexbox>
                 <Link
+                  to="/community/agent"
                   style={{
                     fontSize: 13,
                     color: 'var(--ant-color-primary)',
                     textDecoration: 'none',
                   }}
-                  to="/community/agent"
                 >
                   View all in Community →
                 </Link>
@@ -445,7 +445,7 @@ const Marketplace: FC = () => {
                         </p>
 
                         {ca.tags && ca.tags.length > 0 && (
-                          <Flexbox horizontal wrap gap={4}>
+                          <Flexbox horizontal gap={4} wrap="wrap">
                             {ca.tags.slice(0, 3).map((tag) => (
                               <span key={tag} style={styles.marker}>
                                 {tag}
@@ -542,7 +542,7 @@ const Marketplace: FC = () => {
                     </p>
 
                     {sk.tags && sk.tags.length > 0 && (
-                      <Flexbox horizontal wrap gap={4}>
+                      <Flexbox horizontal gap={4} wrap="wrap">
                         {sk.tags.slice(0, 3).map((tag) => (
                           <span key={tag} style={styles.marker}>
                             {tag}
@@ -613,7 +613,7 @@ const Marketplace: FC = () => {
 
                     <p style={{ ...styles.muted, minHeight: 48 }}>{mcp.description}</p>
 
-                    <Flexbox horizontal wrap gap={4}>
+                    <Flexbox horizontal gap={4} wrap="wrap">
                       {mcp.tags.map((tag) => (
                         <span key={tag} style={styles.marker}>
                           {tag}

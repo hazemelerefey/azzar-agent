@@ -54,7 +54,9 @@ describe('catalog integrity', () => {
   });
 
   it('only the Marketing manager and its 4 specialists are available', () => {
-    const available = AGENT_TEMPLATES.filter((a) => a.availability === 'available').map((a) => a.id);
+    const available = AGENT_TEMPLATES.filter((a) => a.availability === 'available').map(
+      (a) => a.id,
+    );
     expect(available.sort()).toEqual(
       [
         'marketing-brand',

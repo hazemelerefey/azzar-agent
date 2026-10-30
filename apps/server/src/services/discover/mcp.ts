@@ -109,6 +109,7 @@ export const getMcpList = async (
   } catch (error) {
     log('getMcpList error: %O', error);
     return {
+      categories: [],
       currentPage: page,
       items: [],
       pageSize,

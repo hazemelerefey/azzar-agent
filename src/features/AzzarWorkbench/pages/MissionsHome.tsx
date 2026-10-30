@@ -42,7 +42,7 @@ const MissionsHome: FC = () => {
         subtitle={t('missionsSubtitle')}
         title={t('missionsTitle')}
         actions={
-          <Flexbox horizontal wrap align="center" gap={8}>
+          <Flexbox horizontal align="center" gap={8} wrap="wrap">
             <Marker label="live" />
             <Btn disabled={loading} onClick={() => void loadMissions()}>
               <Icon icon={RefreshCw} size="small" />

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { AGENT_TEMPLATES, DEPARTMENT_TEMPLATES } from '../catalog';
 import { buildCaoTree, countNodes } from '../domain/cao';
 import { createWorkbenchStore } from '../domain/store';
-import { dictionaryEntry, DICTIONARY_KEYS } from '../ui/i18n';
+import { DICTIONARY_KEYS, dictionaryEntry } from '../ui/i18n';
 
 describe('Restored Workbench & CAO Tree Verification', () => {
   it('enforces Available vs Coming soon wording only (never Working)', () => {

@@ -168,13 +168,13 @@ export const Header: FC<{ actions?: ReactNode; subtitle?: string; title: string 
   subtitle,
   title,
 }) => (
-  <Flexbox horizontal wrap align="flex-start" gap={12} justify="space-between">
+  <Flexbox horizontal align="flex-start" gap={12} justify="space-between" wrap="wrap">
     <Flexbox gap={4}>
       <h1 style={styles.h1}>{title}</h1>
       {subtitle && <p style={styles.muted}>{subtitle}</p>}
     </Flexbox>
     {actions && (
-      <Flexbox horizontal wrap align="center" gap={8}>
+      <Flexbox horizontal align="center" gap={8} wrap="wrap">
         {actions}
       </Flexbox>
     )}

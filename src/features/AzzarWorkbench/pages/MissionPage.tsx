@@ -348,7 +348,7 @@ const MissionPage: FC = () => {
       <Notice>{t('liveNote')}</Notice>
       {actionError && <Notice>{actionError}</Notice>}
       {busy && (
-        <Notice style={{ borderColor: 'var(--ant-color-primary)', borderWidth: 2 }}>
+        <Notice>
           {t('generatingStep')} ({mission.modelId || 'gemma4:e4b'})
         </Notice>
       )}
@@ -372,11 +372,7 @@ const MissionPage: FC = () => {
               <p style={styles.muted}>{bi(a.summary)}</p>
               <p style={{ ...styles.muted, fontSize: 12 }}>{t('approvalNote')}</p>
               <Flexbox horizontal align="center" gap={10}>
-                <Btn
-                  disabled={busy}
-                  primary
-                  onClick={() => void handleDecision(a.id, 'approved')}
-                >
+                <Btn primary disabled={busy} onClick={() => void handleDecision(a.id, 'approved')}>
                   <Icon icon={CheckCircle2} size="small" />
                   <span>{t('approve')}</span>
                 </Btn>
@@ -391,7 +387,7 @@ const MissionPage: FC = () => {
 
       {/* Mission Controls */}
       <Flexbox horizontal align="center" gap={10} wrap="wrap">
-        <Btn disabled={!running || busy} primary onClick={() => void handleResume()}>
+        <Btn primary disabled={!running || busy} onClick={() => void handleResume()}>
           <Icon icon={Play} size="small" />
           <span>{t('runAll')}</span>
         </Btn>
@@ -437,11 +433,13 @@ const MissionPage: FC = () => {
                   <Flexbox horizontal align="center" justify="space-between" wrap="wrap">
                     <strong style={{ fontSize: 14 }}>{bi(n.title)}</strong>
                     <Flexbox horizontal align="center" gap={6}>
-                      {dbNode?.dependsOnJson && (dbNode.dependsOnJson as string[]).length > 0 && (
-                        <code style={{ fontSize: 11 }}>
-                          dependsOn: [{(dbNode.dependsOnJson as string[]).join(', ')}]
-                        </code>
-                      )}
+                      {Boolean(dbNode?.dependsOnJson) &&
+                        Array.isArray(dbNode?.dependsOnJson) &&
+                        (dbNode.dependsOnJson as string[]).length > 0 && (
+                          <code style={{ fontSize: 11 }}>
+                            dependsOn: [{(dbNode.dependsOnJson as string[]).join(', ')}]
+                          </code>
+                        )}
                       <Marker raw label={`${n.kind} · ${dbNode?.status || n.status}`} />
                     </Flexbox>
                   </Flexbox>

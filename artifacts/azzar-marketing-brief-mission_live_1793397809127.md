@@ -1,6 +1,6 @@
 # موجز الحملة الإعلانية — أذّار (AZZAR Marketing Agent Launch Brief)
 
-**المهمة (Mission ID):** `mission_live_1793392030200`
+**المهمة (Mission ID):** `mission_live_1793397809127`
 **العلامة التجارية:** AZZAR (أذّار) — VO for Technology (Eng. Hazem Elerefy, AI Engineer at VO for Technology)
 **الروابط الرسمية:**
 
@@ -13,16 +13,14 @@
 ## 1. ملخص الأبحاث السوقية (N1 Research Findings)
 
 - **Small and medium enterprises (SMEs) form the backbone of the Egyptian non-agricultural private sector, relying heavily on social commerce (Facebook, Instagram, and WhatsApp Business) for customer acquisition.** (المصدر: <https://en.wikipedia.org/wiki/Economy_of_Egypt> — تاريخ الفحص: 2026-10-30)
-- **Egyptian small businesses prioritize practical Arabic-first tools that save time on daily content creation, lead tracking, and customer follow-up without requiring a full marketing agency.** (المصدر: <https://www.vo.technology/en> — تاريخ الفحص: 2026-10-30)
+- **Egyptian small businesses prioritize practical Arabic-first AI tools built by VO for Technology (<https://www.vo.technology/en>) that save time on daily content creation, lead tracking, and customer follow-up without requiring a full marketing agency.** (المصدر: <https://www.vo.technology/en> — تاريخ الفحص: 2026-10-30)
 
 **ملخص الباحث (باللهجة المصرية):**
-أهلاً بك. بصفتي أذّار، قمت بتحليل البيانات دي عشان أقدم لك ملخص واضح ومباشر لأهم اكتشافات البحث دي.
+أهلاً بك، أنا أذّار (AZZAR). بصفتي أخصائي أبحاث التسويق، إليك ملخص لأهم النتائج اللي طلعت بيها الأبحاث دي، مركزين على إزاي الشركات الصغيرة في مصر بتكتشف أدوات وقنوات التسويق:
 
-إليك أهم 3 نقاط بتلخص إزاي الشركات الصغيرة والمتوسطة في مصر بتكتشف أدوات وقنوات التسويق بتاعتها:
-
-- **الاعتماد على التجارة الاجتماعية:** الشركات دي بتعتمد بشكل أساسي على منصات التواصل الاجتماعي (زي فيسبوك، إنستجرام، وواتساب بيزنس) كقناة رئيسية لاكتساب العملاء والبيع المباشر.
-- **البحث عن الكفاءة والسرعة:** بيحتاجوا أدوات تسويق عملية جداً وموفرة للوقت، تساعدهم في إنشاء المحتوى وتتبع العملاء، من غير ما يضطروا يستعينوا بوكالة تسويق كبيرة.
-- **الأولوية للحلول المحلية:** الأولوية عندهم بتكون للأدوات اللي بتشتغل باللغة العربية بشكل أساسي، عشان تتناسب مع طبيعة السوق المصري وتكون سهلة الاستخدام للمشغل الصغير.
+- **الاعتماد على التجارة الاجتماعية:** الشركات الصغيرة والمتوسطة بتعتمد بشكل أساسي على قنوات التجارة الاجتماعية زي فيسبوك، وإنستجرام، وواتساب للأعمال، ودي هي القنوات الرئيسية بتاعتهم لجلب العملاء.
+- **البحث عن حلول الذكاء الاصطناعي المحلية:** فيه توجه واضح إنهم بيفضلوا أدوات الذكاء الاصطناعي العملية اللي بتكون باللغة العربية، لأنها بتوفر عليهم وقت كبير في عمل المحتوى وتتبع العملاء.
+- **البديل للوكالات التسويقية:** الهدف من استخدام الأدوات دي هو إنهم يقدروا يديروا كل عملياتهم التسويقية (زي متابعة العملاء وتوليد العملاء المحتملين) من غير ما يحتاجوا يستأجروا وكالة تسويق كبيرة ومكلفة.
 
 ---
 
@@ -38,19 +36,21 @@
 - Must not invent fake client testimonials or fabricated ROI percentages
 
 **بيان التموضع (باللهجة المصرية):**
-يا صاحب المشروع الصغير،
+يا أهل المشاريع الصغيرة وأصحاب الأعمال في مصر،
 
-إحنا في **أذّار (AZZAR)** عارفين إن التسويق ممكن يكون تحدي كبير ومخاطرة مالية. عشان كده، جهزنا لك وكيل التسويق الذكي بتاعنا.
+أنا أذّار (أذّار)، والنهاردة جاي أقدم لكم حاجة هتغير طريقة شغلكم في التسويق.
 
-**أذّار** مش مجرد أداة تسويق، ده شريكك اللي بيشتغل عشان مشروعك ينمو بشكل طبيعي ومضمون. إحنا بنركز على إن كل خطوة تسويقية تكون **ذات معنى** وتوصل للعميل الصح، وده بيضمنلك **يقين** في النتائج.
+احنا عارفين إنك محتاج نمو حقيقي، بس في نفس الوقت خايف من أي خطوة غلط أو إن فلوسك تضيع في إعلانات مش جايبة نتيجة.
 
-**إزاي ده بيحصل؟**
-ببساطة، الذكاء الاصطناعي بيجهز لك أفضل الاستراتيجيات والمحتوى، لكن القرار النهائي دايماً بيكون **بإيدك**. عندنا نظام موافقات (Human-in-the-loop) بيخليك أنت المتحكم الكامل، ومفيش أي حملات بتنزل من غير ما تكون راضي عنها تماماً.
+**أذّار بيقدم لكم وكيل التسويق الذكي بتاعه، اللي مش مجرد أتمتة، لأ، ده شريك استراتيجي ليك.**
 
-**الخلاصة:**
-مع **أذّار**، بتضمن **نمو** مشروعك بشكل طبيعي ومحسوب، وبتحافظ على السيطرة الكاملة على كل قرش وكل كلمة بتتقال باسمك.
+إحنا بنبني التسويق بتاعك على أربع أساسيات: **طبيعي** (يعني كلام حقيقي وملموس)، **ذو معنى** (يعني كل خطوة ليها هدف)، **يقين** (وده أهم حاجة، لأن كل قرار كبير بيعدي على موافقتك البشرية قبل ما يتنفذ)، و**نمو** مستدام.
 
-**أذّار:** التسويق الذكي، تحت إشرافك أنت.
+يعني إيه؟ يعني التسويق بتاعك هيكون متوازن، وموجه صح، ومضمون إنك تاخد القرار وأنت مطمن.
+
+**أذّار: النمو اللي بتشوفه بعينك، وبأمانة يقين.**
+
+_(AZZAR: The growth you see with certainty.)_
 
 ---
 
@@ -68,17 +68,17 @@
 
 ### النص الترحيبي المولد من النموذج (`gemma4:e4b`):
 
-أهلاً وسهلاً بكل رواد الأعمال وأصحاب المشاريع الصغيرة في مصر! 👋
+أهلاً بيك في عالم أذّار!
 
-**\[الفقرة الترحيبية باللغة المصرية]**
+**الفقرة الترحيبية (باللهجة المصرية):**
 
-إحنا في أذّار (AZZAR) عارفين كويس قد إيه البيزنس بتاعك هو العمود الفقري للاقتصاد المصري، وإزاي السوشيال ميديا (فيسبوك، انستجرام، واتساب) بقت هي ساحة المعركة الأساسية بتاعتك عشان توصل لعميلك. بس في نفس الوقت، إحنا كمان عارفين إن الوقت والموارد المحدودة بتخلي مهمة التسويق والـ Content Creation عبء كبير، وإن فكرة توظيف وكالة تسويق كاملة ممكن تكون مكلفة أوي. عشان كده، أذّار جه عشان يكون وكيلك التسويقي الذكي والمحلي. إحنا مش مجرد أداة، إحنا شريكك اللي مصمم عشان يتكلم لغتك، ويفهم احتياجات السوق المصري بالظبط، ويساعدك توفر وقتك ومجهودك في متابعة العملاء وإنشاء المحتوى، كل ده بأسلوب طبيعي ومضمون (يقين). هدفنا هو النمو الحقيقي لمشروعك، خطوة بخطوة.
+يا أصحاب المشاريع الصغيرة وأصحاب البيزنس في مصر، إحنا عارفين كويس إن البيزنس بتاعك هو أساس الاقتصاد المصري، وإنك بتشتغل بجد عشان توصل لعملائك في السوشيال ميديا (فيسبوك، إنستجرام، واتساب). بس في نفس الوقت، الوقت بتاعك غالي ومحتاج تركز على المنتج بتاعك مش بس على التسويق والمحتوى! عشان كده، أذّار (AZZAR) جه عشان يكون شريكك التسويقي الذكي والمحلي. إحنا مش مجرد أداة، إحنا وكيل تسويق متكامل مصمم خصيصاً للبيزنس المصري. هنساعدك توفر وقتك ومجهودك في كتابة المحتوى، متابعة العملاء، وتتبع العملاء المحتملين، كل ده بلغة عربية طبيعية ومفهومة. خلي أذّار يتولى الشغل التسويقي المعقد، وخلّك أنت تركز على النمو والنجاح. مستعدين نبدأ رحلة النمو دي سوا؟
 
 ---
 
-**\[English Summary]**
+**English Summary:**
 
-Welcome to all entrepreneurs and small business owners in Egypt! We at AZZAR understand that your business is the backbone of the Egyptian economy, and that social media (Facebook, Instagram, WhatsApp) is your primary battleground for reaching customers. However, we also know that limited time and resources make marketing and content creation a huge burden, and hiring a full marketing agency can be too costly. That’s why AZZAR is here to be your smart, local marketing agent. We are not just a tool; we are your partner designed to speak your language, understand the Egyptian market's needs precisely, and help you save time and effort in customer follow-up and content creation—all in a natural and certain way. Our goal is the genuine growth of your project, step by step.
+Welcome, Egyptian entrepreneurs! We understand that as the backbone of the Egyptian economy, your time is precious, and you rely heavily on social commerce (Facebook, Instagram, WhatsApp) to reach customers. AZZAR (أذّار) is here to be your smart, local marketing agent. We are designed specifically for the Egyptian business landscape to save you time and effort in content creation, lead tracking, and customer follow-up—all in natural Arabic. Let AZZAR handle the complex marketing tasks so you can focus entirely on growth and success. Ready to start this journey together?
 
 ---
 
@@ -108,4 +108,4 @@ Welcome to all entrepreneurs and small business owners in Egypt! We at AZZAR und
 ## 6. فحص الحواجز ومراجعة مدير التسويق (N5 Guardrail & Manager Review)
 
 - **Overall Guardrail Pass:** `true` (Retries: `0`)
-- **توقيع مدير التسويق:** المسودة جاهزة بالكامل ومراجعة كل الشروط الداخلية، وكل حاجة متطابقة مع المتطلبات المحددة. ياريت تراجعها وتديها الموافقة النهائية عشان نقدر نبدأ التنفيذ على طول.
+- **توقيع مدير التسويق:** تم مراجعة المسودة بالكامل، وكل الشروط المطلوبة للمشروع اتنفذت بنجاح وبشكل احترافي. الخطة جاهزة تمامًا للموافقة البشرية، ومستنيين رأيك عشان نبدأ التنفيذ ونحقق الأهداف المطلوبة.
