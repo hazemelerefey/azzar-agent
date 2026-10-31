@@ -326,7 +326,15 @@ export const contextEngineering = async ({
       // prompt text — inject it so the model can answer "who are you?" with
       // the name the user gave it instead of the product/model name.
       identity: {
-        defaultToAzzar: agentItem?.slug === 'inbox',
+        defaultToAzzar:
+          agentItem?.slug === 'inbox' ||
+          agentId === 'inbox' ||
+          agentId === 'ssn_inbox' ||
+          (agentId && agentStoreState.builtinAgentIdMap?.['inbox'] === agentId) ||
+          (!agentId &&
+            !!agentStoreState.builtinAgentIdMap?.['inbox'] &&
+            agentStoreState.activeAgentId === agentStoreState.builtinAgentIdMap['inbox']) ||
+          agentItem?.virtual === true,
         name: agentMeta?.name,
         title: agentMeta?.title,
       },

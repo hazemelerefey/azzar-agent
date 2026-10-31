@@ -1,3 +1,4 @@
+import { AZZAR_IDENTITY_BLOCK } from '@azzar/builtin-agents';
 import { REQUEST_TOPIC_ID_HEADER } from '@azzar/const';
 import { type ChatCompletionErrorPayload } from '@azzar/model-runtime';
 import { AGENT_RUNTIME_ERROR_SET } from '@azzar/model-runtime';
@@ -35,6 +36,20 @@ export const POST = checkAuth(async (req: Request, { params, userId, serverDB })
       // ============  2. create chat completion   ============ //
 
       const data = (await req.json()) as ChatStreamPayload;
+
+      // Defensive identity guard: ensure AZZAR identity is never omitted in chat completions
+      if (Array.isArray(data.messages)) {
+        const hasSystem = data.messages.some(
+          (m) =>
+            m.role === 'system' && typeof m.content === 'string' && m.content.trim().length > 0,
+        );
+        if (!hasSystem) {
+          data.messages.unshift({
+            content: AZZAR_IDENTITY_BLOCK,
+            role: 'system',
+          });
+        }
+      }
 
       const tracePayload = getTracePayload(req);
 

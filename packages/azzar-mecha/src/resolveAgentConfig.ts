@@ -10,10 +10,10 @@ import { type AzzarToolManifest } from '@azzar/context-engine';
 import {
   type AgentModelConfig,
   type AgentModelOverride,
-  type ChatCompletionTool,
-  getActivePluginIds,
   type AzzarAgentChatConfig,
   type AzzarAgentConfig,
+  type ChatCompletionTool,
+  getActivePluginIds,
   type MessageMapScope,
   resolveAgentModelConfig,
 } from '@azzar/types';
@@ -358,7 +358,7 @@ export const resolveAgentConfig = (
 
   // If not identified as supervisor, check agent store for slug
   if (!slug) {
-    const storeSlug = snapshot.slug;
+    const storeSlug = snapshot.slug || snapshot.agent?.slug;
     log('slug from agentStore: %s (agentId: %s)', storeSlug, agentId);
 
     // Only use the slug if it's a valid builtin agent slug
@@ -368,6 +368,17 @@ export const resolveAgentConfig = (
     } else if (storeSlug) {
       log('slug %s is not a valid builtin agent slug, treating as regular agent', storeSlug);
     }
+  }
+
+  // Fallback for inbox assistant: if agentId is inbox or marked virtual
+  if (
+    !slug &&
+    (agentId === 'inbox' ||
+      agentId === 'ssn_inbox' ||
+      (snapshot.agent?.virtual === true && snapshot.agent?.slug === 'inbox') ||
+      (!agentId && snapshot.agent?.virtual === true))
+  ) {
+    slug = BUILTIN_AGENT_SLUGS.inbox;
   }
 
   if (!slug) {

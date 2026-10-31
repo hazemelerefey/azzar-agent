@@ -2,10 +2,10 @@ import react from '@vitejs/plugin-react';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
 import type { ModulePreloadOptions, Plugin } from 'vite';
 
-import { canvasRuntime } from './canvasRuntime';
-import { viteCompletionSounds } from './completionSounds';
 import { azzarIconImports } from './azzarIconImports';
 import { azzarUiImports } from './azzarUiImports';
+import { canvasRuntime } from './canvasRuntime';
+import { viteCompletionSounds } from './completionSounds';
 import { viteMarkdownImport } from './markdownImport';
 import { viteNodeModuleStub } from './nodeModuleStub';
 import { vitePlatformResolve } from './platformResolve';
@@ -592,6 +592,12 @@ export const sharedOptimizeDeps = {
 
 // Workspace packages can resolve @azzar/editor through different peer-dependency
 // snapshots. They must still share one LexicalComposerContext at runtime.
-export const sharedRendererDedupe = ['@azzar/editor', 'react', 'react-dom'];
+export const sharedRendererDedupe = [
+  '@azzar/editor',
+  'react',
+  'react-dom',
+  'react-i18next',
+  'i18next',
+];
 
 export const __testing = { isUiCoreModule, sharedChunkFileNames, sharedManualChunks };

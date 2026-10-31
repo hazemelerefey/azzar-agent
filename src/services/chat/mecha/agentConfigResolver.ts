@@ -44,6 +44,30 @@ const collectSnapshot = (ctx: AgentConfigResolverContext): AgentConfigSnapshot =
       ? agentGroupByIdSelectors.groupById(ctx.groupId)(groupStoreState)
       : undefined;
 
+  const resolvedSlug = (() => {
+    const storeSlug = agentSelectors.getAgentSlugById(agentId)(agentStoreState);
+    if (storeSlug) return storeSlug;
+
+    if (agent?.slug) return agent.slug;
+
+    const builtinEntry = Object.entries(agentStoreState.builtinAgentIdMap || {}).find(
+      ([_, id]) => id === agentId,
+    );
+    if (builtinEntry?.[0]) return builtinEntry[0];
+
+    const inboxId = agentStoreState.builtinAgentIdMap?.['inbox'];
+    if (
+      agentId === 'inbox' ||
+      agentId === 'ssn_inbox' ||
+      (inboxId && agentId === inboxId) ||
+      (!agentId && inboxId && agentStoreState.activeAgentId === inboxId)
+    ) {
+      return 'inbox';
+    }
+
+    return undefined;
+  })();
+
   return {
     agent,
     agentConfig: agentSelectors.getAgentConfigById(agentId)(agentStoreState),
@@ -64,7 +88,7 @@ const collectSnapshot = (ctx: AgentConfigResolverContext): AgentConfigSnapshot =
     isDev,
     memberModeOverride: userState.workspaceUserPreference.agentModeOverrides?.[agentId],
     memberModelOverride: userState.workspaceUserPreference.agentModelOverrides?.[agentId],
-    slug: agentSelectors.getAgentSlugById(agentId)(agentStoreState) ?? undefined,
+    slug: resolvedSlug,
     userLocale: userGeneralSettingsSelectors.currentResponseLanguage(userState),
   };
 };

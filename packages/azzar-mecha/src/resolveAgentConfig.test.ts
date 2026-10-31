@@ -165,7 +165,8 @@ describe('resolveAgentConfig without a host', () => {
       }),
     );
     expect(customized.isBuiltinAgent).toBe(true);
-    expect(customized.agentConfig.systemRole).toBe('Mine.');
+    expect(customized.agentConfig.systemRole).toContain('Mine.');
+    expect(customized.agentConfig.systemRole).toContain('AZZAR (أذّار)');
 
     const empty = resolveAgentConfig(
       { agentId: 'agt_inbox' },

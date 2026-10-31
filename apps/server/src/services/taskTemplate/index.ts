@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 
 import type { TaskTemplate, TaskTemplateConnector } from '@azzar/const';
 import {
-  getComposioAppByIdentifier,
   getAzzarConnectorProviderById,
+  getComposioAppByIdentifier,
   INTEREST_AREA_KEYS,
   TASK_TEMPLATE_CATEGORIES,
   TASK_TEMPLATE_ICONS,
@@ -101,15 +101,13 @@ const taskTemplateRecommendationEnvelopeSchema = z.object({
 const parseTaskTemplateRecommendations = (value: unknown): TaskTemplate[] => {
   const envelope = taskTemplateRecommendationEnvelopeSchema.safeParse(value);
   if (!envelope.success) {
-    throw new Error('Market recommendations returned no items array');
+    return [];
   }
 
-  const items = z.array(taskTemplateSchema).safeParse(envelope.data.items);
-  if (!items.success) {
-    throw new Error('Market recommendations returned malformed items');
-  }
-
-  return items.data;
+  return envelope.data.items
+    .map((item) => taskTemplateSchema.safeParse(item))
+    .filter((res): res is z.SafeParseSuccess<TaskTemplate> => res.success)
+    .map((res) => res.data);
 };
 
 export class TaskTemplateService {
