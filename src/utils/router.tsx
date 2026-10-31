@@ -20,7 +20,21 @@ import { isChunkLoadError, notifyChunkError } from '@/utils/chunkError';
 import { NavigatorRegistrar } from './NavigatorRegistrar';
 
 async function importModule<T>(importFn: () => Promise<T>): Promise<T> {
-  return importFn();
+  let retries = 3;
+  let delay = 350;
+  while (true) {
+    try {
+      return await importFn();
+    } catch (error) {
+      if (retries > 0 && typeof window !== 'undefined') {
+        retries--;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= 1.5;
+        continue;
+      }
+      throw error;
+    }
+  }
 }
 
 function resolveLazyModule<P>(module: { default: ComponentType<P> } | ComponentType<P>) {

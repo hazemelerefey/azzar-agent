@@ -23,19 +23,33 @@ function dynamic<P = NonNullable<unknown>>(
   options?: DynamicOptions<P>,
 ): ComponentType<P> {
   const LazyComponent = lazy(async () => {
-    const mod = await loader();
-    if (mod == null) {
-      throw new Error(
-        'Dynamic import resolved to undefined. This usually means a chunk failed to load.',
-      );
+    let retries = 3;
+    let delay = 350;
+    while (true) {
+      try {
+        const mod = await loader();
+        if (mod == null) {
+          throw new Error(
+            'Dynamic import resolved to undefined. This usually means a chunk failed to load.',
+          );
+        }
+        if (typeof mod === 'function') {
+          return { default: mod as ComponentType<P> };
+        }
+        if ('default' in mod) {
+          return mod as { default: ComponentType<P> };
+        }
+        return { default: mod as unknown as ComponentType<P> };
+      } catch (error) {
+        if (retries > 0 && typeof window !== 'undefined') {
+          retries--;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          delay *= 1.5;
+          continue;
+        }
+        throw error;
+      }
     }
-    if (typeof mod === 'function') {
-      return { default: mod as ComponentType<P> };
-    }
-    if ('default' in mod) {
-      return mod as { default: ComponentType<P> };
-    }
-    return { default: mod as unknown as ComponentType<P> };
   });
 
   const DynamicWrapper = (props: P & Record<string, unknown>) => (
