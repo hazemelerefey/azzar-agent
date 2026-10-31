@@ -37,17 +37,31 @@ export const POST = checkAuth(async (req: Request, { params, userId, serverDB })
 
       const data = (await req.json()) as ChatStreamPayload;
 
-      // Defensive identity guard: ensure AZZAR identity is never omitted in chat completions
-      if (Array.isArray(data.messages)) {
+      // Defensive identity guard: ensure AZZAR identity is never omitted or lost to context truncation
+      if (Array.isArray(data.messages) && data.messages.length > 0) {
+        const identityInstruction = `[CRITICAL IDENTITY MANDATE]\n${AZZAR_IDENTITY_BLOCK.trim()}\n- Primary language: Egyptian Arabic default (اللهجة المصرية الطبيعية والواضحة والعملية). Always identify as AZZAR (أذّار), developed by VO for Technology (https://www.vo.technology/en), engineer Eng. Hazem Elerefy (github.com/hazemelerefey). Never claim to be trained or created by Google, OpenAI, or Anthropic.`;
+
         const hasSystem = data.messages.some(
           (m) =>
             m.role === 'system' && typeof m.content === 'string' && m.content.trim().length > 0,
         );
+
         if (!hasSystem) {
           data.messages.unshift({
-            content: AZZAR_IDENTITY_BLOCK,
+            content: identityInstruction,
             role: 'system',
           });
+        } else {
+          // Find the last user message to inject identity right before the active turn
+          // This prevents local models with sliding context windows (e.g. Ollama) from dropping
+          // identity when preceding messages or tool manifests exceed context limit.
+          const lastUserIdx = data.messages.findLastIndex((m) => m.role === 'user');
+          if (lastUserIdx !== -1) {
+            data.messages.splice(lastUserIdx, 0, {
+              content: identityInstruction,
+              role: 'system',
+            });
+          }
         }
       }
 

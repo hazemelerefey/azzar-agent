@@ -74,6 +74,7 @@ export class AzzarOllamaAI implements AzzarRuntimeAI {
         model: payload.model,
         options: {
           frequency_penalty: payload.frequency_penalty,
+          num_ctx: 16384,
           presence_penalty: payload.presence_penalty,
           temperature: payload.temperature !== undefined ? payload.temperature / 2 : undefined,
           top_p: payload.top_p,
